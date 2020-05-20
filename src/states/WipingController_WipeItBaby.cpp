@@ -18,6 +18,7 @@ void WipingController_WipeItBaby::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
+
   //if(feetForceControl_)
   //{
   //  ctl.addFootForceControl();
@@ -46,6 +47,8 @@ void WipingController_WipeItBaby::start(mc_control::fsm::Controller & ctl_)
   ctl.setTargetFromCoMQP();
   ctl.addHandForceControl();
 
+  ctl.setFeetTargetFromCoMQP();
+  ctl.addLeftFootForceControl();
   ctl.solver().addTask(ctl.comTask);
 
   ctl.comQP().addToLogger(ctl.logger());
@@ -72,6 +75,7 @@ bool WipingController_WipeItBaby::run(mc_control::fsm::Controller & ctl_)
   auto & ctl = static_cast<WipingController &>(ctl_);
 
   ctl.setTargetFromCoMQP();
+  ctl.setFeetTargetFromCoMQP();
   // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
 
   output("OK");
@@ -82,7 +86,7 @@ void WipingController_WipeItBaby::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
   ctl.removeHandForceControl();
-  //ctl.removeFootForceControl();
+  ctl.removeLeftFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
   ctl.solver().removeTask(ctl.lookAtTask);
 

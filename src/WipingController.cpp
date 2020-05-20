@@ -103,8 +103,8 @@ void WipingController::setFeetTargetFromCoMQP()
   if(comQPComputed)
   {
     const auto & result = this->comQP().result();
-    addLeftFootForceControl();
- //   this->leftFootTask->targetForceW(result.leftFootForce.force());
+    this->leftFootTask->targetForceW(result.leftFootForce.force());
+    //addLeftFootForceControl();
  //   this->rightFootTask->targetForceW(result.rightFootForce.force());
 
  //   if(useFeetForceControl_)
@@ -141,21 +141,21 @@ void WipingController::removeHandForceControl()
 void WipingController::addLeftFootForceControl()
 {
   solver().addTask(leftFootTask);
-  gui()->addElement(
-      {"Forces"},
-      mc_rtc::gui::Point3D("LeftFootCoP",
-                           [this]() { return robot().copW("LeftFootCenter"); }),
-      mc_rtc::gui::Point3D("LeftFootCoPTarget",
-                           mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
-                           [this]() { return leftFootTask->targetCoPW(); })
-      );
+ // gui()->addElement(
+ //     {"Forces"},
+ //     mc_rtc::gui::Point3D("LeftFootCoP",
+ //                          [this]() { return robot().copW("LeftFootCenter"); }),
+ //     mc_rtc::gui::Point3D("LeftFootCoPTarget",
+ //                          mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
+ //                          [this]() { return leftFootTask->targetCoPW(); })
+ //     );
 }
 
 void WipingController::removeLeftFootForceControl()
 {
   solver().removeTask(leftFootTask);
-  gui()->removeElement({"Forces"}, "LeftFootCoP");
-  gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
+ // gui()->removeElement({"Forces"}, "LeftFootCoP");
+ // gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
 }
 //void WipingController::addFootForceControl()
 //{
@@ -218,8 +218,8 @@ bool WipingController::run()
 {
   //supportPolygon_.update(robots());
   computeCoMQP();
-  //addLeftFootForceControl();
-  //setFeetTargetFromCoMQP();
+  setFeetTargetFromCoMQP();
+  addLeftFootForceControl();
   return mc_control::fsm::Controller::run();
 }
 
@@ -229,9 +229,9 @@ void WipingController::reset(const mc_control::ControllerResetData & reset_data)
   comTask->reset();
   comHeight_ = robot().com().z();
 
-  leftFootTask->reset();
-  leftFootTask->setGains(1, 300);
-  leftFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));
+  //leftFootTask->reset();
+  //leftFootTask->setGains(1, 300);
+  //leftFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));
   rightFootTask->reset();
   rightFootTask->setGains(1, 300);
   rightFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));

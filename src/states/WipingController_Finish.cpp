@@ -9,7 +9,7 @@ void WipingController_Finish::configure(const mc_rtc::Configuration & config)
 void WipingController_Finish::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  //ctl.removeFootForceControl();
+  ctl.removeLeftFootForceControl();
 }
 
 bool WipingController_Finish::run(mc_control::fsm::Controller & ctl_)

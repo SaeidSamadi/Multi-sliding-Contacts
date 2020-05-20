@@ -39,9 +39,11 @@ void WipingController_PrepareWiping::start(mc_control::fsm::Controller & ctl_)
   // ctl.admittanceTask->stiffness(sva::MotionVecd({s,s,s},{10.0,10.0,s}));
   ctl.comQP().desiredNormalForce(desiredNormalForce_);
   ctl.setTargetFromCoMQP();
+  ctl.setFeetTargetFromCoMQP();
 
   ctl.solver().addTask(ctl.comTask);
 	ctl.addHandForceControl();
+	ctl.addLeftFootForceControl();
   ctl.comQP().addToLogger(ctl.logger());
 }
 
@@ -50,6 +52,7 @@ bool WipingController_PrepareWiping::run(mc_control::fsm::Controller & ctl_)
   auto & ctl = static_cast<WipingController &>(ctl_);
 
   ctl.setTargetFromCoMQP();
+  ctl.setFeetTargetFromCoMQP();
 
   if(
 			(ctl.admittanceTask->measuredWrench().couple() - ctl.admittanceTask->targetWrench().couple()).norm() < 1
