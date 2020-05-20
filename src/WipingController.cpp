@@ -103,6 +103,7 @@ void WipingController::setFeetTargetFromCoMQP()
   if(comQPComputed)
   {
     const auto & result = this->comQP().result();
+    addLeftFootForceControl();
  //   this->leftFootTask->targetForceW(result.leftFootForce.force());
  //   this->rightFootTask->targetForceW(result.rightFootForce.force());
 
@@ -137,6 +138,25 @@ void WipingController::removeHandForceControl()
   gui()->removeElement({"Forces"}, "RightHandCoPTarget");
 }
 
+void WipingController::addLeftFootForceControl()
+{
+  solver().addTask(leftFootTask);
+  gui()->addElement(
+      {"Forces"},
+      mc_rtc::gui::Point3D("LeftFootCoP",
+                           [this]() { return robot().copW("LeftFootCenter"); }),
+      mc_rtc::gui::Point3D("LeftFootCoPTarget",
+                           mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
+                           [this]() { return leftFootTask->targetCoPW(); })
+      );
+}
+
+void WipingController::removeLeftFootForceControl()
+{
+  solver().removeTask(leftFootTask);
+  gui()->removeElement({"Forces"}, "LeftFootCoP");
+  gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
+}
 //void WipingController::addFootForceControl()
 //{
 //  if(useFeetForceControl_)
@@ -198,6 +218,7 @@ bool WipingController::run()
 {
   //supportPolygon_.update(robots());
   computeCoMQP();
+  //addLeftFootForceControl();
   //setFeetTargetFromCoMQP();
   return mc_control::fsm::Controller::run();
 }

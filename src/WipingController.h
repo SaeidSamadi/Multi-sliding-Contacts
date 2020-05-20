@@ -32,6 +32,8 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
 
 	void addHandForceControl();
 	void removeHandForceControl();
+	void addLeftFootForceControl();
+	void removeLeftFootForceControl();
 //private:
 //  void updateFootForceDifferenceControl();
 
