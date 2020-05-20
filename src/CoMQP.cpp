@@ -38,6 +38,9 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   E_rh.resize(6, 6);
   E_rh.setZero();
 
+  E_lh.resize(6, 6);
+  E_lh.setZero();
+
   sliding1.resize(6, 6);
   sliding1.setZero();
   sliding1(0, 0) = 1.0;
@@ -135,10 +138,12 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const double Px_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().x();
   const double Py_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().y();
   const double Pz_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().z();
-  const static double Px_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().x();
+  const double Px_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().x();
   const double Py_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().y();
   const double Pz_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().z();
-  
+  const double Px_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().x();
+  const double Py_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().y();
+  const double Pz_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().z();
  
   // XXX inefficient
   // clang-format off
@@ -163,6 +168,13 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
           0., -Pz_rh, Py_rh, 1., 0., 0.,
           Pz_rh, 0., -Px_rh, 0., 1., 0.,
           -Py_rh, Px_rh, 0., 0., 0., 1.;
+  E_lh <<
+          1., 0., 0., 0., 0., 0.,
+          0., 1., 0., 0., 0., 0.,
+          0., 0., 1., 0., 0., 0.,
+          0., -Pz_lh, Py_lh, 1., 0., 0.,
+          Pz_lh, 0., -Px_lh, 0., 1., 0.,
+          -Py_lh, Px_lh, 0., 0., 0., 1.;
   // clang-format on
 
   // XXX measure mu_y and mu_z from force sensor here.
@@ -175,6 +187,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   // mu_z = mu.z();
   // }}}
   sva::MotionVecd rhVel = robot.bodyVelW("r_wrist");
+  //sva::MotionVecd rhVel = robot.bodyVelW("___"); XXX Other Sliding contacts
   //Eigen::Vector3d CoMPos = robot.com();
   //double velNorm = rhVel.linear().norm();
   double velNorm = Eigen::Vector3d{0.,rhVel.linear().y(), rhVel.linear().z()}.norm();
@@ -193,12 +206,32 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   sliding2(2, 0) = mu_z;
   sliding = sliding1 - sliding2;
 
+  /* XXX For Horizental slidings
+  double velNorm_H = Eigen::Vector3d{rhVel_H.linear().x(), rhVel_H.linear().y(), 0.}.norm();
+  if(velNorm_H < 10e-5)
+  {
+    mu_x_H = mu_CONTACT/2.;
+    mu_y_H = mu_rh/2.;
+  }
+  else
+  {
+    mu_x_H = mu_rh * fabs(rhVel.linear().y()) / velNorm;
+    mu_y_H = mu_rh * fabs(rhVel.linear().z()) / velNorm;
+  }
+
+  sliding2_H(0, 2) = mu_x_H;
+  sliding2_H(1, 2) = mu_y_H;
+  sliding_H = sliding1 - sliding2_H;
+  */
+
   A_st.block<6, 3>(0, 0) = E_m1;
   A_st.block<6, 6>(0, 3) = E_rf;
   A_st.block<6, 6>(0, 9) = E_lf;
   A_st.block<6, 6>(0, 15) = E_rh;
+  //A_st.block<6, 6>(0, 21) = E_rh; XXX A_st: 12x21 -> 12x27 (adding a contact)
   A_st.block<6, 6>(6, 15) = sliding;
-  //A_st.block<12, 21>(0, 0) = A;
+  //A_st.block<6, 6>(12, relatedContact) = sliding; XXX b: 12x1 -> 18x1
+  // (12,15):rh / lf:9 / rf:3 / lh:21               XXX A_st: 12x21 -> 18x21 (adding Sliding Contact)
 
   UBmat_rf(0, 2) = mu_rf;
   UBmat_rf(1, 2) = mu_rf;
@@ -206,16 +239,24 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   UBmat_rf(4, 2) = X_rf;
   LBmat_rf = UBmat_rf;
 
+  //tau_x <= Yf_z && tau_y <= Xf_z
   UBmat_lf(0, 2) = mu_lf;
   UBmat_lf(1, 2) = mu_lf;
   UBmat_lf(3, 2) = Y_lf;
   UBmat_lf(4, 2) = X_lf;
   LBmat_lf = UBmat_lf;
-
+  // Sliding Contact: tau_y <= X(-f_x) && tau_z <= y(-f_x)
   UBmat_rh(4, 0) = -X_rh;
   UBmat_rh(5, 0) = -Y_rh;
   LBmat_rh = UBmat_rh;
-
+  /*
+   If Sliding horizental:
+  UBmat_lf(3, 2) = Y_lf;
+  UBmat_lf(4, 2) = X_lf;
+  LBmat_lf = UBmat_lf;
+   *  By adding new contact: add IneqMat 7 and 8
+   *  These are for [f tau_x tau_y]
+   */
   b.head<6>() = E_m2.head<6>();
   b(6) = N;
   //b_st.head<12>() = b;
@@ -227,10 +268,10 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Ineq_mat3.block<6, 6>(0, 9) = Eigen::Matrix6d::Identity() - UBmat_lf;
   Ineq_mat3(5, 14) = 0.;
   Ineq_mat4.block<6, 6>(0, 9) = -Eigen::Matrix6d::Identity() - LBmat_lf;
-  Ineq_mat4(5, 14) = 0.;
-  Ineq_mat5.block<6, 6>(0, 15) = Eigen::Matrix6d::Zero() - UBmat_rh;
-  Ineq_mat5(4, 19) = 1.;
-  Ineq_mat5(5, 20) = 1.;
+  Ineq_mat4(5, 14) = 0.; // related to tau_z
+  Ineq_mat5.block<6, 6>(0, 15) = Eigen::Matrix6d::Zero() - UBmat_rh; // So for Sliding contacts: Zero() matrix
+  Ineq_mat5(4, 19) = 1.; // tau_y
+  Ineq_mat5(5, 20) = 1.; //tau_z -> because here tau_x is crucial
   Ineq_mat6.block<6, 6>(0, 15) = Eigen::Matrix6d::Zero() - LBmat_rh;
   Ineq_mat6(4, 19) = -1.;
   Ineq_mat6(5, 20) = -1.;
@@ -260,7 +301,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
             -Y_lf, X_lf, coef_lf, mu_lf, -mu_lf, -1.,
             Y_lf, -X_lf, coef_lf, -mu_lf, mu_lf, -1.,
             -Y_lf, -X_lf, coef_lf, mu_lf, mu_lf, -1.;
-  Ineq_max_rh.block<4,6>(0,15) <<
+  Ineq_max_rh.block<4,6>(0,15) << // Vertical contact
             -coef_rh, X_rh, Y_rh, 1, -mu_rh, -mu_rh,
             -coef_rh, X_rh, -Y_rh, 1, -mu_rh, mu_rh,
             -coef_rh, -X_rh, Y_rh, 1, mu_rh, -mu_rh,
@@ -293,7 +334,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   };
   G_st(20*k, 3+6*k) = -1.;
 
-  h_st(2) = fz_max;
+  h_st(2) = fz_max; //For Fixed contacts set it for normal component; Horizental: f_z, Vertical Fix: f_x
   h_st(8) = -fz_min;
   h_st(14) = fz_max;
   h_st(20) = -fz_min;
@@ -306,9 +347,12 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   P.block<3, 3>(12, 12) = P_Wrench_lf * Eigen::Matrix3d::Identity();
   P.block<3, 3>(15, 15) = P_Force_rh * Eigen::Matrix3d::Identity();
   P.block<3, 3>(18, 18) = P_Wrench_rh * Eigen::Matrix3d::Identity();
-  P(21,21) = P_Radius;
+  //P.block<3, 3>(15, 15) = P_Force_rh * Eigen::Matrix3d::Identity();  // size P: 22x22 -> 28x28
+  //P.block<3, 3>(18, 18) = P_Wrench_rh * Eigen::Matrix3d::Identity(); // Also set nVar_
+  P(21,21) = P_Radius; //Put it at last
   P.Identity(22,22);
   P = 2 * P;
+
   //const Eigen::Vector3d & centroid = supportPolygon.centralPoint();
   //double com_x_d = centroid.x();
   //double com_y_d = centroid.y();
@@ -317,13 +361,13 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Eigen::Vector3d PG_d{com_pos.x(), com_pos.y(), com_pos.z()};
   //LOG_INFO("desired_CoM ="<<PG_d);
   //CoMQP::PG_d.setZero();
-  Eigen::Vector3d f_rf_d{-N / 2, -(mu_y * N) / 2, (mg - mu_z * N) / 2};
+  //Eigen::Vector3d f_rf_d{-N / 2, -(mu_y * N) / 2, (mg - mu_z * N) / 2};
   //Eigen::Vector3d f_rf_d;
   //f_rf_d.setZero();
   //Eigen::Vector3d tau_rf_d = Eigen::Vector3d{Px_rf, Py_rf, Pz_rf}.cross(f_rf_d);
-  Eigen::Vector3d f_lf_d = f_rf_d;
+  //Eigen::Vector3d f_lf_d = f_rf_d;
   //Eigen::Vector3d tau_lf_d = Eigen::Vector3d{Px_lf, Py_lf, Pz_lf}.cross(f_lf_d);
-  Eigen::Vector3d f_rh_d{N, mu_y * N, mu_z * N};
+  Eigen::Vector3d f_rh_d{N, mu_y * N, mu_z * N}; //XXX Set sliding Condition here
   Eigen::Vector3d tau_rh_d = Eigen::Vector3d{Px_rh, Py_rh, Pz_rh}.cross(f_rh_d);
   
   //Y_desired.block<3, 1>(0, 0) = PG_d;
@@ -331,8 +375,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   //Y_desired.block<3, 1>(6, 0) = tau_rf_d;
   //Y_desired.block<3, 1>(9, 0) = f_lf_d;
   //Y_desired.block<3, 1>(12, 0) = tau_lf_d;
-  Y_desired.block<3, 1>(15, 0) = f_rh_d;
-  Y_desired.block<3, 1>(18, 0) = tau_rh_d;
+  Y_desired.block<3, 1>(15, 0) = f_rh_d;     // uncomment or add for sliding contact
+  Y_desired.block<3, 1>(18, 0) = tau_rh_d;   // q_size
   q = -2* Y_desired;
   q(21) = 1.;
   

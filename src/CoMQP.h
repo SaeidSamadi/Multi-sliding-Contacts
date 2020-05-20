@@ -14,6 +14,7 @@ struct CoMQPResult
   sva::ForceVecd rightFootForce;
   sva::ForceVecd leftFootForce;
   sva::ForceVecd rightHandForce;
+  sva::ForceVecd leftHandForce;
 };
 
 class CoMQP
@@ -109,7 +110,7 @@ protected:
 
   Eigen::MatrixXd E_m1;
   Eigen::VectorXd E_m2;
-  Eigen::MatrixXd E_lf, E_rf, E_rh;
+  Eigen::MatrixXd E_lf, E_rf, E_rh, E_lh;
   Eigen::MatrixXd sliding1, sliding2, sliding;
   Eigen::MatrixXd A, A_st;
   Eigen::MatrixXd UBmat_lf, UBmat_rf, UBmat_rh;
@@ -143,6 +144,7 @@ protected:
   std::string leftFootForceSensor = "LeftFootForceSensor";
 
   std::string rightHandSurface = "RightHandPad";
+  std::string leftHandSurface = "LeftHand"; //XXX To add the correct element
   std::string rightFootSurface = "RightFoot";
   std::string leftFootSurface = "LeftFoot";
 
