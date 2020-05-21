@@ -27,15 +27,15 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
     return comQP_;
   }
 
-  //void addFootForceControl();
-  //void removeFootForceControl();
+  void addFootForceControl();
+  void removeFootForceControl();
 
 	void addHandForceControl();
 	void removeHandForceControl();
 	void addLeftFootForceControl();
 	void removeLeftFootForceControl();
-//private:
-//  void updateFootForceDifferenceControl();
+private:
+  void updateFootForceDifferenceControl();
 
 public:
   std::shared_ptr<mc_tasks::CoMTask> comTask;
