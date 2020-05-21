@@ -20,7 +20,7 @@ items:
           plugin: Body
           class: BodyItem
           data: 
-            modelFile: "${MODEL}/HRP4Comanoid/model/HRP4LIRMM_block.wrl"
+            modelFile: "${MODEL}/HRP4LIRMM/model/HRP4LIRMM_block.wrl"
             currentBaseLink: "WAIST"
             rootPosition: [ -0.00444289964, 0.00195066485, 0.746657583 ]
             rootAttitude: [ 
