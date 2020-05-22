@@ -48,7 +48,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comQP_.addToGUI(*gui());
 
- // addFootForceControl();
+  addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
 }
 
@@ -105,12 +105,12 @@ void WipingController::setFeetTargetFromCoMQP()
     const auto & result = this->comQP().result();
     this->leftFootTask->targetForceW(result.leftFootForce.force());
     //addLeftFootForceControl();
- //   this->rightFootTask->targetForceW(result.rightFootForce.force());
+    this->rightFootTask->targetForceW(result.rightFootForce.force());
 
- //   if(useFeetForceControl_)
- //   {
- //     updateFootForceDifferenceControl();
- //   }
+    if(useFeetForceControl_)
+    {
+      updateFootForceDifferenceControl();
+    }
   }
   else
   {
@@ -157,69 +157,69 @@ void WipingController::removeLeftFootForceControl()
  // gui()->removeElement({"Forces"}, "LeftFootCoP");
  // gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
 }
-//void WipingController::addFootForceControl()
-//{
-//  if(useFeetForceControl_)
-//  {
-//    solver().addTask(rightFootTask);
-//    solver().addTask(leftFootTask);
-//
-//    Eigen::Vector6d dof;
-//    dof << 1,1,1,1,1,0;
-//    addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
-//    addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-//    LOG_SUCCESS("FeetForceControlAdded");
-//  }
-//  else
-//  {
-//    LOG_WARNING("Requesting to use foot force control but this feature is disable in the configuration. Please use \"UseFeetForceControl: true\"");
-//  }
-//}
-//
-//void WipingController::removeFootForceControl()
-//{
-//  solver().removeTask(rightFootTask);
-//  solver().removeTask(leftFootTask);
-//  Eigen::Vector6d dof;
-//  dof << 1,1,1,1,1,1;
-//  addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
-//  addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-//  LOG_SUCCESS("FeetForceControl removed");
-//}
-//
-//void WipingController::updateFootForceDifferenceControl()
-//{
-//  leftFootTask->targetPose(lfTarget_);
-//  rightFootTask->targetPose(rfTarget_);
-//
-//  double LFz = leftFootTask->measuredWrench().force().z();
-//  double RFz = rightFootTask->measuredWrench().force().z();
-//  double LFz_d = leftFootTask->targetWrench().force().z();
-//  double RFz_d = rightFootTask->targetWrench().force().z();
-//  double dz_ctrl = dfzAdmittance_ * ((LFz_d - RFz_d) - (LFz - RFz));
-//
-//  double LTz = leftFootTask->surfacePose().translation().z();
-//  double RTz = rightFootTask->surfacePose().translation().z();
-//  double vfcZCtrl_ = RTz - LTz;
-//  dz_ctrl -= vdcDamping_ * vfcZCtrl_;
-//
-//  double LTz_d = leftFootTask->targetPose().translation().z();
-//  double RTz_d = rightFootTask->targetPose().translation().z();
-//  double dz_pos = vdcFrequency_ * ((LTz_d + RTz_d) - (LTz + RTz));
-//  double vdcZPos_ = RTz + LTz;
-//
-//  sva::MotionVecd velF = {{0., 0., 0.}, {0., 0., dz_ctrl}};
-//  sva::MotionVecd velT = {{0., 0., 0.}, {0., 0., dz_pos}};
-//  leftFootTask->refVelB(0.5 * (velT - velF));
-//  rightFootTask->refVelB(0.5 * (velT + velF));
-//}
+void WipingController::addFootForceControl()
+{
+  if(useFeetForceControl_)
+  {
+    solver().addTask(rightFootTask);
+    solver().addTask(leftFootTask);
+
+    Eigen::Vector6d dof;
+    dof << 1,1,1,1,1,0;
+    addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
+    addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
+    LOG_SUCCESS("FeetForceControlAdded");
+  }
+  else
+  {
+    LOG_WARNING("Requesting to use foot force control but this feature is disable in the configuration. Please use \"UseFeetForceControl: true\"");
+  }
+}
+
+void WipingController::removeFootForceControl()
+{
+  solver().removeTask(rightFootTask);
+  solver().removeTask(leftFootTask);
+  Eigen::Vector6d dof;
+  dof << 1,1,1,1,1,1;
+  addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
+  addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
+  LOG_SUCCESS("FeetForceControl removed");
+}
+
+void WipingController::updateFootForceDifferenceControl()
+{
+  leftFootTask->targetPose(lfTarget_);
+  rightFootTask->targetPose(rfTarget_);
+
+  double LFz = leftFootTask->measuredWrench().force().z();
+  double RFz = rightFootTask->measuredWrench().force().z();
+  double LFz_d = leftFootTask->targetWrench().force().z();
+  double RFz_d = rightFootTask->targetWrench().force().z();
+  double dz_ctrl = dfzAdmittance_ * ((LFz_d - RFz_d) - (LFz - RFz));
+
+  double LTz = leftFootTask->surfacePose().translation().z();
+  double RTz = rightFootTask->surfacePose().translation().z();
+  double vfcZCtrl_ = RTz - LTz;
+  dz_ctrl -= vdcDamping_ * vfcZCtrl_;
+
+  double LTz_d = leftFootTask->targetPose().translation().z();
+  double RTz_d = rightFootTask->targetPose().translation().z();
+  double dz_pos = vdcFrequency_ * ((LTz_d + RTz_d) - (LTz + RTz));
+  double vdcZPos_ = RTz + LTz;
+
+  sva::MotionVecd velF = {{0., 0., 0.}, {0., 0., dz_ctrl}};
+  sva::MotionVecd velT = {{0., 0., 0.}, {0., 0., dz_pos}};
+  leftFootTask->refVelB(0.5 * (velT - velF));
+  rightFootTask->refVelB(0.5 * (velT + velF));
+}
 
 bool WipingController::run()
 {
   //supportPolygon_.update(robots());
   computeCoMQP();
   setFeetTargetFromCoMQP();
-  addLeftFootForceControl();
+  //addLeftFootForceControl();
   return mc_control::fsm::Controller::run();
 }
 
@@ -229,9 +229,9 @@ void WipingController::reset(const mc_control::ControllerResetData & reset_data)
   comTask->reset();
   comHeight_ = robot().com().z();
 
-  //leftFootTask->reset();
-  //leftFootTask->setGains(1, 300);
-  //leftFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));
+  leftFootTask->reset();
+  leftFootTask->setGains(1, 300);
+  leftFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));
   rightFootTask->reset();
   rightFootTask->setGains(1, 300);
   rightFootTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-4}));
@@ -248,23 +248,6 @@ void WipingController::reset(const mc_control::ControllerResetData & reset_data)
   }
   if(!feetContacts.empty())
   {
- //   supportPolygon_.setContacts(feetContacts);
- //   supportPolygon_.update(robots());
- //   shiftedSupportPolygon_.setContacts(feetContacts);
- //   shiftedSupportPolygon_.update(robots(), sva::ForceVecd::Zero());
- //   gui()->addElement(
- //       {"Polygon"},
- //       mc_rtc::gui::Polygon("SupportPolygon", mc_rtc::gui::Color(1., 0., 0.),
- //                            [this]() -> const std::vector<Eigen::Vector3d> & { return supportPolygon_.vertices(); }),
- //       mc_rtc::gui::Point3D("CentralPoint", [this]() { return supportPolygon_.centralPoint(); }));
- //   gui()->addElement({"Polygon"},
- //                     mc_rtc::gui::Polygon("ShiftedSupportPolygon", mc_rtc::gui::Color(0., 1., 0.),
- //                                          [this]() -> const std::vector<Eigen::Vector3d> & {
- //                                            return shiftedSupportPolygon_.vertices();
- //                                          }),
- //                     mc_rtc::gui::Point3D("ShiftedCentralPoint",
- //                                          mc_rtc::gui::PointConfig(mc_rtc::gui::Color(0., 1., 0.)),
- //                                          [this]() { return shiftedSupportPolygon_.centralPoint(); }));
   }
   else
   {
