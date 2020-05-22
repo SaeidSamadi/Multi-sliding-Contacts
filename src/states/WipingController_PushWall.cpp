@@ -106,7 +106,8 @@ LOG_INFO("force rate: "<< forceRate_);
 
   ctl.solver().addTask(ctl.comTask);
   ctl.addHandForceControl();
-  ctl.addLeftFootForceControl();
+  //ctl.addLeftFootForceControl();
+  ctl.addFootForceControl();
   ctl.comQP().addToLogger(ctl.logger());
 }
 
@@ -145,7 +146,8 @@ void WipingController_PushWall::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
   ctl.removeHandForceControl();
-  ctl.removeLeftFootForceControl();
+  //ctl.removeLeftFootForceControl();
+  ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
   ctl.comQP().removeFromLogger(ctl.logger());
   ctl.solver().removeTask(ctl.lookAtTask);
