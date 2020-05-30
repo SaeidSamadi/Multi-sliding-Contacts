@@ -57,9 +57,9 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
 bool WipingController::computeCoMQP()
 {
-  Eigen::Vector2d muXY = this->comQP().muXY();
-  double mu_x = muXY.x();
-  double mu_y = muXY.y();
+  Eigen::Vector2d muYZ = this->comQP().muYZ_rh();
+  double mu_y = muYZ.x();
+  double mu_z = muYZ.y();
   //this->shiftedSupportPolygon().update(this->robots(), sva::ForceVecd(Eigen::Vector3d::Zero(),
   //                                                                    {
   //                                                                    this->comQP().desiredNormalForce(),

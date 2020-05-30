@@ -37,7 +37,7 @@ void WipingController_PrepareWiping::start(mc_control::fsm::Controller & ctl_)
   // double d = 300.;
   // ctl.admittanceTask->damping(sva::MotionVecd({d,d,d},{0.,0.,d}));
   // ctl.admittanceTask->stiffness(sva::MotionVecd({s,s,s},{10.0,10.0,s}));
-  ctl.comQP().desiredNormalForce(desiredNormalForce_);
+  ctl.comQP().rh_desiredNormalForce(desiredNormalForce_);
   ctl.setTargetFromCoMQP();
   //ctl.setFeetTargetFromCoMQP();
 

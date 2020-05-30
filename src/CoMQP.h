@@ -46,19 +46,33 @@ public:
     return debug_;
   }
 
-  double desiredNormalForce() const
+  double rh_desiredNormalForce() const
   {
-    return N;
+    return N_rh;
   }
 
-  void desiredNormalForce(double v)
+  void rh_desiredNormalForce(double v)
   {
-    N = v;
+    N_rh = v;
   }
 
-  Eigen::Vector2d muXY() const
+  double lh_desiredNormalForce() const
   {
-    return {mu_x, mu_y};
+    return N_lh;
+  }
+
+  void lh_desiredNormalForce(double v)
+  {
+    N_lh = v;
+  }
+
+  Eigen::Vector2d muYZ_rh() const
+  {
+    return {mu_x_rh, mu_y_rh};
+  }
+  Eigen::Vector2d muYZ_lh() const
+  {
+    return {mu_x_lh, mu_y_lh};
   }
 
   void addToGUI(mc_rtc::gui::StateBuilder &);
@@ -95,24 +109,23 @@ protected:
   double Y_rf;
   double X_lf;
   double Y_lf;
-  double X_rh;
-  double Y_rh;
+  double X_rh, X_lh;
+  double Y_rh, Y_lh;
 
-  double mu_rf, mu_lf, mu_rh;
+  double mu_rf, mu_lf, mu_rh, mu_lh;
 
   const double eps = -1e-4;
 
   // XXX use realistic limits here?
   const double fz_max = 8000;
   const double fz_min = -8000;
-  const double k = 3; //number of contacts
-  const double n = 1; //number of sliding contacts
+  const double k = 4; //number of contacts
+  const double n = 2; //number of sliding contacts
   Eigen::Vector3d com_pos;
 
   Eigen::MatrixXd E_m1;
   Eigen::VectorXd E_m2;
   Eigen::MatrixXd E_lf, E_rf, E_rh, E_lh;
-  Eigen::MatrixXd sliding1, sliding2, sliding, sliding_tmp, sliding2_tmp, sliding_tmp_tr, sliding1_check, sliding2_check;
   Eigen::MatrixXd A, A_st;
   Eigen::MatrixXd UBmat_ineq_rf, UBmat_ineq_lf, UBmat_rf, UBmat_lf, UBmat_rh, UBmat_rh_tmp;
   Eigen::MatrixXd LBmat_ineq_rf, LBmat_ineq_lf, LBmat_lf, LBmat_rf, LBmat_rh, LBmat_rh_tmp;
@@ -120,8 +133,11 @@ protected:
   Eigen::MatrixXd LBmat_ineq_rh, LBmat_ineq_lh;
   Eigen::VectorXd b, b_st;
 
-  Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6;
-  Eigen::MatrixXd Ineq_max_rf, Ineq_min_rf, Ineq_max_lf, Ineq_min_lf, Ineq_max_rh, Ineq_min_rh, Ineq_max_nonRotate;
+  Eigen::MatrixXd sliding_rh1, sliding_rh2, sliding_rh;
+  Eigen::MatrixXd sliding_lh1, sliding_lh2, sliding_lh;
+
+  Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6, Ineq_mat7, Ineq_mat8;
+  Eigen::MatrixXd Ineq_max_rf, Ineq_min_rf, Ineq_max_lf, Ineq_min_lf, Ineq_max_rh, Ineq_min_rh, Ineq_max_lh, Ineq_min_lh;
   Eigen::MatrixXd G, G_st; // G_st is for G* matrix (star) 
   Eigen::VectorXd h, h_st;
   Eigen::MatrixXd P, P_st;
@@ -130,25 +146,30 @@ protected:
   Eigen::Vector3d PG_d;
   double tmp = 0.0;
 
-  double P_PG = 10;
+  double P_PG = 1;
   double P_Force_rf = 1;
   double P_Wrench_rf = 1;
   double P_Force_lf = 1;
   double P_Wrench_lf = 1;
   double P_Force_rh = 10;
   double P_Wrench_rh = 10;
+  double P_Force_lh = 10;
+  double P_Wrench_lh = 10;
   double P_Radius = 0.1;
 
   // Desired normal force
-  double N = 1;
-  double mu_x = 0, mu_y = 0;
+  double N_rh = -1.0;
+  double N_lh = -1.0;
+  double mu_x_rh = 0, mu_y_rh = 0;
+  double mu_x_lh = 0, mu_y_lh = 0;
 
   std::string rightHandForceSensor = "RightHandForceSensor";
+  std::string leftHandForceSensor = "RightHandForceSensor";
   std::string rightFootForceSensor = "RightFootForceSensor";
   std::string leftFootForceSensor = "LeftFootForceSensor";
 
   std::string rightHandSurface = "RightHandPad";
-  std::string leftHandSurface = "LeftHand"; //XXX To add the correct element
+  std::string leftHandSurface = "LeftHandPad";
   std::string rightFootSurface = "RightFoot";
   std::string leftFootSurface = "LeftFoot";
 
