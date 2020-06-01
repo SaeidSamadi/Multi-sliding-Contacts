@@ -159,4 +159,100 @@ volume = {22},
 year = {2006}
 }
 
+@article{Reher2020Springer,
+abstract = {This paper presents the meta-algorithmic approach used to realize multi-contact walking on the humanoid robot, DURUS. This sys- tematic methodology begins by decomposing human walking into a se- quence of distinct events (e.g. heel-strike, toe-strike, and toe push-off). These events are converted into an alternating sequence of domains and guards, resulting in a hybrid system model of the locomotion. Through the use of a direct collocation based optimization framework, a walk- ing gait is generated for the hybrid system model emulating human-like multi-contact walking behaviors – additional constraints are iteratively added and shaped from experimental evaluation to reflect the machine's practical limitations. The synthesized gait is analyzed directly on hard- ware wherein feedback regulators are introduced which stabilize the walk- ing gait, e.g., modulating foot placement. The end result is an energy- optimized walking gait that is physically implementable on hardware. The novelty of this work lies in the creation of a systematic approach for developing dynamic walking gaits on 3D humanoid robots: from for- mulating the hybrid system model to gait optimization to experimental validation refined to produce multi-contact 3D walking in experiment.},
+author = {Reher, Jacob P. and Hereid, Ayonga and Kolathaya, Shishir and Hubicki, Christian M. and Ames, Aaron D.},
+doi = {10.1007/978-3-030-43089-4_26},
+mendeley-groups = {Chebyshev},
+pages = {400--415},
+title = {{Algorithmic Foundations of Realizing Multi-Contact Locomotion on the Humanoid Robot DURUS}},
+year = {2020}
+}
+
+@inproceedings{Kumagai2019Humanoids,
+abstract = {In this paper, we propose a multi-contact bipedal locomotion planning system for a humanoid robot, which can efficiently find feasible arm contacts and generate a quasistatic motion sequence supported by them. The key idea of our method is approximating the feasibility of an arm contact as its sustainability during a bipedal walking cycle, which we call 'geometrical feasibility'. First, we plan a global path by RB-RRT with the reachability model and discretize it using footstep planning. In order to find sustainable contacts, we compute the intersections between the reachability volumes and environments along the planned footsteps, which are defined as contactable areas, and define contact candidates inside these intersections. Then, we prioritize possible contact sets based on their contactable areas and expected supportability. We pass these contact sets to whole-body motion planning process according to their priorities, and evaluate static equilibrium and kinematic constraints to generate quasi-static contact transitions. We apply the proposed system to four different simulation experiments, and conclude that it is a reasonable solution for the difficulty in predicting 'feasible' arm contacts, which contributes to improving multi-contact capability of locomotion planning for a humanoid robot.},
+author = {Kumagai, Iori and Morisawa, Mitsuharu and Benallegue, Mehdi and Kanehiro, Fumio},
+booktitle = {IEEE-RAS International Conference on Humanoid Robots},
+doi = {10.1109/Humanoids43949.2019.9035072},
+file = {:home/sasa/Controllers/wiping{\_}cheb{\_}admittance/TexFiles/Refs/Kumagai2019Humanoids.pdf:pdf},
+mendeley-groups = {Chebyshev},
+publisher = {IEEE},
+title = {{Bipedal Locomotion Planning for a Humanoid Robot Supported by Arm Contacts Based on Geometrical Feasibility}},
+year = {2019}
+}
+@article{Vaillant2015Humanoids,
+abstract = {We report the results obtained from our trials in making the HRP-2 humanoid robot climb vertical industrial-norm ladders. We integrated our multi-contact planner and multi-objective QP control as basic components. First, a set of contacts to climb the ladder is planned off-line and provided as an input for a finite state machine that sequences tasks to be realized by our multi-objective model-based QP in closed-loop control. The trials we made revealed that hardware changes are to be made on the HRP-2, and the software has to be made more robust. Yet, we confirmed that HRP-2 has power capability to climb real industrial ladders, such as those found in nuclear power plants and large scale manufacturings (e.g. airliners, shipyards and buildings).},
+author = {Vaillant, Joris and Kheddar, Abderrahmane and Audren, Herve and Keith, Francois and Brossette, Stanislas and Kaneko, Kenji and Morisawa, Mitsuharu and Yoshida, Eiichi and Kanehiro, Fumio},
+doi = {10.1109/HUMANOIDS.2014.7041435},
+file = {:home/sasa/Controllers/wiping{\_}cheb{\_}admittance/TexFiles/Refs/Vaillant Ladder Climbing by the HRP-2 Humanoid Rob.pdf:pdf},
+isbn = {9781479971749},
+issn = {21640580},
+journal = {IEEE-RAS International Conference on Humanoid Robots},
+mendeley-groups = {Chebyshev},
+pages = {671--676},
+title = {{Vertical ladder climbing by the HRP-2 humanoid robot}},
+year = {2015}
+}
+@inproceedings{Nozawa2016Humanoids,
+abstract = {Motion planning of humanoid's full-body trajectory requires satisfying various constraints such as balance, contact, joint limitation, kinematics, and collision. To obtain trajectory efficiently, related research has integrated coarse motion planning to fine full-body trajectory generation. In a three-dimensional motion, coarse motion planning considering at swing phase in addition to support phase is important because constraints at swing phase drastically change from support phase. In this paper, we propose a humanoid motion planner satisfying various constraints based on key pose generation by exploiting center-of-mass (COM) feasible region (CFR): (a) We show a method to project approximately balance constraints of statics and dynamics into CFR. (b) We propose a key pose generation capable of considering swing and support phase to satisfy asymptotically CFR constraint while satisfying kinematics constraints. (c) We show a method to interpolate obtained key pose and to obtain full-body trajectory. We validate our proposed method through experiments, in which the robot performs locomotion tasks especially related to ladder climbing under the stringent constraints.},
+author = {Nozawa, Shunichi and Kanazawa, Masao and Kakiuchi, Yohei and Okada, Kei and Yoshiike, Takahide and Inaba, Masayuki},
+booktitle = {IEEE-RAS International Conference on Humanoid Robots},
+doi = {10.1109/HUMANOIDS.2016.7803253},
+file = {:home/sasa/Controllers/wiping{\_}cheb{\_}admittance/TexFiles/Refs/LadderClimbing.pdf:pdf},
+isbn = {9781509047185},
+issn = {21640580},
+mendeley-groups = {Chebyshev},
+pages = {49--56},
+publisher = {IEEE},
+title = {{Three-dimensional humanoid motion planning using COM feasible region and its application to ladder climbing tasks}},
+year = {2016}
+}
+@article{Vaillant2016Springer,
+abstract = {We describe the research and the integration methods we developed to make the HRP-2 humanoid robot climb vertical industrial-norm ladders. We use our multi-contact planner and multi-objective closed-loop control formulated as a QP (quadratic program). First, a set of contacts to climb the ladder is planned off-line (automatically or by the user). These contacts are provided as an input for a finite state machine. The latter builds supplementary tasks that account for geometric uncertainties and specific grasps procedures to be added to the QP controller. The latter provides instant desired states in terms of joint accelerations and contact forces to be tracked by the embedded low-level motor controllers. Our trials revealed that hardware changes are necessary, and parts of software must be made more robust. Yet, we confirmed that HRP-2 has the kinematic and power capabilities to climb real industrial ladders, such as those found in nuclear power plants and large scale manufacturing factories (e.g. aircraft, shipyard) and construction sites.},
+author = {Vaillant, Joris and Kheddar, Abderrahmane and Audren, Herv{\'{e}} and Keith, Fran{\c{c}}ois and Brossette, Stanislas and Escande, Adrien and Bouyarmane, Karim and Kaneko, Kenji and Morisawa, Mitsuharu and Gergondet, Pierre and Yoshida, Eiichi and Kajita, Suuji and Kanehiro, Fumio},
+doi = {10.1007/s10514-016-9546-4},
+file = {:home/sasa/Documents/papers/ICRA2020/newRefs/vaillant2016.pdf:pdf},
+issn = {15737527},
+journal = {Autonomous Robots},
+keywords = {Disaster humanoid robots,Field humanoid robots,Humanoid robots,Multi-contact motion planning and control},
+mendeley-groups = {Wiping,Chebyshev},
+number = {3},
+pages = {561--580},
+publisher = {Springer US},
+title = {{Multi-contact vertical ladder climbing with an HRP-2 humanoid}},
+volume = {40},
+year = {2016}
+}
+@inproceedings{Collette2008icra,
+abstract = {While realizing a task, human-beings are able to use grasping inside their environment in order to keep the most stable balance. Although such a behavior is quite natural for humans, it is very difficult to find the best formulation to adapt human motion to humanoid robots. This paper proposes a conceptually simple framework of human posture control based on optimization which takes into account grasp and friction and achieves robustness against external disturbances. A new stability criteria is also introduced. Contrary to most other approaches, our method deals not only with unilateral contacts with friction but also with bilateral grasps. This allows for arbitrarily pulling, pushing or twisting on a handhold. Additionally, and in contrast to classical methods based on ZMP, our method also accounts for contacts not being all in the same plane. {\textcopyright}2008 IEEE.},
+author = {Collette, Cyrille and Micaelli, Alain and Andriot, Claude and Lemerle, Pierre},
+booktitle = {Proceedings - IEEE International Conference on Robotics and Automation},
+doi = {10.1109/ROBOT.2008.4543696},
+file = {:home/sasa/Controllers/wiping{\_}cheb{\_}admittance/TexFiles/Refs/Collette et al. - 2008 - Robust balance optimization control of humanoid ro.pdf:pdf},
+isbn = {9781424416479},
+issn = {10504729},
+keywords = {Dynamic balance control,Frictional contacts,Grasp control,Humanoid robot motion,Multiple non-coplanar contacts,Robust posture},
+mendeley-groups = {Chebyshev},
+pages = {3187--3193},
+title = {{Robust balance optimization control of humanoid robots with multiple non coplanar grasps and frictional contacts}},
+year = {2008}
+}
+@inproceedings{Garcia-Haro2019Humanoids,
+abstract = {This work presents an extension of balance control for torque-controlled humanoid robots. Within a non-strict task hierarchy, the controller allows the robot to use the feet end-effectors to balance, while the remaining hand end-effectors can be used to perform Dual-Arm manipulation. The controller generates a passive and compliance behaviour to regulate the location of the centre of mass (CoM), the orientation of the hip and the poses of each end-effector assigned to the task of interaction (in this case bi-manipulation). Then, an appropriate wrench (force and torque) is applied to each of the end-effectors employed for the task to achieve this purpose. Now, in this new controller, the essential requirement focuses on the fact that the desired wrench in the CoM is computed through the sum of the balancing and bi-manipulation wrenches. The bi-manipulation wrenches are obtained through a new dynamic model that allows executing tasks of approaching the grip and manipulation of large objects compliantly. On the other hand, the feedback controller has been maintained but in combination with a bi-manipulation-oriented feedforward control to improve the performance in the object trajectory tracking. This controller is tested in different experiments with the robot TORO.},
+author = {Garcia-Haro, Juan Miguel and Henze, Bernd and Mesesan, George and Martinez, Santiago and Ott, Christian},
+booktitle = {IEEE-RAS International Conference on Humanoid Robots},
+doi = {10.1109/Humanoids43949.2019.9035010},
+file = {:home/sasa/Controllers/wiping{\_}cheb{\_}admittance/TexFiles/Refs/ICHR19{\_}0029{\_}FI.pdf:pdf},
+isbn = {9781538676301},
+issn = {21640580},
+mendeley-groups = {Chebyshev},
+pages = {644--650},
+title = {{Integration of dual-Arm manipulation in a passivity based whole-body controller for torque-controlled humanoid robots}},
+volume = {2019-Octob},
+year = {2019}
+}
+
+
+
+
 
