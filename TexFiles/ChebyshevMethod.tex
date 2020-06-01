@@ -1,0 +1,352 @@
+\documentclass[letterpaper, 10pt, conference]{ieeeconf}
+%\documentclass[10pt,english,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+
+%\usepackage[a4paper, total={14cm, 25cm}]{geometry}
+\usepackage{blindtext}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage[pdfencoding=auto]{hyperref}
+%\usepackage{natbib}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{soul}
+\usepackage{pdfpages}
+%\usepackage[pdftex]{graphicx}
+\usepackage{subfigure}
+\pdfminorversion=4
+
+
+\sethlcolor{green}
+
+\input{abbr.tex}
+
+\def\ankle{\text{ankle}}
+\newcommand{\TODO}[1]{{\color{red} {\bf TODO:} {#1}}}
+\newcommand{\SC}[1]{{\color{red} {\bf SC:} {#1}}}
+\renewcommand{\SS}[1]{{\color{blue} {\bf SC:} {#1}}}
+%\renewcommand\IEEEkeywordsname{Keywords}
+
+\def\pcmd{p^{cmd}}
+\def\vcmd{v^{cmd}}
+
+\title{\Large \bf
+	Balance Control of Humanoid robot in presence of Multi-sliding and fixed contacts}
+
+\author{Saeid Samadi$^{1}$, Julien Roux$^{1}$, St\'{e}phane Caron$^{2}$ and, Abderrahmane Kheddar$^{1}$
+	\thanks{$^{1}$S. Samadi, J. Roux and A. Kheddar are with Montpellier Laboratory of Informatics,
+		Robotics and Microelectronics (LIRMM), CNRS-University of Montpellier, France.
+		Corresponding author: {\tt\footnotesize saeid.samadi@lirmm.fr}},
+	 \thanks{$^{2}$St\'{e}phane's affiliation}
+}
+
+\begin{document}
+	
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\begin{abstract}
+\TODO{To be written at the end - Now Just a Draft}
+
+The Aim of the current paper is to perform multi-sliding and fixed contact scenarios by keeping the balance of the robot while performance. The force tracking of the fixed and sliding end-effectors is achievable by locating the position of the CoM and the proper wrench distribution simultaneously. Whole-body admittance controller is task-space is utilized to realize the calculated wrenches and position of CoM from the planner.
+The distribution of the wrench and position of the CoM is planned by Quadratic programming with the basis of Chebyshev center.
+Experiments and simulations shows the capability of this method over multiple challenging scenarios.
+
+\begin{keywords}
+Humanoid robots, Sliding contacts, Multi-contact, Chebyshev Center, Admittance Control , Quadratic programming
+\end{keywords}
+\end{abstract}
+
+
+	
+%%% XXX To be uncommented on "ieeeConf" document class
+%\begin{keywords}
+%Chebyshev center
+%\end{keywords}
+\begin{comment}
+
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.5}
+\caption{Table of Symbols}
+\label{table_example}
+\centering
+\begin{tabular}{p{0.09\textwidth}|p{0.09\textwidth}||p{0.09\textwidth}|p{0.09\textwidth}}
+%\begin{tabular*}{0.4\textwidth}{l | r || l | r}
+\hline
+\bfseries \centering First & \bfseries Next & me & you \\
+\hline\hline
+1.0 & 2.0\\
+\hline
+\end{tabular}
+\end{table}
+\end{comment}
+
+\section{Introduction} \label{Sec_Introduction}
+
+Combination of variable contact modes such as sliding and fixed contacts is an unavoidable scenario of human during his daily life. 
+Current researches on humanoid robotics is mostly focused on multi-contact applications in order to perform complex scenarios like getting assistance from environment for walking on uneven terrains \textcolor{red}{\textbf{BDs,..}}, ladder climbing \textcolor{red}{\textbf{3refs}}, grasping \textcolor{red}{\textbf{Collette 2008}}, manipulation \textcolor{red}{\textbf{ref}} and so on.
+
+
+Design of an efficient control strategy plays the most important role on being able to perform human-like scenarios.
+These control strategies should be able to guarantee the balance of the robot during certain scenarios and perform the objective of the scenario properly. Balance of the humanoid robot in single or double support phases has been widely studied \textcolor{red}{\textbf{ref}} for static and dynamic motions \textcolor{red}{\textbf{ref}} with the capability of recovering balance in presence of external perturbances \textcolor{red}{\textbf{Kajita2010}}. However, the recent researches are mostly focused on multi-contact balance controller of the limbed robot. Morisawa2018 introduces dynamic planner with output of CoM trajecory for multi-contact applications and then introduced the dynamic balance controller in (check scenarios). Stephane2019 also combined the end-effector and CoM admittance tasks to realize WB-admittance controller (but it's not mc). 
+
+Including sliding contacts in the scenarios is a new-study. In general, the constraints of friction cone is introduced to apply on contact points and keep the contact stability \textcolor{red}{\textbf{ref}} and have a non-sliding contact which is the case in most of the studies \textcolor{red}{\textbf{ref}}. For sliding contacts, the criteria is more crucial and the constraint should output an equality constraint to lie the friction force on the edge of the friction cone to be able to slide. 
+
+ There are many works regarding force control of sliding contacts and motions of the end-effectors \textcolor{red}{\textbf{ref}}. These are not dealing with the balance issue because of wheeled \textcolor{red}{\textbf{ref}} or fixed-base \textcolor{red}{\textbf{ref}} designs of robots.
+ Keeping balance is more challenging with consideration of sliding contacts.
+Shuffling of the foot is also one of the challenging scenarios. Because regulation of ZMP plays an important role in keeping and recovering the balance of the HR. \textcolor{red}{\textbf{ref}}. This scenario can be performed on slippery surfaces\textcolor{red}{\textbf{ref}}, skating of the foot and even more challenging on high friction surfaces\textcolor{red}{\textbf{ref}}. However the latter work is performed by introducing stabilizer with force distribution on two feet contacts.
+
+The Combination of the mix of multi-fixed-and-sliding contacts has been rarely studied. 
+The humanoid robot should be able to keep the balance while performing the mentioned scenarios.
+\textcolor{red}{\textbf{Samadi2020}} is mentioned a mix of sliding and fixed multi-contact scenarios.
+In this work, the CoM support area (CSA) is calculated by an analytical solution which is bounded to certain contact configurations. The limitation of this method is the co-planarity of the fixed contacts. Otherwise, the CSA can not be calculated by proposed method and there you can see the feet contacts located on the same plane of the ground. 
+This limitation leads us to more general scenarios by introducing a novel formulation for the planner by using Chebyshev method.
+
+In the current study, we aim for generalize the scenarios and cover all combination and orientation of multi-sliding-and-fixed contacts. The position of the CoM is should lie inside the support region \textcolor{red}{\textbf{ref}} in order to keep the balance. This region is constructed based on position and constraints of the contact forces. However, we are skipping this layer of separate computation for constructing the CoM support polytopes \textcolor{red}{\textbf{ref}} be able to maintain the CoM within a very-safe CoM region during multiple scenarios. This is achieved by introducing a fast-computed (less than 0.5ms) methodology by considering the Chebyshev center and radius of the support area.
+
+The planner calculates the target position of the CoM and the wrench distribution of contacts according to the desired scenarios and the targets has been realized by whole-body admittance introduced in \textcolor{red}{\textbf{Karim}}. The section II shows the planner, III WBQP, IV experiments and simulations...
+
+
+
+
+
+
+
+
+
+
+\section{Planner} \label{Sec_Planner}
+
+\subsection{Static Equilibrium} \label{SSec_StaticEquilibrium}
+
+Due to the scenarios which we are aiming to perform, the static assumption is sufficient. These scenarios will include a mix of the multi-sliding and fixed contacts of the robot without locomotion.
+Static equilibrium of the robot is described by Newton-Euler equation for $l$ limbs in contact with the environment:
+\begin{equation}
+\bfw^g + \sum_{i=1}^l {\bfw_{i}^c} = 0 \label{NE}
+\end{equation}
+where $\bfw^g\in \mathbb{R}^6$ and $\bfw_{i}^c \in \mathbb{R}^6$ are gravity wrench and the $i^{th}$ contact wrench in the world frame, respectively and $ \bfw = [\bff \ \ \bftau ]^T$. Gravity and contact wrenches are defined in the following form:
+\begin{comment}
+
+\begin{equation}
+\bfw^g=\begin{bmatrix}
+0 & 0 & 0\\0 & 0 & 0\\0 & 0 & 0\\
+0 & -mg & 0\\
+mg & 0 & 0\\
+0 & 0 & 0
+\end{bmatrix} \bfp_G+\begin{bmatrix}
+0\\0\\-mg\\0\\0\\0
+\end{bmatrix} \label{GravityWrench}
+\end{equation}
+
+\begin{equation}
+\bfW_{i} = \begin{bmatrix}
+& & & \\ & I_{3\times 3} & & 0_{3\times 3}\\ & & & \\ 0 & -p_{z,i} & p_{y,i} &\\p_{z,i} & 0 & -p_{x,i} & I_{3\times 3}\\-p_{y,i} & 0 & p_{x,i} &\\
+\end{bmatrix}\calW_{i} \label{ContactWrenches}
+\end{equation}
+where 
+\begin{equation}
+\calW_{i} = [\bfR_i]_{6\times6} \bfw_i 
+\end{equation}
+
+\end{comment}
+\begin{equation}
+\bfw^g=\begin{bmatrix}
+\bff^g \\ \bfc \times \bff^g
+\end{bmatrix}
+\label{GravityWrench}
+\end{equation}
+
+\begin{equation}
+\bfw_{i}^c = \begin{bmatrix}
+\bff_i^c \\ \bfp_i \times \bff_i^c + \bftau_i^c
+\end{bmatrix}
+\label{ContactWrenches}
+\end{equation}
+where $\bff^g = [0 \ \ 0 \ \ mg]^T$ and the position of the CoM $\bfc = [\bfc_x \ \ \bfc_y \ \ \bfc_z]^T$ and contact points $\bfp_i$ are measured with respect to the global frame. Note that the contact wrenches are rotated from the local frame to the global frame by the rotation matrix $[\bfR]_i \in \bbR^{6\times6}$:
+\begin{equation}
+\bfw_i^c = [\bfR]_i \ ^l\bfw_i^c 
+\end{equation}
+where $^l\circ$ denotes the local frame of the contact point.
+\subsection{Quadratic Programming} \label{SSec_QP}
+As a planner, we consider the following state variables to be computed at each iteration:
+\begin{align}
+\bfY = [\bfc \ \ \mathbf{\calW}_1 \ \ \mathbf{\calW}_2 \ \ \hdots \ \  \mathbf{\calW}_l ]
+\end{align}
+where $ \mathbf{\calW}_i$ is the $i$-th contact wrench denoted as state variables. Basically it's the same wrench of $\bfw_i^c$, but the notation is used to specify the one owned to the decision variables for easy-understanding of the calculation process.
+
+ \subsection{Equality Constraints} \label{EqualityConstraintsSubsection}
+ For every contact of the robot, we define the wrench. Equations~\eqref{GravityWrench} and \eqref{ContactWrenches} can be re-written as:
+ \begin{align}
+ \bfw^g &\equiv \bfA^g \bfc - \bfb^g \label{EqualityMass}\\
+ \bfw_{i}^c &\equiv \bfA_{i}^c \mathbf{\calW}_i \text{;  where: } i=1,...,l \label{EqualityContacts}
+ \end{align}
+ which imposes equality constraints to the Quadrartic Programming (QP). On the other hand, sliding condition will cast additional equality constraints as mentioned in~\cite{Samadi2019HAL}. In general, for a sliding contact, the normal contact force ($f_z^c$) is along the vertical axis of the local frame. The main assumption is that we know the dynamic friction ($\bfmu$) of each contact, so that the force along other axis ($f_x^c$ and $f_y^c$) of the local frame is known according to the pre-defined velocity and trajectory of the sliding motion. Assume that we have $s$ sliding contacts and the velocity of the sliding trajectory in local frame for $\bfk^{th}$ sliding contact is $\bfv_k = v_{x,k}i + v_{y,k}j$. We define the coefficient $\alpha_{x,k} = \frac{v_{x,k}}{\norm{\bfv_k}}$ and $\alpha_{y,k} = \frac{v_{y,k}}{\norm{\bfv_k}}$. So, the force vector in the local frame is:
+ \begin{equation}
+ ^l\bff_i = \begin{bmatrix}
+ f_{x,i} & f_{y,i} & f_{z,i}
+ \end{bmatrix}^T ; i = 1,...,s
+ \end{equation}
+ By considering $\mu_{k}$ as friction of $k^{th}$ contact and defining $\mu_{x,k} = \mu_k\alpha_{x,k}$ and $\mu_{y,k} = \mu_k\alpha_{y,k}$, we have:
+ \begin{equation}
+ ^l\bff_k = \begin{bmatrix}
+ 0&0&\mu_{x,k} \\
+ 0&0&\mu_{y,k} \\
+ 0&0&0
+ \end{bmatrix} \ ^l\bff_k + 
+ \begin{bmatrix}
+ 0 \\
+ 0 \\
+ f_{z,k}
+ \end{bmatrix}
+ \end{equation}
+as a result:
+ \begin{equation}
+ \begin{bmatrix}
+ 1&0&-\mu_{x,k} \\
+ 0&1&-\mu_{y,k} \\
+ 0&0&1
+ \end{bmatrix} \ ^l\bff_k = 
+ \begin{bmatrix}
+ 0 \\
+ 0 \\
+ f_{z,k}
+ \end{bmatrix}
+ \end{equation}
+and we can re-write the above equation as:
+\begin{equation}
+\bfC\bff^{local}_k = \calK
+\end{equation}
+note that the determinant of matrix $\bfC$ is equal to $1$ and is an invertible matrix. So:
+\begin{equation}
+\bff^{local}_k = \bfC^{-1}\calK
+\end{equation}
+Also, by using the rotation matrix, we are able to change the coordinate to the global frame:
+\begin{equation}
+\bff_k^c = [\bfR_k]_{3\times3} \bfC^{-1}\calK
+\end{equation}
+which can be written by selection matrix $[S]_{3\times6} = [I_{3\times3} \ \ 0_{3\times3}]$ as:
+\begin{equation}
+[S]\bfw_k^c = [\bfR_k]_{3\times3} \bfC^{-1}\calK \label{SlidingEqualityConstraint}
+\end{equation} 
+
+The Equation~\eqref{SlidingEqualityConstraint} is the other equality constraint that should be applied to the QP simultaneous with equations~\eqref{EqualityMass}~and~\eqref{EqualityContacts}. So, the equation~\eqref{SlidingEqualityConstraint} can be written as:
+\begin{align}
+\bfA_i^{sl} \calW_i - \bfb^{sl}_i = 0 \text{; } i = 1, ... , s
+\end{align}
+Note that this equation, will be applied for all $s$ number of sliding contacts according to their desired forces to slide. So, $\mathbf{\calW}_i$ only refers to the sliding contacts in this equation.
+\subsection{Inequality Constraints} \label{InequalityConstraintsSubsection}
+Non-sliding condition of contacts will be satisfied when the contact force stays inside the friction cone. Linearized equations for non-sliding conditions were introduced in~\cite{Caron2015thesis}. These equations are in the following form:
+\begin{equation}
+\begin{split}
+\mid f_x  \mid \leqslant \mu f_z \;,\; \mid f_y \mid \leqslant \mu f_z  \;,\;  f_z^{\min} \leqslant f_z  \leqslant f_z^{\min} \\ 
+\mid \tau_x \mid  \leqslant  \mathbb{Y}f_z \;,\;  \mid \tau_y \mid \leqslant  \mathbb{X}f_z  \;,\; \tau_z^{\min} \leqslant \tau_z  \leqslant \tau_z^{\min} 
+\end{split}
+\label{FrictionCone}
+\end{equation}
+
+So, by cosidering $n$ non-sliding contacts, the inequality constraints are in the following form:
+\begin{subequations}
+\begin{align}
+\bfUpsilon_{i}^{ub} \calW_i &\leqslant \textbf{h}_{i}^{ub} \text{; } i=1,...,n \\
+\bfUpsilon_{i}^{lb} \calW_i &\leqslant \textbf{h}_{i}^{lb} \text{; } i=1,...,n
+\end{align}
+\end{subequations}
+where indexes $ub$ and $lb$ shows the upper and lower bounds. $\bfUpsilon_i$ matrices and $\bfh_i$ vectors are introduced in~\cite{Samadi2019HAL} for both sliding and fixed contacts. Also, $\bfPsi_i$ are introduced for applying inequality constraints on $\tau_z$ element of wrenches:
+\begin{subequations}
+	\begin{align}
+	\bfPsi_{i}^{ub} \calW_i &\leqslant 0_{4\times 1} \text{; } i=1,...,n \\
+	\bfPsi_{i}^{lb} \calW_i &\leqslant 0_{4\times 1} \text{; } i=1,...,n
+	\end{align}
+\end{subequations}
+
+Also, for the sliding contacts, the same inequality constraints should be applied just on the torque of the wrench where the force of the sliding contacts are within equality constraints. This is to avoid tilting of the sliding contacts. This can be done by a selection matrix.
+
+While using solvers, equality and inequality constraints can be combined and utilized in general formulation using selection matrices.
+
+\TODO{To find a proper way to explicitely describe the construction of A,b,G and h matrices/vectors}
+
+\subsection{Chebyshev Center} \label{ChebyshevCenterSubsection}
+
+Aim of using Chebyshev center is to find the most reliable values for position of CoM and wrench distribution of contacts. A radius will be set to each decision variable and the goal is to find the maximum valid radius and the center in which the Chebyshev circle will stay inside the the valid region based on inequality constraints. Note that we use these constraints to maximize the radius is -- which basically needed when we want to construct and visualize these regions. Equality constraints should be applied separately to the QP to be taken into account while solving the maximization problem.
+
+Consider $\bfY = [\bfp_G \ \ \calW_{i}]^T$ where $\bfY \in \bbR^{3+6k}$. Thus, equality and inequality constraints can be expressed as:
+\begin{subequations}
+	\begin{align}
+	\bfA \bfY &= \bfb \label{eq} \\
+	\bfG \bfY &\leqslant \bfh \label{ineq}
+	\end{align}
+\end{subequations}
+where $\bfA \in \bbR^{(6+6n)\times(3+6k)}$ and $\bfG\in \bbR^{(20k)\times(3+6k)}$ are selection matrices introduced in~\cite{Samadi2019HAL}. 
+
+
+
+So, for maximizing the radius and selecting the proper Chebyshev center, inequality constraint~\eqref{ineq} will be modified in the following form in presence of Chebyshev radius $\bfr$ as formulated in~\cite{Knitter1988}:
+\begin{equation}
+ \bfG \bfY+\bfr \bfxi \leqslant \bfb
+\end{equation}
+where $\bfxi \in \bbR^{20k}$ is a vector which consists of the norm of the rows of $\bfG$ matrix separately:
+\begin{equation}
+\bfxi_j = \norm{\bfG(j,:)} \ ; j=1,...,20k
+\end{equation}
+and the operator $(j,:)$ shows the $j^{th}$ row of the matrix. The aim of QP is to maximize the amount of Chebyshev radius and the output for this QP will be position of CoM, wrench distribution and $\bfr$ and to include all of these outputs in the solver, matrices will be modified in the following form:
+
+\begin{align}
+\bfX &= [\bfY \ \ \bfr]^T \\
+\bfG^* &=\begin{bmatrix}
+\bfG & \bfxi \\
+0_{1 \times (3+6k)} & -1
+\end{bmatrix} \\
+\bfh^* &= [\bfh \ \ 0]^T \\
+\bfA^* &= [\bfA \ \ 0] \\
+%\bfb^* &= [\bfb \ \ 0]^T \\
+\bfq &= [0_{(3+6k) \times 1} \ \ -1] \\
+\bfP &= 2I_{(4+6k) \times (4+6k)}
+\end{align}
+
+The controller is designed by QP formulation and the aim of this controller is to calculate the proper wrench distribution of contacts along with the position of CoM to the specified task. Specified tasks can be sliding contact of certain contacts and related forces for this purpose. In order to do so, we introduce $\bfX_{des}$ which contains the desired position for CoM at each iteration and desired contact wrenches. Note that we can not give any desired amount for Chebyshev radius and we leave it zero. In order to have minimized wrench distribution, we put zero for fixed contacts' desired wrenches. For position of CoM, we give the current position as a reference for the next step. In that case, it avoids jerky motions.
+
+\begin{subequations}
+	\begin{align}
+	%\min_{\bfX} \ \ &\bfq^T \bfX \\
+	%\min_{\bfX} \ \ &\frac{1}{2}\bfP^T \bfX \bfP\\
+	\min_{\bfX} \ \ &\norm{\bfX-\bfX_{des}}-r \\
+	 &\bfG^* \bfX \leqslant \bfh^* \\
+	 &\bfA^* \bfX = \bfb
+	\end{align}
+\end{subequations}
+By solving this QP, position of CoM and wrench distributon using Chebyshev method as the planner is available.
+
+\subsection{Scenarios}
+
+\section{Whole-body Admittance Controller} \label{Sec_WBQP}
+
+\subsection{Controller Specifications}
+
+
+\section{Simulations and Experiments} \label{Sec_Simulations_and_Experiments}
+
+\subsection{Scenario number1}
+The First scenario is dedicated to the same wiping process of~\cite{Samadi2019HAL}. The difference is in applying the dynamic balance controller while wiping.
+
+\TODO{to add the failed results of utilizing non-extended stabilizer on this scenario for comparison}
+\subsection{Scenario number2}
+\TODO{To be added later on}
+\subsection{Scenario number3}
+\TODO{To be added later on}
+
+\section{Conclusion} \label{Sec_Conclusion}
+\TODO{To be written at the end}
+
+\bibliographystyle{ieeetr}
+\bibliography{refs}
+
+\appendices
+\section{First Appendix} \label{FirstAppendix}
+ \subsection{First Subsection In Appendix}
+\end{document}
