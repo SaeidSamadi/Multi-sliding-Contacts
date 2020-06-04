@@ -48,6 +48,9 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comQP_.addToGUI(*gui());
 
+  logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
+                                                  x=robot().surfacePose("RightHandPad");
+                                                  return x; });
   addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
 }
@@ -222,6 +225,10 @@ bool WipingController::run()
   //addLeftFootForceControl();
   return mc_control::fsm::Controller::run();
 }
+
+WipingController::~WipingController(){
+  logger().removeLogEntry("RightHandPose");
+};
 
 void WipingController::reset(const mc_control::ControllerResetData & reset_data)
 {

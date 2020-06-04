@@ -13,7 +13,7 @@
 struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
 {
   WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration & config);
-
+  ~WipingController();
   bool run() override;
 
   void reset(const mc_control::ControllerResetData & reset_data) override;
