@@ -49,7 +49,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   comQP_.addToGUI(*gui());
 
   logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
-                                                  x=robot().surfacePose("RightHandPad");
+                                                  x=robot().surface("RightHandPad").X_0_s(robot());
                                                   return x; });
   addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
