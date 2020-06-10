@@ -97,12 +97,14 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   Ineq_min_lf.resize(4, 21);
   Ineq_max_rh.resize(4, 21);
   Ineq_min_rh.resize(4, 21);
+  Ineq_max_nonRotate.resize(4, 6);
   Ineq_max_rf.setZero();
   Ineq_min_rf.setZero();
   Ineq_max_lf.setZero();
   Ineq_min_lf.setZero();
   Ineq_max_rh.setZero();
   Ineq_min_rh.setZero();
+  Ineq_max_nonRotate.setZero();
 
   G.resize(60, 21);
   G.setZero();
@@ -144,7 +146,14 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const double Px_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().x();
   const double Py_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().y();
   const double Pz_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().z();
- 
+  const auto Rot_rh = robot.surface(rightHandSurface).X_0_s(robot).rotation();
+  Eigen::Matrix6d RotationMat_rh;
+  RotationMat_rh.setZero();
+  RotationMat_rh.block<3, 3>(0, 0) = Rot_rh;
+  RotationMat_rh.block<3, 3>(3, 3) = Rot_rh;
+  //const auto Rot_rh_dual = robot.surface(rightHandSurface).X_0_s(robot).dualMatrix();
+  //LOG_INFO("RotMat:" << RotationMat_rh << endl); 
+  //LOG_INFO("DualMat:" << Rot_rh_dual << endl); 
   // XXX inefficient
   // clang-format off
   E_rf << 1., 0., 0., 0., 0., 0.,
@@ -301,11 +310,17 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
             -Y_lf, X_lf, coef_lf, mu_lf, -mu_lf, -1.,
             Y_lf, -X_lf, coef_lf, -mu_lf, mu_lf, -1.,
             -Y_lf, -X_lf, coef_lf, mu_lf, mu_lf, -1.;
-  Ineq_max_rh.block<4,6>(0,15) << // Vertical contact
-            -coef_rh, X_rh, Y_rh, 1, -mu_rh, -mu_rh,
-            -coef_rh, X_rh, -Y_rh, 1, -mu_rh, mu_rh,
-            -coef_rh, -X_rh, Y_rh, 1, mu_rh, -mu_rh,
-            -coef_rh, -X_rh, -Y_rh, 1, mu_rh, mu_rh;
+ // Ineq_max_rh.block<4,6>(0,15) << // Vertical contact
+ //           -coef_rh, X_rh, Y_rh, 1, -mu_rh, -mu_rh,
+ //           -coef_rh, X_rh, -Y_rh, 1, -mu_rh, mu_rh,
+ //           -coef_rh, -X_rh, Y_rh, 1, mu_rh, -mu_rh,
+ //           -coef_rh, -X_rh, -Y_rh, 1, mu_rh, mu_rh;
+  Ineq_max_nonRotate <<
+           Y_lf, X_lf, coef_lf, mu_lf, mu_lf, 1.,
+           -Y_lf, X_lf, coef_lf, -mu_lf, mu_lf, 1.,
+           Y_lf, -X_lf, coef_lf, mu_lf, -mu_lf, 1.,
+           -Y_lf, -X_lf, coef_lf, -mu_lf, -mu_lf, 1.;
+  Ineq_max_rh.block<4, 6>(0, 15) = Ineq_max_nonRotate * RotationMat_rh;
   Ineq_min_rh.block<4,6>(0,15) <<
            coef_rh, -X_rh, -Y_rh, 1, -mu_rh, -mu_rh,
            coef_rh, -X_rh, Y_rh, 1, -mu_rh, mu_rh,

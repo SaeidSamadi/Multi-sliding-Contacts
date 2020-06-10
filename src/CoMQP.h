@@ -118,7 +118,7 @@ protected:
   Eigen::VectorXd b, b_st;
 
   Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6;
-  Eigen::MatrixXd Ineq_max_rf, Ineq_min_rf, Ineq_max_lf, Ineq_min_lf, Ineq_max_rh, Ineq_min_rh;
+  Eigen::MatrixXd Ineq_max_rf, Ineq_min_rf, Ineq_max_lf, Ineq_min_lf, Ineq_max_rh, Ineq_min_rh, Ineq_max_nonRotate;
   Eigen::MatrixXd G, G_st; // G_st is for G* matrix (star) 
   Eigen::VectorXd h, h_st;
   Eigen::MatrixXd P, P_st;
