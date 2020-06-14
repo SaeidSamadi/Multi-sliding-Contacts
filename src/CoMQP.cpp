@@ -52,6 +52,12 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   sliding.resize(6, 6);
   sliding.setZero();
 
+  sliding2_tmp.resize(6, 6);
+  sliding2_tmp.setZero();
+
+  sliding_tmp.resize(6, 6);
+  sliding_tmp.setZero();
+
   A.resize(12, 21);
   A.setZero();
   
@@ -146,13 +152,28 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const double Px_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().x();
   const double Py_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().y();
   const double Pz_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().z();
-  const auto Rot_rh = robot.surface(rightHandSurface).X_0_s(robot).rotation();
-  Eigen::Matrix6d RotationMat_rh;
-  RotationMat_rh.setZero();
-  RotationMat_rh.block<3, 3>(0, 0) = Rot_rh;
-  RotationMat_rh.block<3, 3>(3, 3) = Rot_rh;
+  const auto R_rf = robot.surface(rightFootSurface).X_0_s(robot).rotation();
+  const auto R_lf = robot.surface(leftFootSurface).X_0_s(robot).rotation();
+  const auto R_rh = robot.surface(rightHandSurface).X_0_s(robot).rotation();
+  const auto R_lh = robot.surface(leftHandSurface).X_0_s(robot).rotation();
+  Eigen::Matrix6d Rot_rf;
+  Rot_rf.setZero();
+  Rot_rf.block<3, 3>(0, 0) = R_rf;
+  Rot_rf.block<3, 3>(3, 3) = R_rf;
+  Eigen::Matrix6d Rot_lf;
+  Rot_lf.setZero();
+  Rot_lf.block<3, 3>(0, 0) = R_lf;
+  Rot_lf.block<3, 3>(3, 3) = R_lf;
+  Eigen::Matrix6d Rot_rh;
+  Rot_rh.setZero();
+  Rot_rh.block<3, 3>(0, 0) = R_rh;
+  Rot_rh.block<3, 3>(3, 3) = R_rh;
+  Eigen::Matrix6d Rot_lh;
+  Rot_lh.setZero();
+  Rot_lh.block<3, 3>(0, 0) = R_lh;
+  Rot_lh.block<3, 3>(3, 3) = R_lh;
   //const auto Rot_rh_dual = robot.surface(rightHandSurface).X_0_s(robot).dualMatrix();
-  //LOG_INFO("RotMat:" << RotationMat_rh << endl); 
+  //LOG_INFO("RotMat:" << Rot_rh.transpose() << endl); 
   //LOG_INFO("DualMat:" << Rot_rh_dual << endl); 
   // XXX inefficient
   // clang-format off
@@ -196,25 +217,58 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   // mu_z = mu.z();
   // }}}
   sva::MotionVecd rhVel = robot.bodyVelW("r_wrist");
+  //sva::MotionVecd rhVel_b = robot.bodyVelB("r_wrist");
+ // sva::MotionVecd rhVel_b = robot.bodyVelB("r_wrist");
   //sva::MotionVecd rhVel = robot.bodyVelW("___"); XXX Other Sliding contacts
   //Eigen::Vector3d CoMPos = robot.com();
   //double velNorm = rhVel.linear().norm();
-  double velNorm = Eigen::Vector3d{0.,rhVel.linear().y(), rhVel.linear().z()}.norm();
+ // Eigen::Vector3d bb;
+ // bb << rhVel_b.linear().x(),rhVel_b.linear().y(), 0.;
+ // Eigen::Vector3d aa;
+ // aa = R_rh * bb; 
+  //double velNorm = aa.norm();
+  Eigen::Vector3d RWristVel, RWristVelB, RotatedRWB, localVel;
+  RWristVel << rhVel.linear().x(), rhVel.linear().y(), rhVel.linear().z(); //Global = [0, 0, vel]
+  localVel = R_rh * RWristVel; // (x)<- || (y)|_ 
+  double velNorm = Eigen::Vector3d{-localVel(1),-localVel(0), 0.}.norm();
+  //RWristVelB << rhVel_b.linear().x(),rhVel_b.linear().y(), rhVel_b.linear().z(); 
+
+ // LOG_INFO("RW_Vel"<<RWristVel<<endl);
+ // LOG_INFO("RW_VelB"<<RWristVelB<<endl);
+ // LOG_INFO("localVel"<<localVel<<endl);
+
   if(velNorm < 10e-5)
   {
     mu_y = mu_rh/2.;
     mu_z = mu_rh/2.;
+    mu_tmp_x = mu_rh/2.;
+    mu_tmp_y = mu_rh/2.;
   }
   else
   {
-    mu_y = mu_rh * fabs(rhVel.linear().y()) / velNorm;
-    mu_z = mu_rh * fabs(rhVel.linear().z()) / velNorm;
+   // mu_y = mu_rh * fabs(rhVel.linear().y()) / velNorm;
+   // mu_z = mu_rh * fabs(rhVel.linear().z()) / velNorm;
+    mu_y = mu_rh * fabs(localVel(0)) / velNorm;
+    mu_z = mu_rh * fabs(localVel(1)) / velNorm;
+    mu_tmp_x = mu_y;
+    mu_tmp_y = mu_z;
   }
 
   sliding2(1, 0) = mu_y;
   sliding2(2, 0) = mu_z;
+  sliding2_tmp(0, 2) = mu_tmp_x;
+  sliding2_tmp(1, 2) = mu_tmp_y;
   sliding = sliding1 - sliding2;
-
+  sliding_tmp = sliding1 - sliding2_tmp; 
+  sliding_tmp = sliding_tmp * Rot_rh;
+  sliding_tmp_tr = (sliding1 - sliding2_tmp) * Rot_rh.transpose();
+  Eigen::Matrix3d Sli, Sli_tmp, Sli_tmp_tr;
+  Sli = sliding.block<3, 3>(0, 0);
+  Sli_tmp = sliding_tmp.block<3, 3>(0, 0);
+  Sli_tmp_tr = sliding_tmp_tr.block<3, 3>(0, 0);
+  LOG_INFO("old"<< Sli<<endl);
+  LOG_INFO("Rot"<< Sli_tmp<<endl);
+  LOG_INFO("Rot_tr"<< Sli_tmp_tr<<endl);
   /* XXX For Horizental slidings
   double velNorm_H = Eigen::Vector3d{rhVel_H.linear().x(), rhVel_H.linear().y(), 0.}.norm();
   if(velNorm_H < 10e-5)
@@ -310,17 +364,17 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
             -Y_lf, X_lf, coef_lf, mu_lf, -mu_lf, -1.,
             Y_lf, -X_lf, coef_lf, -mu_lf, mu_lf, -1.,
             -Y_lf, -X_lf, coef_lf, mu_lf, mu_lf, -1.;
- // Ineq_max_rh.block<4,6>(0,15) << // Vertical contact
- //           -coef_rh, X_rh, Y_rh, 1, -mu_rh, -mu_rh,
- //           -coef_rh, X_rh, -Y_rh, 1, -mu_rh, mu_rh,
- //           -coef_rh, -X_rh, Y_rh, 1, mu_rh, -mu_rh,
- //           -coef_rh, -X_rh, -Y_rh, 1, mu_rh, mu_rh;
-  Ineq_max_nonRotate <<
-           Y_lf, X_lf, coef_lf, mu_lf, mu_lf, 1.,
-           -Y_lf, X_lf, coef_lf, -mu_lf, mu_lf, 1.,
-           Y_lf, -X_lf, coef_lf, mu_lf, -mu_lf, 1.,
-           -Y_lf, -X_lf, coef_lf, -mu_lf, -mu_lf, 1.;
-  Ineq_max_rh.block<4, 6>(0, 15) = Ineq_max_nonRotate * RotationMat_rh;
+  Ineq_max_rh.block<4,6>(0,15) << // Vertical contact
+            -coef_rh, X_rh, Y_rh, 1, -mu_rh, -mu_rh,
+            -coef_rh, X_rh, -Y_rh, 1, -mu_rh, mu_rh,
+            -coef_rh, -X_rh, Y_rh, 1, mu_rh, -mu_rh,
+            -coef_rh, -X_rh, -Y_rh, 1, mu_rh, mu_rh;
+ // Ineq_max_nonRotate <<
+ //          Y_lf, X_lf, coef_lf, mu_lf, mu_lf, 1.,
+ //          -Y_lf, X_lf, coef_lf, -mu_lf, mu_lf, 1.,
+ //          Y_lf, -X_lf, coef_lf, mu_lf, -mu_lf, 1.,
+ //          -Y_lf, -X_lf, coef_lf, -mu_lf, -mu_lf, 1.;
+ // Ineq_max_rh.block<4, 6>(0, 15) = Ineq_max_nonRotate * Rot_rh;
   Ineq_min_rh.block<4,6>(0,15) <<
            coef_rh, -X_rh, -Y_rh, 1, -mu_rh, -mu_rh,
            coef_rh, -X_rh, Y_rh, 1, -mu_rh, mu_rh,
