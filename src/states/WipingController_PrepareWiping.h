@@ -12,7 +12,7 @@ struct WipingController_PrepareWiping : mc_control::fsm::State
 
   void teardown(mc_control::fsm::Controller & ctl) override;
  private:
-  double desiredNormalForce_ = -10.;
+  double desiredNormalForce_ = 10.;
   bool autoTransition_ = false;
   Eigen::Vector6d admittance_;
 };

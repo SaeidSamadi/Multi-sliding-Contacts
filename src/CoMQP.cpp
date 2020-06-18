@@ -49,6 +49,14 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   sliding2.resize(6, 6);
   sliding2.setZero();
 
+  sliding1_check.resize(6, 6);
+  sliding1_check.setZero();
+  sliding1_check(0, 2) = 1.0;
+  sliding1_check(1, 1) = 1.0;
+  sliding1_check(2, 0) = -1.0;
+  sliding2_check.resize(6, 6);
+  sliding2_check.setZero();
+
   sliding.resize(6, 6);
   sliding.setZero();
 
@@ -156,6 +164,17 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const auto R_lf = robot.surface(leftFootSurface).X_0_s(robot).rotation();
   const auto R_rh = robot.surface(rightHandSurface).X_0_s(robot).rotation();
   const auto R_lh = robot.surface(leftHandSurface).X_0_s(robot).rotation();
+  Eigen::Matrix3d constRot_rh;
+  constRot_rh << 0.0,  0.0, -1.0,
+                 1.0,  0.0,  0.0,
+                 0.0, -1.0,  0.0;
+  const auto bodyName = robot.surface(rightHandSurface).bodyName();
+  //mc_rtc::log::info("BodyName: {}", bodyName);
+  const auto body_PT = robot.bodyPosW(bodyName);
+  const auto bodyRot = constRot_rh * body_PT.rotation();
+
+  //mc_rtc::log::info("surfaceRot: \n {}", R_rh);
+  //mc_rtc::log::info("Body Rotation Matrix: \n {}", bodyRot);
   Eigen::Matrix6d Rot_rf;
   Rot_rf.setZero();
   Rot_rf.block<3, 3>(0, 0) = R_rf;
@@ -166,8 +185,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Rot_lf.block<3, 3>(3, 3) = R_lf;
   Eigen::Matrix6d Rot_rh;
   Rot_rh.setZero();
-  Rot_rh.block<3, 3>(0, 0) = R_rh;
-  Rot_rh.block<3, 3>(3, 3) = R_rh;
+  Rot_rh.block<3, 3>(0, 0) = bodyRot; //R_rh; //bodyRot;
+  Rot_rh.block<3, 3>(3, 3) = bodyRot; //R_rh; //bodyRot;
   Eigen::Matrix6d Rot_lh;
   Rot_lh.setZero();
   Rot_lh.block<3, 3>(0, 0) = R_lh;
@@ -256,19 +275,29 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
 
   sliding2(1, 0) = mu_y;
   sliding2(2, 0) = mu_z;
+  sliding2_check(0, 0) = mu_y;
+  sliding2_check(1, 0) = mu_z;
   sliding2_tmp(0, 2) = mu_tmp_x;
   sliding2_tmp(1, 2) = mu_tmp_y;
-  sliding = sliding1 - sliding2;
+  //sliding = sliding1 - sliding2;
+  //sliding = sliding1_check + sliding2_check;
   sliding_tmp = sliding1 - sliding2_tmp; 
   sliding_tmp = sliding_tmp * Rot_rh;
   sliding_tmp_tr = (sliding1 - sliding2_tmp) * Rot_rh.transpose();
   Eigen::Matrix3d Sli, Sli_tmp, Sli_tmp_tr;
   Sli = sliding.block<3, 3>(0, 0);
   Sli_tmp = sliding_tmp.block<3, 3>(0, 0);
+  mc_rtc::log::info(N);
+  if(CoMQP::desiredNormalForce() < 2){
+  sliding = sliding1_check - sliding2_check;
+  }
+  else{
+  sliding = sliding_tmp;
+  }
   Sli_tmp_tr = sliding_tmp_tr.block<3, 3>(0, 0);
-  LOG_INFO("old"<< Sli<<endl);
-  LOG_INFO("Rot"<< Sli_tmp<<endl);
-  LOG_INFO("Rot_tr"<< Sli_tmp_tr<<endl);
+  //mc_rtc::log::info("global \n {}", Sli);
+  //mc_rtc::log::info("rot \n {}", Sli_tmp);
+  //mc_rtc::log::info("rot + trsp \n {}", Sli_tmp_tr);
   /* XXX For Horizental slidings
   double velNorm_H = Eigen::Vector3d{rhVel_H.linear().x(), rhVel_H.linear().y(), 0.}.norm();
   if(velNorm_H < 10e-5)
@@ -321,7 +350,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
    *  These are for [f tau_x tau_y]
    */
   b.head<6>() = E_m2.head<6>();
-  b(6) = N;
+  b(8) = N;
   //b_st.head<12>() = b;
 
   Ineq_mat1.block<6, 6>(0, 3) = Eigen::Matrix6d::Identity() - UBmat_rf;

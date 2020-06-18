@@ -111,7 +111,7 @@ protected:
   Eigen::MatrixXd E_m1;
   Eigen::VectorXd E_m2;
   Eigen::MatrixXd E_lf, E_rf, E_rh, E_lh;
-  Eigen::MatrixXd sliding1, sliding2, sliding, sliding_tmp, sliding2_tmp, sliding_tmp_tr;
+  Eigen::MatrixXd sliding1, sliding2, sliding, sliding_tmp, sliding2_tmp, sliding_tmp_tr, sliding1_check, sliding2_check;
   Eigen::MatrixXd A, A_st;
   Eigen::MatrixXd UBmat_lf, UBmat_rf, UBmat_rh;
   Eigen::MatrixXd LBmat_lf, LBmat_rf, LBmat_rh;
@@ -136,7 +136,7 @@ protected:
   double P_Radius = 0.1;
 
   // Desired normal force
-  double N = -30;
+  double N = 1;
   double mu_y = 0, mu_z = 0, mu_tmp_x = 0, mu_tmp_y = 0;
 
   std::string rightHandForceSensor = "RightHandForceSensor";

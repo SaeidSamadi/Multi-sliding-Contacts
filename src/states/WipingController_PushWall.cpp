@@ -75,7 +75,7 @@ void WipingController_PushWall::start(mc_control::fsm::Controller & ctl_)
   double initialForce = 0.;
   if(initFromCoMQP_)
   {
-    initialForce = -ctl.comQP().desiredNormalForce();
+    initialForce = ctl.comQP().desiredNormalForce();
     forceTarget_ = sva::ForceVecd({0.,0.,0.}, {0.,0.,initialForce});
   }
   else
@@ -93,7 +93,7 @@ LOG_INFO("force rate: "<< forceRate_);
 
   if(useCoMQP_)
   {
-    ctl.comQP().desiredNormalForce(-forceTarget_.force().z());
+    ctl.comQP().desiredNormalForce(forceTarget_.force().z());
     ctl.computeCoMQP();
     ctl.setTargetFromCoMQP();
     ctl.comTask->stiffness(comStiffness_);
@@ -117,7 +117,7 @@ bool WipingController_PushWall::run(mc_control::fsm::Controller & ctl_)
 
   if(useCoMQP_)
   {
-    ctl.comQP().desiredNormalForce(-forceTarget_.force().z());
+    ctl.comQP().desiredNormalForce(forceTarget_.force().z());
     ctl.setTargetFromCoMQP();
   }
   else
