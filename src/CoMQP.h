@@ -113,8 +113,10 @@ protected:
   Eigen::MatrixXd E_lf, E_rf, E_rh, E_lh;
   Eigen::MatrixXd sliding1, sliding2, sliding, sliding_tmp, sliding2_tmp, sliding_tmp_tr, sliding1_check, sliding2_check;
   Eigen::MatrixXd A, A_st;
-  Eigen::MatrixXd UBmat_ineq, UBmat_lf, UBmat_rf, UBmat_rh, UBmat_rh_tmp;
-  Eigen::MatrixXd LBmat_ineq, LBmat_lf, LBmat_rf, LBmat_rh, LBmat_rh_tmp;
+  Eigen::MatrixXd UBmat_ineq_rf, UBmat_ineq_lf, UBmat_rf, UBmat_lf, UBmat_rh, UBmat_rh_tmp;
+  Eigen::MatrixXd LBmat_ineq_rf, LBmat_ineq_lf, LBmat_lf, LBmat_rf, LBmat_rh, LBmat_rh_tmp;
+  Eigen::MatrixXd UBmat_ineq_rh, UBmat_ineq_lh;
+  Eigen::MatrixXd LBmat_ineq_rh, LBmat_ineq_lh;
   Eigen::VectorXd b, b_st;
 
   Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6;
