@@ -248,10 +248,10 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   // mu_z = mu.z();
   // }}}
   sva::MotionVecd rhVel = robot.bodyVelW("r_wrist");
-  Eigen::Vector3d RWristVel, RWristVelB, RotatedRWB, localVel;
+  Eigen::Vector3d RWristVel, localVel;
   RWristVel << rhVel.linear().x(), rhVel.linear().y(), rhVel.linear().z(); //Global = [0, 0, vel]
   localVel = bodyRot_rh * RWristVel; // (x)<- || (y)|_ 
-  double velNorm = Eigen::Vector3d{-localVel(1),-localVel(0), 0.}.norm();
+  double velNorm = Eigen::Vector3d{localVel(0), localVel(1), 0.}.norm();
 
   if(velNorm < 10e-5)
   {
