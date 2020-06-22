@@ -55,9 +55,9 @@ public:
     N = v;
   }
 
-  Eigen::Vector2d muYZ() const
+  Eigen::Vector2d muXY() const
   {
-    return {mu_y, mu_z};
+    return {mu_x, mu_y};
   }
 
   void addToGUI(mc_rtc::gui::StateBuilder &);
@@ -113,8 +113,8 @@ protected:
   Eigen::MatrixXd E_lf, E_rf, E_rh, E_lh;
   Eigen::MatrixXd sliding1, sliding2, sliding, sliding_tmp, sliding2_tmp, sliding_tmp_tr, sliding1_check, sliding2_check;
   Eigen::MatrixXd A, A_st;
-  Eigen::MatrixXd UBmat_lf, UBmat_rf, UBmat_rh;
-  Eigen::MatrixXd LBmat_lf, LBmat_rf, LBmat_rh;
+  Eigen::MatrixXd UBmat_ineq, UBmat_lf, UBmat_rf, UBmat_rh, UBmat_rh_tmp;
+  Eigen::MatrixXd LBmat_ineq, LBmat_lf, LBmat_rf, LBmat_rh, LBmat_rh_tmp;
   Eigen::VectorXd b, b_st;
 
   Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6;
@@ -137,7 +137,7 @@ protected:
 
   // Desired normal force
   double N = 1;
-  double mu_y = 0, mu_z = 0, mu_tmp_x = 0, mu_tmp_y = 0;
+  double mu_x = 0, mu_y = 0;
 
   std::string rightHandForceSensor = "RightHandForceSensor";
   std::string rightFootForceSensor = "RightFootForceSensor";
