@@ -18,7 +18,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   lookAtTask.reset(new mc_tasks::LookAtSurfaceTask(robots(), robots().robotIndex(), "xtion_link", {1., 0., 0.},
                                                    robots().robotIndex(), "RightHandPad", 1.0, 10.));
-  solver().addTask(lookAtTask);
+  //solver().addTask(lookAtTask);
 
   auto handForceConfig = mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(0., 1., 0.));
   handForceConfig.force_scale *= 3;
@@ -51,7 +51,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
                                                   x=robot().surface("RightHandPad").X_0_s(robot());
                                                   return x; });
-  addFootForceControl();
+  //addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
 }
 
@@ -168,7 +168,7 @@ void WipingController::addFootForceControl()
     solver().addTask(leftFootTask);
 
     Eigen::Vector6d dof;
-    dof << 1,1,1,1,1,0;
+    dof << 1,1,1,1,1,1;
     addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
     addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
     LOG_SUCCESS("FeetForceControlAdded");
@@ -219,6 +219,8 @@ void WipingController::updateFootForceDifferenceControl()
 
 bool WipingController::run()
 {
+  anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
+  anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
   //supportPolygon_.update(robots());
   computeCoMQP();
   setFeetTargetFromCoMQP();
@@ -232,6 +234,8 @@ WipingController::~WipingController(){
 
 void WipingController::reset(const mc_control::ControllerResetData & reset_data)
 {
+  anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
+  anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
   mc_control::fsm::Controller::reset(reset_data);
   comTask->reset();
   comHeight_ = robot().com().z();
