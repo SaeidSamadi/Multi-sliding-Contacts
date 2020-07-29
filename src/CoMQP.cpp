@@ -5,7 +5,10 @@ using namespace std;
 
 CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config)
 {
-  numVar_ = 3 + 6 * 3 + 1;
+
+  //numVar_ = 3 + 6 * 3 + 1;
+  numVar_ = 3 + 6 * 4 + 1;
+  //updateNumVar(robot);
 
 // Offset mass
   mg = (massOffset_ + robot.mass()) * robot.mbc().gravity.z();
@@ -148,6 +151,23 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 
   solver_.problem(nrVar(), nrEq(), nrInEq());
 }
+
+//int CoMQP::updateNumVar(const mc_rbdyn::Robot & robot){
+//  double NormalForce_rh = robot.surfaceWrench(rightHandSurface).force().z();
+//  double NormalForce_rh_abs = fabs(NormalForce_rh);
+//  double err = fabs(NormalForce_rh - tmp);
+//  //mc_rtc::log::info(NormalForce_rh_abs);
+//  //mc_rtc::log::info(tmp);
+//  tmp = NormalForce_rh; 
+//  if(NormalForce_rh_abs > 8.0 && err < 0.3){
+//    mc_rtc::log::info("Hand Contact added ***************** ");
+//    numVar_ = 22;
+//  }
+//  else{
+//    numVar_ = 22;
+//    mc_rtc::log::info("else");
+//  }
+//}
 
 bool CoMQP::solve(const mc_rbdyn::Robot & robot)
 {

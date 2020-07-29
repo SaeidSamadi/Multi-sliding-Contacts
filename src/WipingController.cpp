@@ -69,6 +69,7 @@ bool WipingController::computeCoMQP()
 
   // Solve com QP
   //comQPComputed = this->comQP().solve(this->robot(), this->shiftedSupportPolygon());
+  //comQP().updateNumVar(robot());
   comQPComputed = this->comQP().solve(this->robot());
   if(!comQPComputed)
   {

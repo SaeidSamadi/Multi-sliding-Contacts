@@ -21,6 +21,7 @@ class CoMQP
 {
 public:
   CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config);
+  int updateNumVar(const mc_rbdyn::Robot & robot);
   bool solve(const mc_rbdyn::Robot & robot);
   //bool solve(const mc_rbdyn::Robot & robot, const ModifiedSupportPolygon & supportPolygon);
   /*!
@@ -127,6 +128,7 @@ protected:
   Eigen::VectorXd Y_desired;
   Eigen::VectorXd q, q_st;
   Eigen::Vector3d PG_d;
+  double tmp = 0.0;
 
   double P_PG = 10;
   double P_Force_rf = 1;
