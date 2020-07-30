@@ -9,9 +9,12 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));
 
-  admittanceTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));
-  admittanceTask->setGains(1, 300);
-  admittanceTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
+  rightHandTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));
+  rightHandTask->setGains(1, 300);
+  rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
+  leftHandTask.reset(new mc_tasks::force::CoPTask("LeftHandPad", robots(), robots().robotIndex(), 5., 500));
+  leftHandTask->setGains(1, 300);
+  leftHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
 
   leftFootTask.reset(new mc_tasks::force::CoPTask("LeftFootCenter", robots(), robots().robotIndex(), 100000, 10000));
   rightFootTask.reset(new mc_tasks::force::CoPTask("RightFootCenter", robots(), robots().robotIndex(), 100000, 10000));
@@ -27,6 +30,9 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
       mc_rtc::gui::Force("RightHandForce", handForceConfig,
                          [this]() { return robot().forceSensor("RightHandForceSensor").worldWrench(robot()); },
                          [this]() { return robot().surface("RightHandPad").X_0_s(robot()); }),
+      mc_rtc::gui::Force("LeftHandForce", handForceConfig,
+                         [this]() { return robot().forceSensor("LeftHandForceSensor").worldWrench(robot()); },
+                         [this]() { return robot().surface("LeftHandPad").X_0_s(robot()); }),
       mc_rtc::gui::Force("RightFootForce", mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(1., 0.2, 0.)),
                          [this]() { return robot().forceSensor("RightFootForceSensor").wrenchWithoutGravity(robot()); },
                          [this]() { return robot().surface("RightFoot").X_0_s(robot()); }),
@@ -48,9 +54,9 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comQP_.addToGUI(*gui());
 
-  logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
-                                                  x=robot().surface("RightHandPad").X_0_s(robot());
-                                                  return x; });
+  //logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
+  //                                                x=robot().surface("RightHandPad").X_0_s(robot());
+  //                                                return x; });
   //addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
 }
@@ -60,15 +66,6 @@ bool WipingController::computeCoMQP()
   Eigen::Vector2d muYZ = this->comQP().muYZ_rh();
   double mu_y = muYZ.x();
   double mu_z = muYZ.y();
-  //this->shiftedSupportPolygon().update(this->robots(), sva::ForceVecd(Eigen::Vector3d::Zero(),
-  //                                                                    {
-  //                                                                    this->comQP().desiredNormalForce(),
-  //                                                                    mu_y * this->comQP().desiredNormalForce(),
-  //                                                                    mu_z * this->comQP().desiredNormalForce()
-  //                                                                    }));
-
-  // Solve com QP
-  //comQPComputed = this->comQP().solve(this->robot(), this->shiftedSupportPolygon());
   //comQP().updateNumVar(robot());
   comQPComputed = this->comQP().solve(this->robot());
   if(!comQPComputed)
@@ -94,11 +91,12 @@ void WipingController::setTargetFromCoMQP()
   {
     const auto & result = this->comQP().result();
     this->comTask->com(Eigen::Vector3d{result.comPos(0), result.comPos(1), comHeight_});
-    this->admittanceTask->targetForceW(result.rightHandForce.force());
+    this->rightHandTask->targetForceW(result.rightHandForce.force());
+    this->leftHandTask->targetForceW(result.leftHandForce.force());
   }
   else
   {
-    LOG_WARNING("CoMQP Failed to compute, ignoring target I");
+    LOG_WARNING("CoMQP Failed to compute, ignoring target");
   }
 }
 
@@ -108,7 +106,6 @@ void WipingController::setFeetTargetFromCoMQP()
   {
     const auto & result = this->comQP().result();
     this->leftFootTask->targetForceW(result.leftFootForce.force());
-    //addLeftFootForceControl();
     this->rightFootTask->targetForceW(result.rightFootForce.force());
 
     if(useFeetForceControl_)
@@ -122,24 +119,44 @@ void WipingController::setFeetTargetFromCoMQP()
   }
 }
 
-void WipingController::addHandForceControl()
+void WipingController::addRightHandForceControl()
 {
-  solver().addTask(admittanceTask);
+  solver().addTask(rightHandTask);
   gui()->addElement(
       {"Forces"},
       mc_rtc::gui::Point3D("RightHandCoP",
                            [this]() { return robot().copW("RightHandPad"); }),
       mc_rtc::gui::Point3D("RightHandCoPTarget",
                            mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
-                           [this]() { return admittanceTask->targetCoPW(); })
+                           [this]() { return rightHandTask->targetCoPW(); })
       );
 }
 
-void WipingController::removeHandForceControl()
+void WipingController::removeRightHandForceControl()
 {
-  solver().removeTask(admittanceTask);
+  solver().removeTask(rightHandTask);
   gui()->removeElement({"Forces"}, "RightHandCoP");
   gui()->removeElement({"Forces"}, "RightHandCoPTarget");
+}
+
+void WipingController::addLeftHandForceControl()
+{
+  solver().addTask(leftHandTask);
+  gui()->addElement(
+      {"Forces"},
+      mc_rtc::gui::Point3D("LeftHandCoP",
+                           [this]() { return robot().copW("LeftHandPad"); }),
+      mc_rtc::gui::Point3D("LeftHandCoPTarget",
+                           mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
+                           [this]() { return leftHandTask->targetCoPW(); })
+      );
+}
+
+void WipingController::removeLeftHandForceControl()
+{
+  solver().removeTask(leftHandTask);
+  gui()->removeElement({"Forces"}, "LeftHandCoP");
+  gui()->removeElement({"Forces"}, "LeftHandCoPTarget");
 }
 
 void WipingController::addLeftFootForceControl()

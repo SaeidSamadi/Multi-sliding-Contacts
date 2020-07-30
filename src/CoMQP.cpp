@@ -299,11 +299,11 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   A_st.block<6, 6>(0, 15) = E_rh;
   A_st.block<6, 6>(0, 21) = E_lh;
   A_st.block<6, 6>(6, 15) = sliding_rh;
-  A_st.block<6, 6>(12, 21) = sliding_lh;
+  //A_st.block<6, 6>(12, 21) = sliding_lh;
 
-  b.head<6>() = E_m2.head<6>();
+  //b.head<6>() = E_m2.head<6>();
   b(8) = -N_rh;
-  b(14) = -N_lh;
+  //b(14) = -N_lh;
 
   Eigen::Matrix6d Ineq_frictionCone_rf;
   Ineq_frictionCone_rf.setZero();
@@ -625,6 +625,7 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("CoMQP_gains_Force_lh");
   logger.removeLogEntry("CoMQP_gains_Wrench_lh");
   logger.removeLogEntry("CoMQP_mu_y");
+  logger.removeLogEntry("CoMQP_mu_z");
   logger.removeLogEntry("CoMQP_mu_sum");
 
   logger.removeLogEntry("CoMQP_pos");

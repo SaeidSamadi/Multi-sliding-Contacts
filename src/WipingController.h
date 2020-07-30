@@ -30,8 +30,10 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
   void addFootForceControl();
   void removeFootForceControl();
 
-	void addHandForceControl();
-	void removeHandForceControl();
+	void addRightHandForceControl();
+	void removeRightHandForceControl();
+	void addLeftHandForceControl();
+	void removeLeftHandForceControl();
 	void addLeftFootForceControl();
 	void removeLeftFootForceControl();
 private:
@@ -39,7 +41,8 @@ private:
 
 public:
   std::shared_ptr<mc_tasks::CoMTask> comTask;
-  std::shared_ptr<mc_tasks::force::CoPTask> admittanceTask;
+  std::shared_ptr<mc_tasks::force::CoPTask> rightHandTask;
+  std::shared_ptr<mc_tasks::force::CoPTask> leftHandTask;
   std::shared_ptr<mc_tasks::LookAtSurfaceTask> lookAtTask;
   FrictionEstimator frictionEstimator;
 
