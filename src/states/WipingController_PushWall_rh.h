@@ -3,7 +3,7 @@
 #include <mc_control/fsm/State.h>
 #include <SpaceVecAlg/SpaceVecAlg>
 
-struct WipingController_PushWall : mc_control::fsm::State
+struct WipingController_PushWall_rh : mc_control::fsm::State
 {
   void configure(const mc_rtc::Configuration & config) override;
 

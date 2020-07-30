@@ -2,7 +2,7 @@
 
 #include <mc_control/fsm/State.h>
 
-struct WipingController_WipeItBaby : mc_control::fsm::State
+struct WipingController_WipeItBaby_lh : mc_control::fsm::State
 {
   void configure(const mc_rtc::Configuration & config) override;
 

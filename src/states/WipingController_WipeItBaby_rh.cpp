@@ -1,8 +1,8 @@
-#include "WipingController_WipeItBaby.h"
+#include "WipingController_WipeItBaby_rh.h"
 
 #include "../WipingController.h"
 
-void WipingController_WipeItBaby::configure(const mc_rtc::Configuration & config)
+void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & config)
 {
 	if(config.has("admittance"))
 	{
@@ -14,7 +14,7 @@ void WipingController_WipeItBaby::configure(const mc_rtc::Configuration & config
   }
 }
 
-void WipingController_WipeItBaby::start(mc_control::fsm::Controller & ctl_)
+void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
@@ -35,17 +35,17 @@ void WipingController_WipeItBaby::start(mc_control::fsm::Controller & ctl_)
   ctl.lookAtTask->weight(10);
   ctl.solver().addTask(ctl.lookAtTask);
 
-  ctl.admittanceTask->reset();
-  ctl.admittanceTask->setGains(1, 300);
-  //ctl.admittanceTask->stiffness(1.);
-  //ctl.admittanceTask->damping(300.);
+  ctl.rightHandTask->reset();
+  ctl.rightHandTask->setGains(1, 300);
+  //ctl.rightHandTask->stiffness(1.);
+  //ctl.rightHandTask->damping(300.);
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 0., 0., 1.;
-  ctl.admittanceTask->dimWeight(dimW);
-  ctl.admittanceTask->admittance(admittance_);
-  ctl.admittanceTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.rightHandTask->dimWeight(dimW);
+  ctl.rightHandTask->admittance(admittance_);
+  ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
   ctl.setTargetFromCoMQP();
-  ctl.addHandForceControl();
+  ctl.addRightHandForceControl();
 
   //ctl.setFeetTargetFromCoMQP();
   //ctl.addLeftFootForceControl();
@@ -70,7 +70,7 @@ void WipingController_WipeItBaby::start(mc_control::fsm::Controller & ctl_)
                            });
 }
 
-bool WipingController_WipeItBaby::run(mc_control::fsm::Controller & ctl_)
+bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
@@ -82,10 +82,10 @@ bool WipingController_WipeItBaby::run(mc_control::fsm::Controller & ctl_)
   return true;
 }
 
-void WipingController_WipeItBaby::teardown(mc_control::fsm::Controller & ctl_)
+void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  ctl.removeHandForceControl();
+  ctl.removeRightHandForceControl();
   //ctl.removeLeftFootForceControl();
   ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
@@ -102,4 +102,4 @@ void WipingController_WipeItBaby::teardown(mc_control::fsm::Controller & ctl_)
 
 }
 
-EXPORT_SINGLE_STATE("WipingController_WipeItBaby", WipingController_WipeItBaby)
+EXPORT_SINGLE_STATE("WipingController_WipeItBaby_rh", WipingController_WipeItBaby_rh)

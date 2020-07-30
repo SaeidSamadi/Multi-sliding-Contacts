@@ -1,8 +1,8 @@
-#include "WipingController_PushWall.h"
+#include "WipingController_PushWall_rh.h"
 
 #include "../WipingController.h"
 
-void WipingController_PushWall::configure(const mc_rtc::Configuration & config)
+void WipingController_PushWall_rh::configure(const mc_rtc::Configuration & config)
 {
   if(config.has("useCoMQP"))
   {
@@ -48,7 +48,7 @@ void WipingController_PushWall::configure(const mc_rtc::Configuration & config)
   }
 }
 
-void WipingController_PushWall::start(mc_control::fsm::Controller & ctl_)
+void WipingController_PushWall_rh::start(mc_control::fsm::Controller & ctl_)
 {
   LOG_INFO("Starting PushWall with:");
   LOG_INFO("admittance : " << admittance_.transpose());
@@ -65,12 +65,12 @@ void WipingController_PushWall::start(mc_control::fsm::Controller & ctl_)
   ctl.lookAtTask->weight(10);
   ctl.solver().addTask(ctl.lookAtTask);
 
-  ctl.admittanceTask->reset();
-  ctl.admittanceTask->dimWeight(Eigen::Vector6d::Ones());
-  ctl.admittanceTask->admittance(admittance_);
-  ctl.admittanceTask->targetCoP(Eigen::Vector2d::Zero());
-  ctl.admittanceTask->stiffness(sva::MotionVecd(stiffness_));
-  ctl.admittanceTask->damping(sva::MotionVecd(damping_));
+  ctl.rightHandTask->reset();
+  ctl.rightHandTask->dimWeight(Eigen::Vector6d::Ones());
+  ctl.rightHandTask->admittance(admittance_);
+  ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.rightHandTask->stiffness(sva::MotionVecd(stiffness_));
+  ctl.rightHandTask->damping(sva::MotionVecd(damping_));
 
   double initialForce = 0.;
   if(initFromCoMQP_)
@@ -80,9 +80,9 @@ void WipingController_PushWall::start(mc_control::fsm::Controller & ctl_)
   }
   else
   {
-    forceTarget_ = ctl.admittanceTask->measuredWrench();
+    forceTarget_ = ctl.rightHandTask->measuredWrench();
      initialForce = forceTarget_.force().z();
-    ctl.admittanceTask->targetForce(forceTarget_.force());
+    ctl.rightHandTask->targetForce(forceTarget_.force());
   }
 LOG_INFO("initial force: " << initialForce);
 LOG_INFO("max force: " << maxForce_);
@@ -100,18 +100,18 @@ LOG_INFO("force rate: "<< forceRate_);
   }
   else
   {
-    ctl.admittanceTask->targetForce(forceTarget_.force());
+    ctl.rightHandTask->targetForce(forceTarget_.force());
     ctl.comTask->stiffness(comStiffness_);
   }
 
   ctl.solver().addTask(ctl.comTask);
-  ctl.addHandForceControl();
+  ctl.addRightHandForceControl();
   //ctl.addLeftFootForceControl();
   ctl.addFootForceControl();
   ctl.comQP().addToLogger(ctl.logger());
 }
 
-bool WipingController_PushWall::run(mc_control::fsm::Controller & ctl_)
+bool WipingController_PushWall_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
@@ -122,12 +122,12 @@ bool WipingController_PushWall::run(mc_control::fsm::Controller & ctl_)
   }
   else
   {
-    ctl.admittanceTask->targetForce(forceTarget_.force());
+    ctl.rightHandTask->targetForce(forceTarget_.force());
   }
 
 
   if(currTime_ >= maxDuration_ ||
-     (currTime_ >= duration_ && std::fabs(ctl.admittanceTask->measuredWrench().force().z() - ctl.admittanceTask->targetWrench().force().z()) < forceThreshold_))
+     (currTime_ >= duration_ && std::fabs(ctl.rightHandTask->measuredWrench().force().z() - ctl.rightHandTask->targetWrench().force().z()) < forceThreshold_))
   {
     output("OK");
     return true;
@@ -142,10 +142,10 @@ bool WipingController_PushWall::run(mc_control::fsm::Controller & ctl_)
   return false;
 }
 
-void WipingController_PushWall::teardown(mc_control::fsm::Controller & ctl_)
+void WipingController_PushWall_rh::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  ctl.removeHandForceControl();
+  ctl.removeRightHandForceControl();
   //ctl.removeLeftFootForceControl();
   ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
@@ -153,4 +153,4 @@ void WipingController_PushWall::teardown(mc_control::fsm::Controller & ctl_)
   ctl.solver().removeTask(ctl.lookAtTask);
 }
 
-EXPORT_SINGLE_STATE("WipingController_PushWall", WipingController_PushWall)
+EXPORT_SINGLE_STATE("WipingController_PushWall_rh", WipingController_PushWall_rh)
