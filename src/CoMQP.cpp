@@ -21,6 +21,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   X_rh = config("right_hand")("shape")[0];
   Y_rh = config("right_hand")("shape")[1];
   mu_rh = config("right_hand")("friction");
+  mu_lh = config("right_hand")("friction");
   mu_rf = config("right_foot")("friction");
   mu_lf = config("left_foot")("friction");
   com_pos = config("com")("pos");
@@ -185,7 +186,10 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   constRot_rh << 0.0,  0.0, -1.0,
                  1.0,  0.0,  0.0,
                  0.0, -1.0,  0.0;
-  constRot_lh = constRot_rh;
+  constRot_lh <<  0.0,  0.0, -1.0,
+                 -1.0,  0.0,  0.0,
+                  0.0,  1.0,  0.0;
+  //constRot_lh = constRot_rh;
 
   const auto bodyRot_rf = constRot_rf * bodyPT_rf.rotation();
   const auto bodyRot_lf = constRot_lf * bodyPT_lf.rotation();
@@ -288,8 +292,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
     mu_y_lh = mu_lh * fabs(localVel_lh(1)) / velNorm_lh;
   }
 
-  sliding_lh2(1, 0) = mu_x_lh;
-  sliding_lh2(2, 0) = mu_y_lh;
+  sliding_lh2(0, 2)= mu_x_lh;
+  sliding_lh2(1, 2)= mu_y_lh;
   sliding_lh = sliding_lh1 - sliding_lh2;
   sliding_lh = sliding_lh * Rot_lh;
 
@@ -299,11 +303,11 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   A_st.block<6, 6>(0, 15) = E_rh;
   A_st.block<6, 6>(0, 21) = E_lh;
   A_st.block<6, 6>(6, 15) = sliding_rh;
-  //A_st.block<6, 6>(12, 21) = sliding_lh;
+  A_st.block<6, 6>(12, 21) = sliding_lh;
 
-  //b.head<6>() = E_m2.head<6>();
+  b.head<6>() = E_m2.head<6>();
   b(8) = -N_rh;
-  //b(14) = -N_lh;
+  b(14) = -N_lh;
 
   Eigen::Matrix6d Ineq_frictionCone_rf;
   Ineq_frictionCone_rf.setZero();
