@@ -61,9 +61,9 @@ void WipingController_PushWall_lh::start(mc_control::fsm::Controller & ctl_)
   ctl.comTask->weight(2000);
   ctl.comTask->com(ctl.robot().com());
 
-  ctl.lookAtTask->stiffness(5);
-  ctl.lookAtTask->weight(10);
-  ctl.solver().addTask(ctl.lookAtTask);
+  //ctl.lookAtTask->stiffness(5);
+  //ctl.lookAtTask->weight(10);
+  //ctl.solver().addTask(ctl.lookAtTask);
 
   ctl.leftHandTask->reset();
   ctl.leftHandTask->dimWeight(Eigen::Vector6d::Ones());
@@ -150,7 +150,7 @@ void WipingController_PushWall_lh::teardown(mc_control::fsm::Controller & ctl_)
   ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
   ctl.comQP().removeFromLogger(ctl.logger());
-  ctl.solver().removeTask(ctl.lookAtTask);
+  //ctl.solver().removeTask(ctl.lookAtTask);
 }
 
 EXPORT_SINGLE_STATE("WipingController_PushWall_lh", WipingController_PushWall_lh)
