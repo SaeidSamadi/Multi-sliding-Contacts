@@ -9,14 +9,14 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));
 
-  rightHandTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));
+  rightHandTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));//Stiff, Weight
   rightHandTask->setGains(1, 300);
   rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
   leftHandTask.reset(new mc_tasks::force::CoPTask("LeftHandPad", robots(), robots().robotIndex(), 5., 500));
   leftHandTask->setGains(1, 300);
   leftHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
 
-  leftFootTask.reset(new mc_tasks::force::CoPTask("LeftFootCenter", robots(), robots().robotIndex(), 100000, 10000));
+  leftFootTask.reset(new mc_tasks::force::CoPTask("LeftFootCenter", robots(), robots().robotIndex(), 100, 1000));
   rightFootTask.reset(new mc_tasks::force::CoPTask("RightFootCenter", robots(), robots().robotIndex(), 100000, 10000));
 
   lookAtTask.reset(new mc_tasks::LookAtSurfaceTask(robots(), robots().robotIndex(), "xtion_link", {1., 0., 0.},
@@ -93,6 +93,7 @@ void WipingController::setTargetFromCoMQP()
     this->comTask->com(Eigen::Vector3d{result.comPos(0), result.comPos(1), comHeight_});
     this->rightHandTask->targetForceW(result.rightHandForce.force());
     this->leftHandTask->targetForceW(result.leftHandForce.force());
+    this->leftFootTask->targetForceW(result.leftFootForce.force());
   }
   else
   {
@@ -162,21 +163,21 @@ void WipingController::removeLeftHandForceControl()
 void WipingController::addLeftFootForceControl()
 {
   solver().addTask(leftFootTask);
- // gui()->addElement(
- //     {"Forces"},
- //     mc_rtc::gui::Point3D("LeftFootCoP",
- //                          [this]() { return robot().copW("LeftFootCenter"); }),
- //     mc_rtc::gui::Point3D("LeftFootCoPTarget",
- //                          mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
- //                          [this]() { return leftFootTask->targetCoPW(); })
- //     );
+  gui()->addElement(
+      {"Forces"},
+      mc_rtc::gui::Point3D("LeftFootCoP",
+                           [this]() { return robot().copW("LeftFootCenter"); }),
+      mc_rtc::gui::Point3D("LeftFootCoPTarget",
+                           mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
+                           [this]() { return leftFootTask->targetCoPW(); })
+      );
 }
 
 void WipingController::removeLeftFootForceControl()
 {
   solver().removeTask(leftFootTask);
- // gui()->removeElement({"Forces"}, "LeftFootCoP");
- // gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
+  gui()->removeElement({"Forces"}, "LeftFootCoP");
+  gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
 }
 void WipingController::addFootForceControl()
 {
@@ -239,10 +240,8 @@ bool WipingController::run()
 {
   anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
   anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
-  //supportPolygon_.update(robots());
   computeCoMQP();
   setFeetTargetFromCoMQP();
-  //addLeftFootForceControl();
   return mc_control::fsm::Controller::run();
 }
 

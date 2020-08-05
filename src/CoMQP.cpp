@@ -66,13 +66,13 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   sliding_lh.resize(6, 6);
   sliding_lh.setZero();
 
-  A.resize(18, 27);
+  A.resize(24, 27);
   A.setZero();
   
-  A_st.resize(18, 28);
+  A_st.resize(24, 28);
   A_st.setZero();
 
-  b.resize(18);
+  b.resize(24);
   b.setZero();
 
   Ineq_mat1.resize(6, 27); //For 3contacts: (6, 21)
@@ -296,6 +296,9 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   sliding_lh2(1, 2)= mu_y_lh;
   sliding_lh = sliding_lh1 - sliding_lh2;
   sliding_lh = sliding_lh * Rot_lh;
+  Eigen::Matrix6d Mat_lf;
+  Mat_lf.setZero();
+  Mat_lf(2, 2) = 1.0;
 
   A_st.block<6, 3>(0, 0) = E_m1;
   A_st.block<6, 6>(0, 3) = E_rf;
@@ -304,10 +307,12 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   A_st.block<6, 6>(0, 21) = E_lh;
   A_st.block<6, 6>(6, 15) = sliding_rh;
   A_st.block<6, 6>(12, 21) = sliding_lh;
+  A_st.block<6, 6>(18, 9) = Mat_lf;
 
   b.head<6>() = E_m2.head<6>();
   b(8) = -N_rh;
   b(14) = -N_lh;
+  b(20) = N_lf;
 
   Eigen::Matrix6d Ineq_frictionCone_rf;
   Ineq_frictionCone_rf.setZero();

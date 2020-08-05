@@ -66,6 +66,16 @@ public:
     N_lh = v;
   }
 
+  double lf_desiredNormalForce() const
+  {
+    return N_lf;
+  }
+
+  void lf_desiredNormalForce(double v)
+  {
+    N_lf = v;
+  }
+
   Eigen::Vector2d muYZ_rh() const
   {
     return {mu_x_rh, mu_y_rh};
@@ -160,6 +170,7 @@ protected:
   // Desired normal force
   double N_rh = -1.0;
   double N_lh = -1.0;
+  double N_lf = 150.0;
   double mu_x_rh = 0, mu_y_rh = 0;
   double mu_x_lh = 0, mu_y_lh = 0;
 
