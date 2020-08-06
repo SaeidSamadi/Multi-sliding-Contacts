@@ -50,7 +50,7 @@ void WipingController_PushWall_lf::configure(const mc_rtc::Configuration & confi
 
 void WipingController_PushWall_lf::start(mc_control::fsm::Controller & ctl_)
 {
-  LOG_INFO("Starting PushWall with:");
+  LOG_INFO("Starting PrepareShuffleState with:");
   LOG_INFO("admittance : " << admittance_.transpose());
   LOG_INFO("stiffness : " << stiffness_.transpose());
   LOG_INFO("damping : " << damping_.transpose());
