@@ -253,15 +253,18 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   // mu_y = mu.y();
   // mu_z = mu.z();
   // }}}
-  sva::MotionVecd rhVel = robot.bodyVelW("r_wrist");
-  sva::MotionVecd lhVel = robot.bodyVelW("l_wrist");
-  Eigen::Vector3d RWristVel, localVel_rh, LWristVel, localVel_lh;
+  rh_fs = robot.forceSensor(rightHandForceSensor).worldWrench(robot);
+  rh_fs_rot << rh_fs.force().x(), rh_fs.force().y(), rh_fs.force().z();
+  rh_fs_rot = bodyRot_rh * rh_fs_rot;
+  rhVel = robot.bodyVelW("r_wrist");
+  lhVel = robot.bodyVelW("l_wrist");
   RWristVel << rhVel.linear().x(), rhVel.linear().y(), rhVel.linear().z(); //Global = [0, 0, vel]
   LWristVel << lhVel.linear().x(), lhVel.linear().y(), lhVel.linear().z(); //Global = [0, 0, vel]
   localVel_rh = bodyRot_rh * RWristVel; 
   localVel_lh = bodyRot_lh * LWristVel; 
   double velNorm_rh = Eigen::Vector3d{localVel_rh(0), localVel_rh(1), 0.}.norm();
   double velNorm_lh = Eigen::Vector3d{localVel_lh(0), localVel_lh(1), 0.}.norm();
+  Eigen::Vector3d velRatio_ = - localVel_rh / velNorm_rh; 
 
   if(velNorm_rh < 10e-5)
   {
@@ -275,6 +278,18 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
     mu_x_rh = mu_rh * fabs(localVel_rh(0)) / velNorm_rh;
     mu_y_rh = mu_rh * fabs(localVel_rh(1)) / velNorm_rh;
   }
+  
+  if( fabs(rh_fs_rot(2)) > 5.0 && //f_z > 1.0 
+      fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) >= 0.1 && //0.1 < mu < 3.0
+      fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) <= 3.0 ){
+  mu_x_calc = rh_fs_rot(0) / (rh_fs_rot(2) * velRatio_(0));
+  mu_x_avg = mu_x_calc;
+  }
+  else{
+    mu_x_calc = mu_x_avg;
+  }
+
+  muN = mu_x_calc * rh_fs_rot(2);
 
   sliding_rh2(0, 2) = mu_x_rh;
   sliding_rh2(1, 2) = mu_y_rh;
@@ -619,6 +634,13 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
   logger.addLogEntry("CoMQP_rightHandForce", [this]() { return result().rightHandForce; });
   logger.addLogEntry("CoMQP_desiredNormalForce_rh", [this]() { return N_rh; });
   logger.addLogEntry("CoMQP_desiredNormalForce_lh", [this]() { return N_lh; });
+  logger.addLogEntry("RHVel", [this]() { return rhVel;});
+  logger.addLogEntry("RHVel_local", [this]() { return localVel_rh;});
+  logger.addLogEntry("RH_fs", [this]() { return rh_fs;});
+  logger.addLogEntry("muN", [this]() { return muN;});
+  logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
+  logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
+                                                     
 }
 
 void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
@@ -644,4 +666,10 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("CoMQP_leftHandForce");
   logger.removeLogEntry("CoMQP_desiredNormalForce_rh");
   logger.removeLogEntry("CoMQP_desiredNormalForce_lh");
+  logger.removeLogEntry("RHVel");
+  logger.removeLogEntry("RHVel_local");
+  logger.removeLogEntry("RH_fs");
+  logger.removeLogEntry("muN");
+  logger.removeLogEntry("RH_fs_rot");
+  logger.removeLogEntry("muXcalc");
 }

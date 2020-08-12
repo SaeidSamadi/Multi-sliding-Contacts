@@ -14,5 +14,6 @@ struct WipingController_WipeItBaby_rh : mc_control::fsm::State
 
  protected:
 	Eigen::Vector6d admittance_;
+  double xx;
   bool feetForceControl_ = true;
 };

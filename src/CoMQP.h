@@ -84,6 +84,7 @@ public:
   {
     return {mu_x_lh, mu_y_lh};
   }
+  double mu_x_calc; 
 
   void addToGUI(mc_rtc::gui::StateBuilder &);
   void removeFromGUI(mc_rtc::gui::StateBuilder &);
@@ -173,6 +174,13 @@ protected:
   double N_lf = 150.0;
   double mu_x_rh = 0, mu_y_rh = 0;
   double mu_x_lh = 0, mu_y_lh = 0;
+  sva::MotionVecd rhVel, lhVel;
+  Eigen::Vector3d RWristVel, localVel_rh, LWristVel, localVel_lh;
+  sva::ForceVecd rh_fs; 
+  Eigen::Vector3d rh_fs_rot;
+  double muN; 
+  double mu_x_avg = 0.5;
+
 
   std::string rightHandForceSensor = "RightHandForceSensor";
   std::string leftHandForceSensor = "RightHandForceSensor";

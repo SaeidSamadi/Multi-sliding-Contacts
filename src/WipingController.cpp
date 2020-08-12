@@ -57,15 +57,17 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
   //                                                x=robot().surface("RightHandPad").X_0_s(robot());
   //                                                return x; });
+  //logger().addLogEntry("RightHandVelocity", [this]() { sva::MotionVecd rhVel;
+  //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
 }
 
 bool WipingController::computeCoMQP()
 {
-  Eigen::Vector2d muYZ = this->comQP().muYZ_rh();
-  double mu_y = muYZ.x();
-  double mu_z = muYZ.y();
+  //Eigen::Vector2d muYZ = this->comQP().muYZ_rh();
+  //double mu_y = muYZ.x();
+  //double mu_z = muYZ.y();
   //comQP().updateNumVar(robot());
   comQPComputed = this->comQP().solve(this->robot());
   if(!comQPComputed)

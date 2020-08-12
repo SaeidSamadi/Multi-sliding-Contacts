@@ -52,22 +52,28 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.solver().addTask(ctl.comTask);
 
   ctl.comQP().addToLogger(ctl.logger());
+  //xx = 10.0;
+  //ctl.logger().addLogEntry("EstimatedFriction",
+  //                         []()
+  //                         { double xxx = 100.0;
+  //                         return xx;
+  //                         });
 
-  ctl.logger().addLogEntry("friction_mu_x",
-                           [&ctl]()
-                           {
-                           return ctl.frictionEstimator.mu_x();
-                           });
-  ctl.logger().addLogEntry("friction_mu_y",
-                           [&ctl]()
-                           {
-                           return ctl.frictionEstimator.mu_y();
-                           });
-  ctl.logger().addLogEntry("friction_mu",
-                           [&ctl]()
-                           {
-                           return ctl.frictionEstimator.mu();
-                           });
+  //ctl.logger().addLogEntry("friction_mu_x",
+  //                         [&ctl]()
+  //                         {
+  //                         return ctl.frictionEstimator.mu_x();
+  //                         });
+  //ctl.logger().addLogEntry("friction_mu_y",
+  //                         [&ctl]()
+  //                         {
+  //                         return ctl.frictionEstimator.mu_y();
+  //                         });
+  //ctl.logger().addLogEntry("friction_mu",
+  //                         [&ctl]()
+  //                         {
+  //                         return ctl.frictionEstimator.mu();
+  //                         });
 }
 
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
