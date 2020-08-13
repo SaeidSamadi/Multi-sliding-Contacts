@@ -59,11 +59,11 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   //                         return xx;
   //                         });
 
-  //ctl.logger().addLogEntry("friction_mu_x",
-  //                         [&ctl]()
-  //                         {
-  //                         return ctl.frictionEstimator.mu_x();
-  //                         });
+  ctl.logger().addLogEntry("friction_mu_Estim",
+                           [&ctl]()
+                           {
+                           return ctl.frictionEstimator.mu_calc();
+                           });
   //ctl.logger().addLogEntry("friction_mu_y",
   //                         [&ctl]()
   //                         {
@@ -79,7 +79,9 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-
+  ctl.frictionEstimator.update(ctl.robot());
+  double EstimatedFriction = ctl.frictionEstimator.mu_calc();
+  mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
   ctl.setTargetFromCoMQP();
   //ctl.setFeetTargetFromCoMQP();
   // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
@@ -102,9 +104,9 @@ void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_
 
   ctl.comQP().removeFromLogger(ctl.logger());
 
-  ctl.logger().removeLogEntry("friction_mu_x");
-  ctl.logger().removeLogEntry("friction_mu_y");
-  ctl.logger().removeLogEntry("friction_mu");
+  ctl.logger().removeLogEntry("friction_mu_x_Estim");
+  //ctl.logger().removeLogEntry("friction_mu_y");
+  //ctl.logger().removeLogEntry("friction_mu");
 
 }
 
