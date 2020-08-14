@@ -81,7 +81,7 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   auto & ctl = static_cast<WipingController &>(ctl_);
   ctl.frictionEstimator.update(ctl.robot());
   double EstimatedFriction = ctl.frictionEstimator.mu_calc();
-  mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
+  //mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
   ctl.setTargetFromCoMQP();
   //ctl.setFeetTargetFromCoMQP();
   // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
