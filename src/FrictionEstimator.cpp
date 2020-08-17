@@ -11,12 +11,14 @@ FrictionEstimator::FrictionEstimator(const mc_rbdyn::Robot& robot, const std::st
 void FrictionEstimator::update(const mc_rbdyn::Robot& robot)
 {
   const auto & surface = robot.surface(surfaceName_);
-  //const auto & wrench = robot.surfaceWrench(surfaceName_);
+  const auto & wrench = robot.surfaceWrench(surfaceName_);
   const auto & bodyName = surface.bodyName();
   //const auto & bodyVel = robot.bodyVelB(bodyName);
   //const auto & surfaceVel = surface.X_b_s() * bodyVel;
   //Eigen::Vector3d velDir = surfaceVel.linear().normalized();
-
+  force_x_ = wrench.force().x();
+  force_y_ = wrench.force().y();
+  force_z_ = wrench.force().z();
   const auto bodyPT = robot.bodyPosW(bodyName);
 
   //XXX To add constRots of different surfaces

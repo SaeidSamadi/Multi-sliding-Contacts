@@ -24,6 +24,18 @@ struct FrictionEstimator
   {
     return mu_calc_;
   }
+  double forceX() const
+  {
+    return force_x_;
+  }
+  double forceY() const
+  {
+    return force_y_;
+  }
+  double forceZ() const
+  {
+    return force_z_;
+  }
 
   Eigen::Matrix6d RotationMat;
 
@@ -38,6 +50,7 @@ struct FrictionEstimator
   Eigen::Vector3d wrench_fs_rot;
   sva::MotionVecd bodyVel;
   Eigen::Vector3d VelocityVec, localVel;
-
+  
+  double force_x_, force_y_, force_z_;
   double mu_x_, mu_y_, mu_, mu_calc_;
 };
