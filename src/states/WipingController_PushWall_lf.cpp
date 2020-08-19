@@ -146,7 +146,6 @@ void WipingController_PushWall_lf::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
   ctl.removeLeftFootForceControl();
-  //ctl.removeLeftFootForceControl();
   //ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
   ctl.comQP().removeFromLogger(ctl.logger());
