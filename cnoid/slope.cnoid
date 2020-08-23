@@ -194,13 +194,13 @@ items:
           data: 
             modelFile: "${PROGRAM_TOP}/share/hrpsys/samples/environments/DRCTestbedButton.wrl"
             currentBaseLink: ""
-            rootPosition: [ 0.193, -0.69, 0.63 ]
+            rootPosition: [ 0.27, -0.69, 0.71 ]
             rootAttitude: [ 
               -0.707106781, 0, 0.707106781, 
               0, -1, 0, 
               0.707106781, 0, 0.707106781 ]
             jointPositions: [  0.000000 ]
-            initialRootPosition: [ 0.193, -0.69, 0.63 ]
+            initialRootPosition: [ 0.27, -0.69, 0.71 ]
             initialRootAttitude: [ 
               -0.707, 0, 0.707, 
               0, -0.999823081, 0, 
@@ -294,7 +294,7 @@ views:
     class: SceneView
     mounted: true
     state: 
-      editMode: false
+      editMode: true
       viewpointControlMode: thirdPerson
       collisionLines: false
       polygonMode: fill
@@ -333,9 +333,9 @@ views:
           fieldOfView: 0.6978
           near: 0.01
           far: 10000
-          eye: [ -0.711524078, -2.95549156, 1.66886054 ]
-          direction: [ 0.374603015, 0.887990386, -0.266731431 ]
-          up: [ 0.103674429, 0.245758558, 0.963770898 ]
+          eye: [ 0.1083567, -4.5943831, 1.89936859 ]
+          direction: [ 0.123089811, 0.947373585, -0.2955202 ]
+          up: [ 0.0380761397, 0.293056985, 0.955336491 ]
         - 
           camera: [ System, Orthographic ]
           orthoHeight: 20
@@ -428,10 +428,10 @@ views:
           id: 2
           selectedLinks: [ 0 ]
         - 
-          id: 9
+          id: 8
           selectedLinks: [ 0 ]
         - 
-          id: 8
+          id: 9
           selectedLinks: [ 0 ]
   - 
     id: 14
