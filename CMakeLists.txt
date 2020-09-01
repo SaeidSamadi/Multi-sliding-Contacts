@@ -15,6 +15,6 @@ find_package(eigen-quadprog REQUIRED)
 add_subdirectory(src)
 
 set(AROBASE "@")
-configure_file(etc/WipingController.in.conf "${CMAKE_CURRENT_BINARY_DIR}/etc/WipingController.conf")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/etc/WipingController.conf" DESTINATION "${MC_CONTROLLER_INSTALL_PREFIX}/etc")
+configure_file(etc/WipingController.in.yaml "${CMAKE_CURRENT_BINARY_DIR}/etc/WipingController.yaml")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/etc/WipingController.yaml" DESTINATION "${MC_CONTROLLER_INSTALL_PREFIX}/etc")
 

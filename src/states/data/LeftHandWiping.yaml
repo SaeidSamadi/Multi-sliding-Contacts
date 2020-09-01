@@ -1,0 +1,73 @@
+LeftHand::LookAt:
+  base: MetaTasks
+  tasks:
+    LookAtLeftHand:
+      type: lookAtSurface
+      body: xtion_link
+      bodyVector: [1.0, 0.0, 0.0]
+      surface: LeftHandPad
+      stiffness: 5.0
+      weight: 10.0
+      activeJoints: [NECK_P, NECK_Y]
+
+LeftHand::TrajectoryToWhiteboard:
+  base: MetaTasks
+  tasks:
+    LeftHandTrajectory:
+      type: bspline_trajectory
+      surface: LeftHandPad
+      weight: 500.0
+      stiffness: 50.0
+      duration: 4.0
+      dimWeight: [1.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+      displaySamples: 100
+      completion:
+        timeElapsed: true
+      target:
+        translation: [0.4, 0.4, 1.1]
+        rotation: [1.57, 0.0, -1.57]
+      controlPoints:
+        - [0.17, 0.5, 0.85]
+      oriWaypoints:
+        - [3.5, [1.57, 0.0, -1.57]]
+
+LeftHand::PrepareWipingJSON:
+  base: MetaTasks
+  # Only allow motion along hand's z axis
+  AddContacts:
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+  tasks:
+    LeftHandConstantVelocity:
+      type: surfaceTransform
+      surface: LeftHandPad
+      refVel: [0,0,0,0,0,-0.05]
+      stiffness: 1
+      damping: 100
+      weight: 800
+      completion:
+        wrench:
+          couple: [0.0, 0.0, 0.0]
+          force: [0.0, 0.0, 10]
+
+LeftHand::Contact:
+  base: MetaTasks
+  AddContacts:
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+
+LeftHand::FSM::LeftHandToWhiteboard:
+  base: Meta
+  transitions:
+    - [LeftHand::TrajectoryToWhiteboard, OK, LeftHand::PrepareWipingJSON, Auto]
+    - [LeftHand::PrepareWipingJSON, OK, LeftHand::Contact, Auto]
+
+UpSlope::FSM::LeftHandToWhiteboard:
+  base: Parallel
+  states: [UpSlope::Stabilizer::Center, LeftHand::LookAt, LeftHand::FSM::LeftHandToWhiteboard]

@@ -1,0 +1,76 @@
+UpSlope::LeftFootTrajectory:
+  base: MetaTasks
+  RemoveContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+  tasks:
+    LiftFootTask:
+      type: bspline_trajectory
+      robot: hrp4
+      stiffness: 50.0
+      weight: 500.0
+      duration: 3.0
+      surface: LeftFootCenter
+      completion:
+        timeElapsed: true
+      # XXX would be nicer to target a surface on the environment
+      target:
+        translation: [0.017046, 0.25, 0.1]
+        rotation: [0.523, 0.0, 0.0]
+      controlPoints:
+        - [0.017046, 0.08, 0.002]
+        - [0.017046, 0.1, 0.08]
+        - [0.017046, 0.12, 0.15]
+
+UpSlope::PutLeftFoot:
+  base: MetaTasks
+  # Only allow motion along foot vertical axis
+  AddContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+  AddContactsAfter:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
+  tasks:
+    LeftFootAdmittance:
+      type: admittance
+      robot: hrp4
+      surface: LeftFootCenter
+      stiffness:  [0, 0, 0, 0, 0, 1]
+      damping:    [0, 0, 0, 0, 0, 300]
+      admittance: [0, 0, 0, 0, 0, 0.001]
+      maxVel:
+        linear:  [0.2, 0.2, 0.5]
+        angular: [0.2, 0.2, 0.2]
+      # XXX we probably want to target CoP in the center of the foot there to ensure good contact establishment
+      wrench:
+        couple: [0.0, 0.0, 0.0]
+        force: [0.0, 0.0, 30.0]
+      completion:
+        wrench:
+          force: [.NaN, .NaN, 30]
+          couple: [.NaN, .NaN, .NaN]
+
+UpSlope::Stabilized::LeftFootTrajectory:
+  base: Parallel
+  states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory]
+
+UpSlope::Stabilized::PutLeftFoot:
+  base: Parallel
+  states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::PutLeftFoot]
+
+UpSlope::FSM::StepUpSlope:
+  base: Meta
+  transitions:
+    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
+    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory]
+    - [UpSlope::Stabilized::LeftFootTrajectory, OK, UpSlope::Stabilized::PutLeftFoot]
+    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]

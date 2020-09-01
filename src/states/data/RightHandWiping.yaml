@@ -1,0 +1,76 @@
+RightHand::LookAt:
+  base: MetaTasks
+  tasks:
+    LookAtRightHand:
+      type: lookAtSurface
+      body: xtion_link
+      bodyVector: [1.0, 0.0, 0.0]
+      surface: RightHandPad
+      stiffness: 5.0
+      weight: 10.0
+      activeJoints: [NECK_P, NECK_Y]
+
+RightHand::TrajectoryToWhiteboard:
+  base: MetaTasks
+  tasks:
+    RightHandTrajectory:
+      type: bspline_trajectory
+      setupMode: false
+      surface: RightHandPad
+      weight: 500.0
+      stiffness: 50.0
+      duration: 4.0
+      dimWeight: [1.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+      displaySamples: 100
+      # XXX we'll want to handle early-impact
+      completion:
+        timeElapsed: true
+      # XXX would be better to target a surface on the environment
+      target:
+        translation: [0.3, -0.4, 0.95]
+        rotation: [-0.785, 0.0, 1.57]
+      controlPoints:
+        - [0.0, -0.5, 0.85]
+      oriWaypoints:
+        - [3.5, [-0.785, 0.0, 1.57]]
+
+RightHand::PrepareWipingJSON:
+  base: MetaTasks
+  # Only allow motion along hand's z axis
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board  
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+  tasks:
+    RightHandConstantVelocity:
+      type: surfaceTransform
+      surface: RightHandPad
+      refVel: [0,0,0,0,0,-0.05]
+      stiffness: 1
+      damping: 100
+      weight: 800
+      completion:
+        wrench:
+          couple: [0, 0, 0]
+          force: [0, 0, 10]
+
+RightHand::Contact:
+  base: MetaTasks
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHand
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+
+RightHand::FSM::RightHandToWhiteboard:
+  base: Meta
+  transitions:
+    - [RightHand::TrajectoryToWhiteboard, OK, RightHand::PrepareWipingJSON, Auto]
+    - [RightHand::PrepareWipingJSON, OK, RightHand::Contact, Auto]
+
+UpSlope::FSM::RightHandToWhiteboard:
+  base: Parallel
+  states: [UpSlope::Stabilizer::Center, RightHand::LookAt, RightHand::FSM::RightHandToWhiteboard]

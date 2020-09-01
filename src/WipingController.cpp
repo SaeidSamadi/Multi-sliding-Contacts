@@ -54,6 +54,16 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   comQP_.addToGUI(*gui());
 
+  logger().addLogEntry("perf_CoMQP",
+                       [this]()
+                       {
+                        return comqp_dt_.count();
+                       });
+
+  datastore().make_call("KinematicAnchorFrame::" + robot().name(), [this](const mc_rbdyn::Robot & robot) {
+    return sva::interpolate(robot.surfacePose("LeftFoot"), robot.surfacePose("RightFoot"), 0.5);
+  });
+
   //logger().addLogEntry("RightHandPose", [this]() {sva::PTransformd x;
   //                                                x=robot().surface("RightHandPad").X_0_s(robot());
   //                                                return x; });
@@ -240,9 +250,13 @@ void WipingController::updateFootForceDifferenceControl()
 
 bool WipingController::run()
 {
-  anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
-  anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
+  /** Always pick a steady clock */
+  using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
+                                          std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
+  auto start_run_t = clock::now();
+
   computeCoMQP();
+  comqp_dt_ = clock::now() - start_run_t;
   setFeetTargetFromCoMQP();
   return mc_control::fsm::Controller::run();
 }
@@ -253,8 +267,8 @@ WipingController::~WipingController(){
 
 void WipingController::reset(const mc_control::ControllerResetData & reset_data)
 {
-  anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
-  anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
+  // anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
+  // anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
   mc_control::fsm::Controller::reset(reset_data);
   comTask->reset();
   comHeight_ = robot().com().z();

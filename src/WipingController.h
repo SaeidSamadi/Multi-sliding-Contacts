@@ -60,4 +60,7 @@ private:
 
   bool useFeetForceControl_ = false;
 	double comHeight_ = 0.0;
+
+  using duration_ms = std::chrono::duration<double, std::milli>;
+  duration_ms comqp_dt_;
 };

@@ -1,0 +1,7 @@
+MainRobot: HRP4ComanoidChoreonoid
+Enabled: [WipingController]
+UDP:
+  IgnoredJoints:
+    joints: [L_HAND_J0, R_HAND_J0, L_HAND_J1]
+    halfsitting: true
+VerboseLoader: false

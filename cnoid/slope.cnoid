@@ -137,7 +137,7 @@ items:
             delay: 0
             simulationOnly: true
             backgroundExecution: true
-            file: "${PROGRAM_TOP}/share/hrpsys/samples/HRP4Comanoid/sim_mc_udp.py"
+            file: "${PROGRAM_TOP}/share/hrpsys/samples/HRP4LIRMM/sim_mc_udp.py"
         - 
           id: 8
           name: "DRCTestbedButton"
