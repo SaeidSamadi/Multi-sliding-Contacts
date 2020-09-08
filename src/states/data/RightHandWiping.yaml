@@ -34,7 +34,7 @@ RightHand::TrajectoryToWhiteboard:
       oriWaypoints:
         - [3.5, [-0.785, 0.0, 1.57]]
 
-RightHand::PrepareWipingJSON:
+RightHand::EstablishContactWithConstantVel:
   base: MetaTasks
   # Only allow motion along hand's z axis
   AddContacts:
@@ -49,7 +49,7 @@ RightHand::PrepareWipingJSON:
       surface: RightHandPad
       refVel: [0,0,0,0,0,-0.05]
       stiffness: 1
-      damping: 100
+      damping: 300
       weight: 800
       completion:
         wrench:
@@ -68,8 +68,8 @@ RightHand::Contact:
 RightHand::FSM::RightHandToWhiteboard:
   base: Meta
   transitions:
-    - [RightHand::TrajectoryToWhiteboard, OK, RightHand::PrepareWipingJSON, Auto]
-    - [RightHand::PrepareWipingJSON, OK, RightHand::Contact, Auto]
+    - [RightHand::TrajectoryToWhiteboard, OK, RightHand::EstablishContactWithConstantVel, Auto]
+    - [RightHand::EstablishContactWithConstantVel, OK, RightHand::Contact, Auto]
 
 UpSlope::FSM::RightHandToWhiteboard:
   base: Parallel

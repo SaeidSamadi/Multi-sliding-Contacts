@@ -68,7 +68,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 
   A.resize(24, 27);
   A.setZero();
-  
+
   A_st.resize(24, 28);
   A_st.setZero();
 
@@ -111,13 +111,13 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 
   G.resize(80, 27);
   G.setZero();
-  
+
   G_st.resize(81, 28);
   G_st.setZero();
 
   h.resize(80);
   h.setZero();
-  
+
   h_st.resize(81);
   h_st.setZero();
 
@@ -141,7 +141,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 //  double err = fabs(NormalForce_rh - tmp);
 //  //mc_rtc::log::info(NormalForce_rh_abs);
 //  //mc_rtc::log::info(tmp);
-//  tmp = NormalForce_rh; 
+//  tmp = NormalForce_rh;
 //  if(NormalForce_rh_abs > 8.0 && err < 0.3){
 //    mc_rtc::log::info("Hand Contact added ***************** ");
 //    numVar_ = 22;
@@ -171,16 +171,16 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const auto bodyName_lf = robot.surface(leftFootSurface).bodyName();
   const auto bodyName_rh = robot.surface(rightHandSurface).bodyName();
   const auto bodyName_lh = robot.surface(leftHandSurface).bodyName();
-  
+
   const auto bodyPT_rf = robot.bodyPosW(bodyName_rf);
   const auto bodyPT_lf = robot.bodyPosW(bodyName_lf);
   const auto bodyPT_rh = robot.bodyPosW(bodyName_rh);
   const auto bodyPT_lh = robot.bodyPosW(bodyName_lh);
 
   Eigen::Matrix3d constRot_rf; // Rotation from body local link to desired surface orien.
-  Eigen::Matrix3d constRot_lf; 
-  Eigen::Matrix3d constRot_rh; 
-  Eigen::Matrix3d constRot_lh; 
+  Eigen::Matrix3d constRot_lf;
+  Eigen::Matrix3d constRot_rh;
+  Eigen::Matrix3d constRot_lh;
   constRot_rf = Eigen::Matrix3d::Identity(); // Foot Surface is aligned with body link axis
   constRot_lf = constRot_rf;
   constRot_rh << 0.0,  0.0, -1.0,
@@ -208,9 +208,9 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Rot_rf.block<3, 3>(0, 0) = bodyRot_rf;
   Rot_rf.block<3, 3>(3, 3) = bodyRot_rf;
   Rot_lf.block<3, 3>(0, 0) = bodyRot_lf;
-  Rot_lf.block<3, 3>(3, 3) = bodyRot_lf; 
-  Rot_rh.block<3, 3>(0, 0) = bodyRot_rh; 
-  Rot_rh.block<3, 3>(3, 3) = bodyRot_rh; 
+  Rot_lf.block<3, 3>(3, 3) = bodyRot_lf;
+  Rot_rh.block<3, 3>(0, 0) = bodyRot_rh;
+  Rot_rh.block<3, 3>(3, 3) = bodyRot_rh;
   Rot_lh.block<3, 3>(0, 0) = bodyRot_lh;
   Rot_lh.block<3, 3>(3, 3) = bodyRot_lh;
   // clang-format off
@@ -260,11 +260,11 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   lhVel = robot.bodyVelW("l_wrist");
   RWristVel << rhVel.linear().x(), rhVel.linear().y(), rhVel.linear().z(); //Global = [0, 0, vel]
   LWristVel << lhVel.linear().x(), lhVel.linear().y(), lhVel.linear().z(); //Global = [0, 0, vel]
-  localVel_rh = bodyRot_rh * RWristVel; 
-  localVel_lh = bodyRot_lh * LWristVel; 
+  localVel_rh = bodyRot_rh * RWristVel;
+  localVel_lh = bodyRot_lh * LWristVel;
   double velNorm_rh = Eigen::Vector3d{localVel_rh(0), localVel_rh(1), 0.}.norm();
   double velNorm_lh = Eigen::Vector3d{localVel_lh(0), localVel_lh(1), 0.}.norm();
-  Eigen::Vector3d velRatio_ = - localVel_rh / velNorm_rh; 
+  Eigen::Vector3d velRatio_ = - localVel_rh / velNorm_rh;
 
   if(velNorm_rh < 10e-5)
   {
@@ -278,8 +278,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
     mu_x_rh = mu_rh * fabs(localVel_rh(0)) / velNorm_rh;
     mu_y_rh = mu_rh * fabs(localVel_rh(1)) / velNorm_rh;
   }
-  
-  if( fabs(rh_fs_rot(2)) > 5.0 && //f_z > 1.0 
+
+  if( fabs(rh_fs_rot(2)) > 5.0 && //f_z > 1.0
       fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) >= 0.1 && //0.1 < mu < 3.0
       fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) <= 3.0 ){
   mu_x_calc = rh_fs_rot(0) / (rh_fs_rot(2) * velRatio_(0));
@@ -363,26 +363,26 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   LBmat_ineq_rf(5, 5) = 0.0;
   UBmat_ineq_rf = UBmat_ineq_rf * Rot_rf;
   LBmat_ineq_rf = LBmat_ineq_rf * Rot_rf;
-  
+
   UBmat_ineq_lf = Eigen::Matrix6d::Identity() - Ineq_frictionCone_lf;
   UBmat_ineq_lf(5, 5) = 0.0;
   LBmat_ineq_lf = -Eigen::Matrix6d::Identity() - Ineq_frictionCone_lf;
   LBmat_ineq_lf(5, 5) = 0.0;
   UBmat_ineq_lf = UBmat_ineq_lf * Rot_lf;
   LBmat_ineq_lf = LBmat_ineq_lf * Rot_lf;
-  
+
   UBmat_ineq_rh = Eigen::Matrix6d::Identity() - Ineq_frictionCone_rh;
   UBmat_ineq_rh(5, 5) = 0.0;
   LBmat_ineq_rh = -Eigen::Matrix6d::Identity() - Ineq_frictionCone_rh;
   LBmat_ineq_rh(5, 5) = 0.0;
-  
+
   UBmat_ineq_lh = Eigen::Matrix6d::Identity() - Ineq_frictionCone_lh;
   UBmat_ineq_lh(5, 5) = 0.0;
   LBmat_ineq_lh = -Eigen::Matrix6d::Identity() - Ineq_frictionCone_lh;
   LBmat_ineq_lh(5, 5) = 0.0;
 
   UBmat_ineq_rh.block<3, 3>(0, 0) = Eigen::Matrix3d::Zero(); //needed for sliding contacts - For fixed: Do not setZero()
-  UBmat_ineq_rh.block<3, 3>(0, 3) = Eigen::Matrix3d::Zero(); 
+  UBmat_ineq_rh.block<3, 3>(0, 3) = Eigen::Matrix3d::Zero();
   UBmat_ineq_rh = UBmat_ineq_rh * Rot_rh;
 
   LBmat_ineq_rh.block<3, 3>(0, 0) = Eigen::Matrix3d::Zero();
@@ -396,9 +396,9 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Ineq_mat3.block<6, 6>(0, 9) = UBmat_ineq_lf;
   Ineq_mat4.block<6, 6>(0, 9) = LBmat_ineq_lf;
   Ineq_mat5.block<6, 6>(0, 15) = UBmat_ineq_rh; // So for Sliding contacts: Zero() matrix
-  Ineq_mat6.block<6, 6>(0, 15) = LBmat_ineq_rh; 
+  Ineq_mat6.block<6, 6>(0, 15) = LBmat_ineq_rh;
   Ineq_mat7.block<6, 6>(0, 21) = UBmat_ineq_lh;
-  Ineq_mat8.block<6, 6>(0, 21) = LBmat_ineq_lh; 
+  Ineq_mat8.block<6, 6>(0, 21) = LBmat_ineq_lh;
 
   double coef_rf = -mu_rf * (X_rf + Y_rf);
   double coef_lf = -mu_lf * (X_lf + Y_lf);
@@ -428,7 +428,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
             -Y_lf, X_lf, coef_lf, mu_lf, -mu_lf, -1.,
             Y_lf, -X_lf, coef_lf, -mu_lf, mu_lf, -1.,
             -Y_lf, -X_lf, coef_lf, mu_lf, mu_lf, -1.;
-  tauZ_max_rh << 
+  tauZ_max_rh <<
             Y_rh,  X_rh, coef_rh,  mu_rh,  mu_rh, 1.,
            -Y_rh,  X_rh, coef_rh, -mu_rh,  mu_rh, 1.,
             Y_rh, -X_rh, coef_rh,  mu_rh, -mu_rh, 1.,
@@ -438,7 +438,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
             -Y_rh,  X_rh, coef_rh,  mu_rh, -mu_rh, -1.,
              Y_rh, -X_rh, coef_rh, -mu_rh,  mu_rh, -1.,
             -Y_rh, -X_rh, coef_rh,  mu_rh,  mu_rh, -1.;
-  tauZ_max_lh << 
+  tauZ_max_lh <<
             Y_lh,  X_lh, coef_lh,  mu_lh,  mu_lh, 1.,
            -Y_lh,  X_lh, coef_lh, -mu_lh,  mu_lh, 1.,
             Y_lh, -X_lh, coef_lh,  mu_lh, -mu_lh, 1.,
@@ -476,7 +476,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   G.block<4, 21>(72, 0) = Ineq_max_lh;
   G.block<4, 21>(76, 0) = Ineq_min_lh;
   G_st.block<80, 27>(0, 0) = G;
-  
+
   for (int i=0; i<20*CoMQP::k; i++){
   double zeta = G.block<1,27>(i,0).norm();
   G_st(i,3+6*k) = zeta;
@@ -488,7 +488,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   h_st(8) = -fz_min;
   h_st(14) = fz_max;
   h_st(20) = -fz_min;
-  
+
   P.block<3, 3>(0, 0) = P_PG * Eigen::Matrix3d::Identity();
   P.block<3, 3>(3, 3) = P_Force_rf * Eigen::Matrix3d::Identity();
   P.block<3, 3>(6, 6) = P_Wrench_rf * Eigen::Matrix3d::Identity();
@@ -516,7 +516,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Eigen::Vector3d tau_rh_d = Eigen::Vector3d{Px_rh, Py_rh, Pz_rh}.cross(f_rh_d);
   Eigen::Vector3d f_lh_d{N_lh, mu_x_lh * N_lh, mu_y_lh * N_lh}; //XXX Set sliding Condition here
   Eigen::Vector3d tau_lh_d = Eigen::Vector3d{Px_lh, Py_lh, Pz_lh}.cross(f_lh_d);
-  
+
   //Y_desired.block<3, 1>(0, 0) = PG_d;
   //Y_desired.block<3, 1>(3, 0) = f_rf_d;
   //Y_desired.block<3, 1>(6, 0) = tau_rf_d;
@@ -528,7 +528,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Y_desired.block<3, 1>(24, 0) = tau_lh_d;   // q_size
   q = -2* Y_desired;
   q(27) = 1.;
-  
+
 
   /*
   cout<<"A_st size" << A_st.rows()<< "x" << A_st.cols() << endl;
@@ -540,20 +540,14 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
 
   if(debug_)
   {
-    LOG_INFO("mu_y: " << mu_x_rh);
-    LOG_INFO("mu_z: " << mu_y_rh);
-    LOG_INFO("P:");
-    LOG_INFO(P);
-    LOG_INFO("\n\nq:");
-    LOG_INFO(q.transpose());
-    LOG_INFO("\n\nA:");
-    LOG_INFO(A);
-    LOG_INFO("\n\nb:");
-    LOG_INFO(b.transpose());
-    LOG_INFO("\n\nG:");
-    LOG_INFO(G);
-    LOG_INFO("\n\nh:");
-    LOG_INFO(h.transpose());
+    mc_rtc::log::info("mu_y: {}", mu_x_lh);
+    mc_rtc::log::info("mu_z: {}", mu_y_rh);
+    mc_rtc::log::info("P:\n{}", P);
+    mc_rtc::log::info("\n\nq: {}", q.transpose());
+    mc_rtc::log::info("\n\nA:\n{}", A);
+    mc_rtc::log::info("\n\nb: {}", b.transpose());
+    mc_rtc::log::info("\n\nG:\n{}", G);
+    mc_rtc::log::info("\n\nh: {}", h.transpose());
   }
 
   bool ret = solver_.solve(P, q, A_st, b, G_st, h_st);
@@ -583,14 +577,14 @@ CoMQPResult CoMQP::result() const
 
 int CoMQP::errorCode() const
 {
-  solver_.fail();
+  return solver_.fail();
 }
 
 void CoMQP::errorMessage() const
 {
   std::ostringstream stream;
   //solver_.inform(stream);
-  LOG_ERROR(stream.str());
+  mc_rtc::log::error(stream.str());
 }
 
 void CoMQP::addToGUI(mc_rtc::gui::StateBuilder & gui)
@@ -640,7 +634,7 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
   logger.addLogEntry("muN", [this]() { return muN;});
   logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
   logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
-                                                     
+
 }
 
 void CoMQP::removeFromLogger(mc_rtc::Logger & logger)

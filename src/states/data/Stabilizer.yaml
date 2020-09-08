@@ -50,23 +50,3 @@ WipingController::Stabilizer::RightFootFlatSupport:
         pitch: 0
       height: 0
     
-# FIXME: Behaviour is a bit shaky there
-# Go to center between the feet with
-# right foot contact at current position but flat on the ground
-# left foot contact at current position and orientation on the slope
-UpSlope::Stabilizer::GoCenter:
-  base: WipingController::Stabilizer::Go
-  stiffness: 3
-  above: CenterAnkles
-  StabilizerConfig:
-    contacts: [Left, Right]
-    # Target flat floor with right foot, and current orientation of the left (slope)
-    Right:
-      overwriteRPY:
-        roll: 0
-        pitch: 0
-      height: 0
-
-UpSlope::Stabilizer::Center:
-  base: WipingController::Stabilizer::Go
-  completion: {}

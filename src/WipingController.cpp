@@ -26,7 +26,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   auto handForceConfig = mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(0., 1., 0.));
   handForceConfig.force_scale *= 3;
   gui()->addElement(
-      {"Forces"},
+      {"WipingController", "Markers", "Forces"},
       mc_rtc::gui::Force("RightHandForce", handForceConfig,
                          [this]() { return robot().forceSensor("RightHandForceSensor").worldWrench(robot()); },
                          [this]() { return robot().surface("RightHandPad").X_0_s(robot()); }),
@@ -136,7 +136,7 @@ void WipingController::addRightHandForceControl()
 {
   solver().addTask(rightHandTask);
   gui()->addElement(
-      {"Forces"},
+      {"WipingController", "Markers", "Forces"},
       mc_rtc::gui::Point3D("RightHandCoP",
                            [this]() { return robot().copW("RightHandPad"); }),
       mc_rtc::gui::Point3D("RightHandCoPTarget",
@@ -148,15 +148,15 @@ void WipingController::addRightHandForceControl()
 void WipingController::removeRightHandForceControl()
 {
   solver().removeTask(rightHandTask);
-  gui()->removeElement({"Forces"}, "RightHandCoP");
-  gui()->removeElement({"Forces"}, "RightHandCoPTarget");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "RightHandCoP");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "RightHandCoPTarget");
 }
 
 void WipingController::addLeftHandForceControl()
 {
   solver().addTask(leftHandTask);
   gui()->addElement(
-      {"Forces"},
+      {"WipingController", "Markers", "Forces"},
       mc_rtc::gui::Point3D("LeftHandCoP",
                            [this]() { return robot().copW("LeftHandPad"); }),
       mc_rtc::gui::Point3D("LeftHandCoPTarget",
@@ -168,15 +168,15 @@ void WipingController::addLeftHandForceControl()
 void WipingController::removeLeftHandForceControl()
 {
   solver().removeTask(leftHandTask);
-  gui()->removeElement({"Forces"}, "LeftHandCoP");
-  gui()->removeElement({"Forces"}, "LeftHandCoPTarget");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "LeftHandCoP");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "LeftHandCoPTarget");
 }
 
 void WipingController::addLeftFootForceControl()
 {
   solver().addTask(leftFootTask);
   gui()->addElement(
-      {"Forces"},
+      {"WipingController", "Markers", "Forces"},
       mc_rtc::gui::Point3D("LeftFootCoP",
                            [this]() { return robot().copW("LeftFootCenter"); }),
       mc_rtc::gui::Point3D("LeftFootCoPTarget",
@@ -188,8 +188,8 @@ void WipingController::addLeftFootForceControl()
 void WipingController::removeLeftFootForceControl()
 {
   solver().removeTask(leftFootTask);
-  gui()->removeElement({"Forces"}, "LeftFootCoP");
-  gui()->removeElement({"Forces"}, "LeftFootCoPTarget");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "LeftFootCoP");
+  gui()->removeElement({"WipingController", "Markers", "Forces"}, "LeftFootCoPTarget");
 }
 void WipingController::addFootForceControl()
 {
@@ -267,8 +267,6 @@ WipingController::~WipingController(){
 
 void WipingController::reset(const mc_control::ControllerResetData & reset_data)
 {
-  // anchorFrame(sva::interpolate(robot().surfacePose("RightFootCenter"), robot().surfacePose("LeftFootCenter"), 0.5));
-  // anchorFrameReal(sva::interpolate(realRobot().surfacePose("RightFootCenter"), realRobot().surfacePose("LeftFootCenter"), 0.5));
   mc_control::fsm::Controller::reset(reset_data);
   comTask->reset();
   comHeight_ = robot().com().z();

@@ -12,6 +12,7 @@ VerboseStateFactory: false
 # New configuration mc_rtc#61 (unmerged)
 ObserverPipelines:
   name: FirstPipeline
+  gui: false
   observers:
     - type: Encoder
     - type: BodySensor
@@ -100,71 +101,6 @@ states:
           - [0.55, -0.25, 1.0]
           - [0.55, -0.3, 1.1]
         oriWaypoints: []
-  WipingController_RightHandCircle:
-    base: MetaTasks
-    tasks:
-      RightHandTrajectory:
-        type: bspline_trajectory
-        setupMode: false
-        surface: RightHandPad
-        weight: 1000.0
-        stiffness: 15.0
-        duration: 5.0
-        dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
-        displaySamples: 100
-        completion:
-          timeElapsed: true
-        completion:
-          timeElapsed: true
-        target:
-          translation: [0.55, -0.36, 0.96]
-          rotation: [-0.785, 0.0, 1.57]
-        controlPoints:
-          - [0.55, -0.53, 0.92]
-          - [0.66, -0.42, 0.99]
-        oriWaypoints: []
-      KeepLeftHand:
-        type: surfaceTransform
-        surface: LeftHandPad
-        stiffness: 5.0
-        dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
-  WipingController_LeftHandCircle:
-    base: MetaTasks
-    tasks:
-      LeftHandTrajectory:
-        type: bspline_trajectory
-        setupMode: false
-        surface: LeftHandPad
-        weight: 1000.0
-        stiffness: 15.0
-        duration: 7.0
-        dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
-        displaySamples: 100
-        completion:
-          timeElapsed: true
-        completion:
-          timeElapsed: true
-        target:
-          translation: [0.55, 0.375, 1.1]
-          rotation: [1.57, 0.0, -1.57]
-        controlPoints:
-          - [0.55, 0.375, 1.34]
-          - [0.55, 0.55, 1.12]
-        oriWaypoints: []
-      KeepRightHand:
-        type: surfaceTransform
-        surface: RightHandPad
-        stiffness: 5.0
-        dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
-      LookAtLeftHand:
-        type: lookAtSurface
-        robot: hrp4
-        body: xtion_link
-        bodyVector: [1.0, 0.0, 0.0]
-        surfaceRobotIndex: 0
-        surface: LeftHandPad
-        stiffness: 5.0
-        weight: 10.0
   WipingController_LeftFootCircle:
     base: MetaTasks
     tasks:
@@ -255,26 +191,6 @@ states:
           wrench:
             couple: [0.0, 0.0, 0.0]
             force: [0.0, 0.0, 0.5]
-  WipingController_PreparePushWallAuto_rh:
-    base: WipingController_PushWall_rh
-    useCoMQP: true
-    duration: 2.0
-    maxDuration: 3.0
-    maxForce: 10
-    forceThreshold: 1
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
-    initFromCoMQP: false
-    comStiffness: 60
-  WipingController_PreparePushWallAuto_lh:
-    base: WipingController_PushWall_lh
-    useCoMQP: true
-    duration: 2.0
-    maxDuration: 3.0
-    maxForce: 10
-    forceThreshold: 1
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
-    initFromCoMQP: false
-    comStiffness: 60
   WipingController_PreparePushWallAuto:
     base: WipingController_PushWall
     useCoMQP: true
@@ -526,15 +442,6 @@ states:
   WipingController_WipeItStateTrajectory:
     base: Parallel
     states: [WipingController_WipeItBabyState_rh, WipingController_RightHandTrajectory]
-  WipingController_WipeItStateCircle_rh:
-    base: Parallel
-    states: [WipingController_WipeItBabyState_rh, WipingController_RightHandCircle]
-  WipingController_WipeItStateCircle_lh:
-    base: Parallel
-    states: [WipingController_WipeItBabyState_lh, WipingController_LeftHandCircle]
-  WipingController_WipeItStateCoWipe:
-    base: Parallel
-    states: [WipingController_WipeItStateCircle_rh, WipingController_WipeItStateCircle_lh]
   WipingController_WipeItStateConstantVelocity:
     base: Parallel
     states: [WipingController_WipeItBabyState_rh, WipingController_RightHandConstantVelocity]
@@ -559,46 +466,6 @@ states:
     configs:
       Pause:
         duration: 3.0
-  WipingController_PrepareMoveHandBack:
-    base: MetaTasks
-    tasks:
-      CoM:
-        type: com
-        stiffness: 50.0
-        weight: 2000.0
-        above: [LeftFootCenter, RightFootCenter]
-        completion:
-          OR:
-            - eval: 0.01
-            - AND:
-                - timeout: 3.0
-                - speed: 0.01
-      MoveRightHand:
-        type: surfaceTransform
-        surface: RightHandPad
-        stiffness: 5.0
-        weight: 500
-        moveWorld:
-          translation: [-0.2, 0.0, 0.0]
-        completion:
-          OR:
-            - eval: 0.01
-            - AND:
-                - timeout: 3.0
-                - speed: 0.01
-      MoveLeftHand:
-        type: surfaceTransform
-        surface: LeftHandPad
-        stiffness: 5.0
-        weight: 500
-        moveWorld:
-          translation: [-0.2, -0.15, 0.0]
-        completion:
-          OR:
-            - eval: 0.01
-            - AND:
-                - timeout: 3.0
-                - speed: 0.01
   WipingController_PrepareMoveHandBackManual:
     base: WipingController_PrepareMoveHandBack
   WipingController_GoStandingCenter:
@@ -642,61 +509,12 @@ states:
   WipingController_StabilizedHalfSitting:
     base: Parallel
     states: [WipingController_GoStandingCenter, WipingController_HalfSitting]
-  WipingController_PushWallCoMQP_rh:
-    base: WipingController_PushWall_rh
-    useCoMQP: true
-    duration: 3.0
-    maxDuration: 4.0
-    maxForce: 60
-    forceThreshold: 5
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
-    initFromCoMQP: true
-    comStiffness: 60
-  WipingController_PushWallCoMQP_lh:
-    base: WipingController_PushWall_lh
-    useCoMQP: true
-    duration: 3.0
-    maxDuration: 4.0
-    maxForce: 60
-    forceThreshold: 5
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
-    initFromCoMQP: true
-    comStiffness: 60
-  WipingController_ReleasePushWallCoMQP_rh:
-    base: WipingController_PushWallCoMQP_rh
-    useCoMQP: true
-    maxForce: 1
-    forceThreshold: 5
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
-    stiffness: [200, 200, 200, 200, 200, 1]
-    damping: [28, 28, 28, 28, 28, 300]
-  WipingController_ReleasePushWallCoMQP_lh:
-    base: WipingController_PushWallCoMQP_lh
-    useCoMQP: true
-    maxForce: 1
-    forceThreshold: 5
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
-    stiffness: [200, 200, 200, 200, 200, 1]
-    damping: [28, 28, 28, 28, 28, 300]
-  WipingController_ReleasePushWallCoMQP:
-    base: Parallel
-    states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
   WipingController_PushWallNoCoMQP:
     base: WipingController_PushWallCoMQP_rh
     useCoMQP: false
     initFromCoMQP: false
     maxForce: 60
     maxDuration: 4.0
-  WipingController_PrepareWipingState_rh:
-    base: WipingController_PreparePushWallAuto_rh
-    maxForce: 10.0
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
-    comStiffness: 30
-  WipingController_PrepareWipingState_lh:
-    base: WipingController_PreparePushWallAuto_lh
-    maxForce: 15
-    admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
-    comStiffness: 30
   WipingController_PrepareWipingState_hands:
     base: WipingController_PreparePushWallAuto
     maxForce_rh: 10
@@ -718,41 +536,6 @@ states:
     maxForce: 15.0
     admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
     comStiffness: 60
-  WipingController_PrepareWipingState:
-    base: Parallel
-    states: [WipingController_PrepareWipingState_rh, WipingController_PrepareWipingState_lh]
-    AddCollisions:
-      - r1: hrp4
-        r2: tilted_board
-        collisions:
-          - body1: torso
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-          - body1: body
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-          - body1: NECK_P_LINK
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-      - r1: hrp4
-        r2: wall
-        collisions:
-          - body1: torso
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-          - body1: NECK_P_LINK
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
   WipingController_PrepareShuffleState:
     base: Parallel
     states: [KeepFeetState, WipingController_PrepareShuffleState_]
@@ -818,109 +601,80 @@ states:
     configs:
       WipingController_PrepareWipingState_lf:
         maxForce: 150
-  Stabilized_StandingBack:
-    base: Stabilizer::Standing
-    AddContacts:
-      - r1: hrp4
-        r2: ground
-        r1Surface: LeftFoot
-        r2Surface: AllGround
-        dof: [0, 0, 1, 1, 1, 0]
-      - r1: hrp4
-        r2: ground
-        r1Surface: RightFoot
-        r2Surface: AllGround
-        dof: [0, 0, 1, 1, 1, 0]
-    StabilizerConfig:
-      tasks:
-        com:
-          stiffness: [100.0, 100.0, 10.0]
-        Left:
-          height: 0.2
-  Stabilized_GoRightBack:
-    base: Stabilizer::GoRight
-    StabilizerConfig:
-      tasks:
-        com:
-          stiffness: [100.0, 100.0, 10.0]
-          height: 0.78
-      dcm_tracking:
-        gains:
-          prop: 3.0
-          integral: 4.0
-          deriv: 0.0
-      Left:
-        height: 0.2
-    completion:
-      dcmEval: [0.015, 0.015, 0.1]
-  LiftLeftFoot_Back:
-    base: LiftLeftFoot_UpSlope
-    RemoveContacts:
-      - r1: hrp4
-        r2: step
-        r1Surface: LeftFoot
-        r2Surface: TableTop
-    tasks:
-      LiftFootTask:
-        target:
-          translation: [0.017046, 0.12, 0.025]
-          rotation: [0.0, 0.0, 0.0]
-        controlPoints:
-          - [0.017046, 0.3, 0.25]
-          - [0.017046, 0.15, 0.3]
-          - [0.017046, 0.12, 0.1]
-  Stabilized_LiftLeftFoot_Up:
-    base: Parallel
-    states: [Stabilizer::RightSupport, LiftLeftFoot_Up]
-  Stabilized_LiftLeftFoot_Back:
-    base: Parallel
-    states: [Stabilizer::RightSupport, LiftLeftFoot_Back]
-    AddCollisions:
-      - r1: hrp4
-        r2: tilted_board
-        collisions:
-          - body1: r_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-  PutLeftFoot_Back:
-    base: PutLeftFootSlope
-    AddContactsAfter:
-      - r1: hrp4
-        r2: ground
-        r1Surface: LeftFoot
-        r2Surface: AllGround
-        dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
-  Stabilized_PutLeftFoot_Back:
-    base: Parallel
-    states: [Stabilizer::RightSupport, PutLeftFoot_Back]
-  Stabilized_PutLeftFoot_Up:
-    base: Parallel
-    states: [Stabilizer::RightSupport, PutLeftFoot_Up]
-  Stabilized_StepBack:
-    base: Meta
-    transitions:
-      - [Stabilized_StandingBack, OK, Stabilized_GoRightBack]
-      - [Stabilized_GoRightBack, OK, Stabilized_LiftLeftFoot_Back]
-      - [Stabilized_LiftLeftFoot_Back, OK, Stabilized_PutLeftFoot_Back]
-      - [Stabilized_PutLeftFoot_Back, OK, Stabilizer::GoCenter]
-    AddCollisions:
-      - r1: hrp4
-        r2: wall
-        collisions:
-          - body1: r_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
   Pause3sec:
     base: Pause
     duration: 3
   Pause1sec:
     base: Pause
     duration: 1
+
+  Choose:
+    base: Parallel
+    states: []
+    configs:
+      WipingController_ChooseTransition:
+        category: []
+      Message:
+        gui: []
+        log: info
+        message: "Manual transition"
+        prefix": "Waiting for"
+
+  Choose::Initial:
+    base: Choose
+    states: [WipingController::Stabilizer::GoCenterFlat, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Step Up Slope: StepUpSlope
+
+  Choose::Slope::PrepareWiping:
+    base: Choose
+    states: [UpSlope::Stabilizer::Center, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Prepare Wiping: PrepareWiping
+
+  Choose::Slope::PrepareWipingAndChooseTrajectory:
+    base: Choose
+    states: [WipingController_PrepareWipingState, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Wipe both hands: WipeBothHands
+
+  Choose::Slope::WipeBothHands:
+    base: Choose
+    states: [WipingController_WipeItStateCoWipe, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Release hands: Release
+
+
 transitions:
+  - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
+
+  # Triggered by StepUpSlope
+  - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
+  - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
+  - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
+
+    # Wipe both hands with left foot on the slope
+    # FIXME: See notes in Wiping.yaml, main points are
+    # - Way too much code duplication. Don't copy paste the PrepareWiping/WipeItBaby states, instead 
+    # adapt them to be capable of handling different end effectors (through configuration)
+    # - As is, computes the CoMQP multiple times, resets/add the Com task multiple times, etc
+    #   Make sure things get done once and only once
+    # - Same remark concerning code duplication in YAML. If things are doing the same for left and right hand,
+    # then factorize the code in a common base state and inherit from it, then only adjust the parameters you need
+  - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseTrajectory, Auto]
+  - [Choose::Slope::PrepareWipingAndChooseTrajectory, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
+  - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
+  - [WipingController_ReleasePushWallCoMQP, Release, Wiping::Stabilized::MoveHandsBack, Auto]
+  - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
+
   - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
   - [WipingController_GoStandingCenter, StableRightHandToBoard, Stabilized_RightHandToWhiteboard] # broken, same target as slope
   - [WipingController_GoStandingCenter, LeftHandToBoard, WipingController_LeftHandToWhiteboard]
@@ -931,8 +685,6 @@ transitions:
     #- [UpSlope::FSM::StepUpSlope, LeftFootForce, WipingController_PrepareWipingState_lf]
     #- [Stabilized_StepUpSlope, RightHand, WipingController_RightHandToWhiteboard]
 
-  - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
-  - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
 
   # - [WipingController_PrepareWipingState_rh, Abort, WipingController_ReleasePushWallCoMQP_rh]
   # - [WipingController_PrepareWipingState_rh, Circle_rh, WipingController_WipeItStateCircle_rh]
@@ -986,4 +738,4 @@ transitions:
   - [Stabilized_StepBack, OK, WipingController_Finish]
   - [WipingController_PrepareMoveHandBackManual, Manual, WipingController_Finish]
   - [WipingController_Finish, OK, WipingController_StabilizedHalfSitting]
-init: WipingController_GoStandingCenter
+init: Choose::Initial

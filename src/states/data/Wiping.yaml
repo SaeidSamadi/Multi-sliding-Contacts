@@ -1,0 +1,262 @@
+WipingController_PreparePushWallAuto_rh:
+  base: WipingController_PushWall_rh
+  useCoMQP: true
+  duration: 2.0
+  maxDuration: 3.0
+  maxForce: 10
+  forceThreshold: 1
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
+  initFromCoMQP: false
+  comStiffness: 60
+
+WipingController_PreparePushWallAuto_lh:
+  base: WipingController_PushWall_lh
+  useCoMQP: true
+  duration: 2.0
+  maxDuration: 3.0
+  maxForce: 10
+  forceThreshold: 1
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
+  initFromCoMQP: false
+  comStiffness: 60
+
+WipingController_PrepareWipingState_rh:
+  base: WipingController_PreparePushWallAuto_rh
+  maxForce: 10.0
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  comStiffness: 30
+
+WipingController_PrepareWipingState_lh:
+  base: WipingController_PreparePushWallAuto_lh
+  maxForce: 15
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  comStiffness: 30
+
+##
+# FIXME: This is computing CoMQP twice
+# Code duplication between *lh and *rh state should be removed.
+# This is the exact same state, just affecting a different task so don't just copy paste everything!
+##
+WipingController_PrepareWipingState:
+  base: Parallel
+  states: [WipingController_PrepareWipingState_rh, WipingController_PrepareWipingState_lh]
+  AddContacts:
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHand
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+  RemoveContactsAfter:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHand
+      r2Surface: AllGround
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+##
+# FIXED: The action of these states is the same for left/right, make them inherit from each other and only change 
+# the needed parameters
+###
+WipingController_HandTrajectoryBase:
+  base: MetaTasks
+  tasks:
+    HandTrajectory:
+      type: bspline_trajectory
+      setupMode: false
+      surface: RightHandPad
+      weight: 1000.0
+      stiffness: 15.0
+      duration: 5.0
+      dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
+      displaySamples: 100
+      completion:
+        timeElapsed: true
+      target:
+        translation: [0.55, -0.36, 0.96]
+        rotation: [-0.785, 0.0, 1.57]
+      controlPoints:
+        - [0.55, -0.53, 0.92]
+        - [0.66, -0.42, 0.99]
+      oriWaypoints: []
+    KeepHand:
+      type: surfaceTransform
+      surface: LeftHandPad
+      stiffness: 5.0
+      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
+
+WipingController_RightHandCircle:
+  base: WipingController_HandTrajectoryBase
+  tasks:
+    HandTrajectory:
+      surface: RightHandPad
+      # XXX should be relative target to a surface
+      target:
+        translation: [0.55, -0.36, 0.96]
+        rotation: [-0.785, 0.0, 1.57]
+      controlPoints:
+        - [0.55, -0.53, 0.92]
+        - [0.66, -0.42, 0.99]
+      oriWaypoints: []
+      #  XXX should be a contact with X/Y freed if you want a circle
+      #  this is current "preventing" to move in all direction but z
+    KeepHand:
+      type: surfaceTransform
+      surface: LeftHandPad
+      stiffness: 5.0
+      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
+
+WipingController_LeftHandCircle:
+  base: WipingController_HandTrajectoryBase
+  tasks:
+    HandTrajectory:
+      surface: LeftHandPad
+      duration: 7.0
+      dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
+      target:
+        # XXX should be target relative to a surface (more generic)
+        translation: [0.55, 0.375, 1.1]
+        rotation: [1.57, 0.0, -1.57]
+      controlPoints:
+        - [0.55, 0.375, 1.34]
+        - [0.55, 0.55, 1.12]
+      oriWaypoints: []
+      # FIXME same remark regarding contact free in X/Y
+    KeepHand:
+      type: surfaceTransform
+      surface: RightHandPad
+      stiffness: 5.0
+      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
+
+###
+# FIXME 
+# - don't duplicate WipeItBaby*rh and WipeItBaby*lh code 
+##
+WipingController_WipeItStateCircle_rh:
+  base: Parallel
+  states: [WipingController_WipeItBabyState_rh, WipingController_RightHandCircle]
+WipingController_WipeItStateCircle_lh:
+  base: Parallel
+  states: [WipingController_WipeItBabyState_lh, WipingController_LeftHandCircle]
+
+##
+# FIXME:
+# - this is computing CoMQP twice. Only set parameters to the CoMQP here (desired forces)
+# but don't compute it
+# - make an other C++ state compute the CoMQP when needed (put in parallel where necessary)
+# - remove code duplication between left and right: this should be the same code,
+# just affecting different tasks/entries in CoMQP
+# - Fixme should start from the current state
+##
+WipingController_WipeItStateCoWipe:
+  base: Parallel
+  states: [WipingController_WipeItStateCircle_rh, WipingController_WipeItStateCircle_lh]
+
+  
+WipingController_PushWallCoMQP_lh:
+  base: WipingController_PushWall_lh
+  useCoMQP: true
+  duration: 3.0
+  maxDuration: 4.0
+  maxForce: 60
+  forceThreshold: 5
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  initFromCoMQP: true
+  comStiffness: 60
+
+##
+#FIXME code duplication
+##
+WipingController_PushWallCoMQP_rh:
+  base: WipingController_PushWall_rh
+  useCoMQP: true
+  duration: 3.0
+  maxDuration: 4.0
+  maxForce: 60
+  forceThreshold: 5
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  initFromCoMQP: true
+  comStiffness: 60
+
+WipingController_ReleasePushWallCoMQP_rh:
+  base: WipingController_PushWallCoMQP_rh
+  useCoMQP: true
+  maxForce: 1
+  forceThreshold: 2
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  stiffness: [200, 200, 200, 200, 200, 1]
+  damping: [28, 28, 28, 28, 28, 300]
+
+WipingController_ReleasePushWallCoMQP_lh:
+  base: WipingController_PushWallCoMQP_lh
+  useCoMQP: true
+  maxForce: 1
+  forceThreshold: 2
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  stiffness: [200, 200, 200, 200, 200, 1]
+  damping: [28, 28, 28, 28, 28, 300]
+
+WipingController_ReleasePushWallCoMQP:
+  base: Parallel
+  states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board  
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+
+WipingController_PrepareMoveHandBack:
+  base: MetaTasks
+  RemoveContacts:
+    - r1: hrp4
+      r2: tilted_board  
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+  tasks:
+    MoveRightHand:
+      type: surfaceTransform
+      surface: RightHandPad
+      stiffness: 5.0
+      weight: 500
+      moveWorld:
+        translation: [-0.2, 0.0, 0.0]
+      completion:
+        OR:
+          - eval: 0.01
+          - AND:
+              - timeout: 3.0
+              - speed: 0.01
+    MoveLeftHand:
+      type: surfaceTransform
+      surface: LeftHandPad
+      stiffness: 5.0
+      weight: 500
+      moveWorld:
+        translation: [-0.2, -0.15, 0.0]
+      completion:
+        OR:
+          - eval: 0.01
+          - AND:
+              - timeout: 3.0
+              - speed: 0.01
+
+Wiping::Stabilized::MoveHandsBack:
+  base: Parallel
+  states: [UpSlope::Stabilizer::GoCenter, WipingController_PrepareMoveHandBack]
+

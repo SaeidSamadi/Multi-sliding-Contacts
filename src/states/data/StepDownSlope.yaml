@@ -1,0 +1,53 @@
+Stabilized_StandingBack:
+  base: UpSlope::Stabilizer::GoCenter
+
+Stabilized_GoRightBack:
+  base: Stabilized_StandingBack
+  above: RightAnkle
+  completion:
+    dcmEval: [0.015, 0.015, 0.1]
+
+LiftLeftFoot_Back:
+  base: UpSlope::LeftFootTrajectory
+  RemoveContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+  tasks:
+    LiftFootTask:
+      target:
+        translation: [0.017046, 0.12, 0.025]
+        rotation: [0.0, 0.0, 0.0]
+      controlPoints:
+        - [0.017046, 0.3, 0.25]
+        - [0.017046, 0.15, 0.3]
+        - [0.017046, 0.12, 0.1]
+
+Stabilized_LiftLeftFoot_Back:
+  base: Parallel
+  states: [Stabilized_GoRightBack, LiftLeftFoot_Back]
+
+PutLeftFoot_Back:
+  base: UpSlope::PutLeftFoot
+  AddContactsAfter:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
+
+Stabilized_PutLeftFoot_Back:
+  base: Parallel
+  states: [Stabilized_GoRightBack, PutLeftFoot_Back]
+
+Stabilized_StepBack:
+  base: Meta
+  transitions:
+    - [Stabilized_StandingBack, OK, Stabilized_GoRightBack]
+    - [Stabilized_GoRightBack, OK, Stabilized_LiftLeftFoot_Back]
+    - [Stabilized_LiftLeftFoot_Back, OK, Stabilized_PutLeftFoot_Back]
+    - [Stabilized_PutLeftFoot_Back, OK, Stabilizer::GoCenter]
+
+DownSlope::FSM::StepDownSlope:
+  base: Stabilized_StepBack
