@@ -470,45 +470,6 @@ states:
     base: WipingController_PrepareMoveHandBack
   WipingController_GoStandingCenter:
     base: WipingController::Stabilizer::GoCenterFlat
-  WipingController_HalfSitting:
-    base: HalfSitting
-    stiffness: 10.0
-    AddCollisions:
-      - r1: hrp4
-        r2: wall
-        collisions:
-          - body1: r_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-      - r1: hrp4
-        r2: tilted_board
-        collisions:
-          - body1: r_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-      - r1: hrp4
-        r2: wall
-        collisions:
-          - body1: l_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-      - r1: hrp4
-        r2: tilted_board
-        collisions:
-          - body1: l_wrist
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-  WipingController_StabilizedHalfSitting:
-    base: Parallel
-    states: [WipingController_GoStandingCenter, WipingController_HalfSitting]
   WipingController_PushWallNoCoMQP:
     base: WipingController_PushWallCoMQP_rh
     useCoMQP: false
@@ -627,6 +588,10 @@ states:
       WipingController_ChooseTransition:
         actions:
           Step Up Slope: StepUpSlope
+      WipingController::Stabilizer::GoCenterFlat:
+        completion:
+          dcmEval: [0.02, 0.02, 0.1]
+
 
   Choose::Slope::PrepareWiping:
     base: Choose
@@ -672,8 +637,9 @@ transitions:
   - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseTrajectory, Auto]
   - [Choose::Slope::PrepareWipingAndChooseTrajectory, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
   - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
-  - [WipingController_ReleasePushWallCoMQP, Release, Wiping::Stabilized::MoveHandsBack, Auto]
+  - [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized::MoveHandsBack, Auto]
   - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
+  - [DownSlope::FSM::StepDownSlope, OK, Choose::Initial, Auto]
 
   - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
   - [WipingController_GoStandingCenter, StableRightHandToBoard, Stabilized_RightHandToWhiteboard] # broken, same target as slope
@@ -713,7 +679,6 @@ transitions:
   - [WipingController_PushWallCoMQP_rh, Abort, WipingController_ReleasePushWallCoMQP_rh]
   - [WipingController_PushWallCoMQP_rh, OK, WipingController_ReleasePushWallCoMQP_rh]
   - [WipingController_ReleasePushWallCoMQP_rh, OK, WipingController_PrepareMoveHandBack]
-  - [WipingController_ReleasePushWallCoMQP, OK, WipingController_PrepareMoveHandBack]
   - [WipingController_PushWallNoCoMQP, Manual, WipingController_PrepareMoveHandBackManual]
   - [WipingController_PrepareWipingState, Circle_rh, WipingController_WipeItStateCircle_rh]
   - [WipingController_PrepareWipingState, Circle_lh, WipingController_WipeItStateCircle_lh]

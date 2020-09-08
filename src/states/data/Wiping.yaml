@@ -48,13 +48,13 @@ WipingController_PrepareWipingState:
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
       r2: tilted_board
-      r1Surface: RightHand
+      r1Surface: RightHandPad
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
   RemoveContactsAfter:
     - r1: hrp4
       r2: tilted_board
-      r1Surface: RightHand
+      r1Surface: RightHandPad
       r2Surface: AllGround
     - r1: hrp4
       r2: wall  
@@ -157,7 +157,6 @@ WipingController_WipeItStateCircle_lh:
 WipingController_WipeItStateCoWipe:
   base: Parallel
   states: [WipingController_WipeItStateCircle_rh, WipingController_WipeItStateCircle_lh]
-
   
 WipingController_PushWallCoMQP_lh:
   base: WipingController_PushWall_lh
@@ -235,10 +234,10 @@ WipingController_PrepareMoveHandBack:
       stiffness: 5.0
       weight: 500
       moveWorld:
-        translation: [-0.2, 0.0, 0.0]
+        translation: [-0.35, -0.05, 0.0]
       completion:
         OR:
-          - eval: 0.01
+          - eval: 0.05
           - AND:
               - timeout: 3.0
               - speed: 0.01
@@ -248,10 +247,10 @@ WipingController_PrepareMoveHandBack:
       stiffness: 5.0
       weight: 500
       moveWorld:
-        translation: [-0.2, -0.15, 0.0]
+        translation: [-0.25, 0.15, 0.0]
       completion:
         OR:
-          - eval: 0.01
+          - eval: 0.05
           - AND:
               - timeout: 3.0
               - speed: 0.01
@@ -259,4 +258,8 @@ WipingController_PrepareMoveHandBack:
 Wiping::Stabilized::MoveHandsBack:
   base: Parallel
   states: [UpSlope::Stabilizer::GoCenter, WipingController_PrepareMoveHandBack]
-
+  configs:
+    UpSlope::Stabilizer::GoCenter:
+      stiffness: 5
+      completion:
+        dcmEval: [0.01, 0.01, 0.1]

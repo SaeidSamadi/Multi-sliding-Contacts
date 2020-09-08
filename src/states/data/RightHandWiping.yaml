@@ -61,7 +61,7 @@ RightHand::Contact:
   AddContacts:
     - r1: hrp4
       r2: tilted_board
-      r1Surface: RightHand
+      r1Surface: RightHandPad
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 1]
 

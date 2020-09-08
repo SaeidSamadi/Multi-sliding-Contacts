@@ -1,14 +1,8 @@
 UpSlope::LeftFootTrajectory:
   base: MetaTasks
-  RemoveContacts:
-    - r1: hrp4
-      r2: ground
-      r1Surface: LeftFoot
-      r2Surface: AllGround
   tasks:
     LiftFootTask:
       type: bspline_trajectory
-      robot: hrp4
       stiffness: 50.0
       weight: 500.0
       duration: 3.0
@@ -62,6 +56,11 @@ UpSlope::PutLeftFoot:
 UpSlope::Stabilized::LeftFootTrajectory:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory]
+  RemoveContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
 
 UpSlope::Stabilized::PutLeftFoot:
   base: Parallel
