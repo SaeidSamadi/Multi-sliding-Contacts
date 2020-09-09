@@ -33,8 +33,7 @@ WipingController_PrepareWipingState_lh:
   comStiffness: 30
 
 ##
-# FIXME: This is computing CoMQP twice
-# Code duplication between *lh and *rh state should be removed.
+# FIXME: Code duplication between *lh and *rh state should be removed.
 # This is the exact same state, just affecting a different task so don't just copy paste everything!
 ##
 WipingController_PrepareWipingState:
@@ -95,6 +94,7 @@ WipingController_RightHandCircle:
   base: WipingController_HandTrajectoryBase
   tasks:
     HandTrajectory:
+      name: RightHandTrajectory
       surface: RightHandPad
       # XXX should be relative target to a surface
       target:
@@ -107,6 +107,7 @@ WipingController_RightHandCircle:
       #  XXX should be a contact with X/Y freed if you want a circle
       #  this is current "preventing" to move in all direction but z
     KeepHand:
+      name: KeepRightHand
       type: surfaceTransform
       surface: LeftHandPad
       stiffness: 5.0
@@ -116,6 +117,7 @@ WipingController_LeftHandCircle:
   base: WipingController_HandTrajectoryBase
   tasks:
     HandTrajectory:
+      name: LeftHandTrajectory
       surface: LeftHandPad
       duration: 7.0
       dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
@@ -129,6 +131,7 @@ WipingController_LeftHandCircle:
       oriWaypoints: []
       # FIXME same remark regarding contact free in X/Y
     KeepHand:
+      name: KeepLeftHand
       type: surfaceTransform
       surface: RightHandPad
       stiffness: 5.0

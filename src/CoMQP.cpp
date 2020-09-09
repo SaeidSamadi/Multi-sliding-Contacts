@@ -610,31 +610,34 @@ void CoMQP::removeFromGUI(mc_rtc::gui::StateBuilder & gui)
 
 void CoMQP::addToLogger(mc_rtc::Logger & logger)
 {
-  logger.addLogEntry("CoMQP_robot_mg", [this]() { return mg; });
-  logger.addLogEntry("CoMQP_gains_PG", [this]() { return P_PG; });
-  logger.addLogEntry("CoMQP_gains_Force_rf", [this]() { return P_Force_rf; });
-  logger.addLogEntry("CoMQP_gains_Force_lf", [this]() { return P_Force_lf; });
-  logger.addLogEntry("CoMQP_gains_Force_rh", [this]() { return P_Force_rh; });
-  logger.addLogEntry("CoMQP_gains_Wrench_rf", [this]() { return P_Wrench_rf; });
-  logger.addLogEntry("CoMQP_gains_Wrench_lf", [this]() { return P_Wrench_lf; });
-  logger.addLogEntry("CoMQP_gains_Wrench_rh", [this]() { return P_Wrench_rh; });
-  logger.addLogEntry("CoMQP_mu_y", [this]() { return mu_x_rh; });
-  logger.addLogEntry("CoMQP_mu_z", [this]() { return mu_y_rh; });
-  logger.addLogEntry("CoMQP_mu_sum", [this]() { return mu_x_rh+mu_y_rh; });
+  if(!inLogger_) // FIXME hack to ensure this is added only once
+  {
+    logger.addLogEntry("CoMQP_robot_mg", [this]() { return mg; });
+    logger.addLogEntry("CoMQP_gains_PG", [this]() { return P_PG; });
+    logger.addLogEntry("CoMQP_gains_Force_rf", [this]() { return P_Force_rf; });
+    logger.addLogEntry("CoMQP_gains_Force_lf", [this]() { return P_Force_lf; });
+    logger.addLogEntry("CoMQP_gains_Force_rh", [this]() { return P_Force_rh; });
+    logger.addLogEntry("CoMQP_gains_Wrench_rf", [this]() { return P_Wrench_rf; });
+    logger.addLogEntry("CoMQP_gains_Wrench_lf", [this]() { return P_Wrench_lf; });
+    logger.addLogEntry("CoMQP_gains_Wrench_rh", [this]() { return P_Wrench_rh; });
+    logger.addLogEntry("CoMQP_mu_y", [this]() { return mu_x_rh; });
+    logger.addLogEntry("CoMQP_mu_z", [this]() { return mu_y_rh; });
+    logger.addLogEntry("CoMQP_mu_sum", [this]() { return mu_x_rh+mu_y_rh; });
 
-  logger.addLogEntry("CoMQP_pos", [this]() { return result().comPos; });
-  logger.addLogEntry("CoMQP_rightFootForce", [this]() { return result().rightFootForce; });
-  logger.addLogEntry("CoMQP_leftFootForce",  [this]() { return result().leftFootForce; });
-  logger.addLogEntry("CoMQP_rightHandForce", [this]() { return result().rightHandForce; });
-  logger.addLogEntry("CoMQP_desiredNormalForce_rh", [this]() { return N_rh; });
-  logger.addLogEntry("CoMQP_desiredNormalForce_lh", [this]() { return N_lh; });
-  logger.addLogEntry("RHVel", [this]() { return rhVel;});
-  logger.addLogEntry("RHVel_local", [this]() { return localVel_rh;});
-  logger.addLogEntry("RH_fs", [this]() { return rh_fs;});
-  logger.addLogEntry("muN", [this]() { return muN;});
-  logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
-  logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
-
+    logger.addLogEntry("CoMQP_pos", [this]() { return result().comPos; });
+    logger.addLogEntry("CoMQP_rightFootForce", [this]() { return result().rightFootForce; });
+    logger.addLogEntry("CoMQP_leftFootForce",  [this]() { return result().leftFootForce; });
+    logger.addLogEntry("CoMQP_rightHandForce", [this]() { return result().rightHandForce; });
+    logger.addLogEntry("CoMQP_desiredNormalForce_rh", [this]() { return N_rh; });
+    logger.addLogEntry("CoMQP_desiredNormalForce_lh", [this]() { return N_lh; });
+    logger.addLogEntry("RHVel", [this]() { return rhVel;});
+    logger.addLogEntry("RHVel_local", [this]() { return localVel_rh;});
+    logger.addLogEntry("RH_fs", [this]() { return rh_fs;});
+    logger.addLogEntry("muN", [this]() { return muN;});
+    logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
+    logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
+  }
+  inLogger_ = true;
 }
 
 void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
@@ -666,4 +669,5 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("muN");
   logger.removeLogEntry("RH_fs_rot");
   logger.removeLogEntry("muXcalc");
+  inLogger_ = false;
 }

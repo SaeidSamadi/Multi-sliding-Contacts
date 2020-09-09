@@ -84,7 +84,7 @@ public:
   {
     return {mu_x_lh, mu_y_lh};
   }
-  double mu_x_calc; 
+  double mu_x_calc;
 
   void addToGUI(mc_rtc::gui::StateBuilder &);
   void removeFromGUI(mc_rtc::gui::StateBuilder &);
@@ -149,7 +149,7 @@ protected:
 
   Eigen::MatrixXd Ineq_mat1, Ineq_mat2, Ineq_mat3, Ineq_mat4, Ineq_mat5, Ineq_mat6, Ineq_mat7, Ineq_mat8;
   Eigen::MatrixXd Ineq_max_rf, Ineq_min_rf, Ineq_max_lf, Ineq_min_lf, Ineq_max_rh, Ineq_min_rh, Ineq_max_lh, Ineq_min_lh;
-  Eigen::MatrixXd G, G_st; // G_st is for G* matrix (star) 
+  Eigen::MatrixXd G, G_st; // G_st is for G* matrix (star)
   Eigen::VectorXd h, h_st;
   Eigen::MatrixXd P, P_st;
   Eigen::VectorXd Y_desired;
@@ -176,9 +176,9 @@ protected:
   double mu_x_lh = 0, mu_y_lh = 0;
   sva::MotionVecd rhVel, lhVel;
   Eigen::Vector3d RWristVel, localVel_rh, LWristVel, localVel_lh;
-  sva::ForceVecd rh_fs; 
+  sva::ForceVecd rh_fs;
   Eigen::Vector3d rh_fs_rot;
-  double muN; 
+  double muN;
   double mu_x_avg = 0.5;
 
 
@@ -195,4 +195,10 @@ protected:
   Eigen::MatrixXd A_;
   Eigen::MatrixXd x_;
   Eigen::QuadProgDense solver_;
+
+  /**
+   * FIXME: Hack to ensure that the ComQP is only added once to the logger
+   * The states should be written properly such that it does not happen instead
+   **/
+  bool inLogger_ = false;
 };
