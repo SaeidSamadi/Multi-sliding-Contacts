@@ -21,7 +21,7 @@ RightHand::TrajectoryToWhiteboard:
       stiffness: 50.0
       duration: 4.0
       dimWeight: [1.0, 1.0, 1.0, 1.0, 0.5, 0.5]
-      displaySamples: 100
+      displaySamples: 50
       # XXX we'll want to handle early-impact
       completion:
         timeElapsed: true
@@ -44,7 +44,7 @@ RightHand::EstablishContactWithConstantVel:
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
   tasks:
-    RightHandConstantVelocity:
+    RightHandContactConstantVelocity:
       type: surfaceTransform
       surface: RightHandPad
       refVel: [0,0,0,0,0,-0.05]

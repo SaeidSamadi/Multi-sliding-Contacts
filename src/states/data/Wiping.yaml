@@ -23,13 +23,13 @@ WipingController_PreparePushWallAuto_lh:
 WipingController_PrepareWipingState_rh:
   base: WipingController_PreparePushWallAuto_rh
   maxForce: 10.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 WipingController_PrepareWipingState_lh:
   base: WipingController_PreparePushWallAuto_lh
   maxForce: 15
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 ##
@@ -71,31 +71,39 @@ WipingController_HandTrajectoryBase:
       setupMode: false
       surface: RightHandPad
       weight: 1000.0
-      stiffness: 15.0
-      duration: 5.0
-      dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
-      displaySamples: 100
+      # Your original stiffness was 15, that's too low: we're tracking very small errors there, so usually we use hight stiffness there, around 500-1000. If too low, then the joint friction prevents the robot from tracking this well and this creates a jerky motion
+      stiffness: 500.0
+      duration: 7.0
+      displaySamples: 50
       completion:
         timeElapsed: true
-      target:
-        translation: [0.55, -0.36, 0.96]
-        rotation: [-0.785, 0.0, 1.57]
-      controlPoints:
-        - [0.55, -0.53, 0.92]
-        - [0.66, -0.42, 0.99]
-      oriWaypoints: []
-    KeepHand:
-      type: surfaceTransform
-      surface: LeftHandPad
-      stiffness: 5.0
-      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
+        # No point in keephand here, the hand motion is fully constrained by the trajectory
+        # KeepHand:
+        #   type: surfaceTransform
+        #   surface: LeftHandPad
+        #   stiffness: 5.0
+        #   dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
 
+## 
+# FIXME: The reference trajectory should be an actual circle in the surface plane,
+# not a weird bspline that's not even parallel to the surface ;)
+# That's like a 10 lines c++ state to write ;)
+##
 WipingController_RightHandCircle:
   base: WipingController_HandTrajectoryBase
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 0, 0, 0] # lock at current hand orientation (your trajectory is changing the hand orientation otherwise)
   tasks:
     HandTrajectory:
-      name: RightHandTrajectory
+      name: RightHandTrajectoryCircle
       surface: RightHandPad
+      # You don't want to control the z axis as you're independently controlling it with admittance,
+      # but you want to control all other axes ;)
+      dimWeight: [0, 0, 0, 1, 1, 0]
       # XXX should be relative target to a surface
       target:
         translation: [0.55, -0.36, 0.96]
@@ -104,23 +112,23 @@ WipingController_RightHandCircle:
         - [0.55, -0.53, 0.92]
         - [0.66, -0.42, 0.99]
       oriWaypoints: []
-      #  XXX should be a contact with X/Y freed if you want a circle
-      #  this is current "preventing" to move in all direction but z
-    KeepHand:
-      name: KeepRightHand
-      type: surfaceTransform
-      surface: LeftHandPad
-      stiffness: 5.0
-      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
 
+##
+# FIXME: circle trajectory
+##
 WipingController_LeftHandCircle:
   base: WipingController_HandTrajectoryBase
+  AddContacts:
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 0, 0, 0]
   tasks:
     HandTrajectory:
-      name: LeftHandTrajectory
+      name: LeftHandTrajectoryCircle
       surface: LeftHandPad
-      duration: 7.0
-      dimWeight: [1.0, 1.0, 1.0, 0.3, 0.3, 1.0]
+      dimWeight: [0, 0, 0, 0, 1, 1]
       target:
         # XXX should be target relative to a surface (more generic)
         translation: [0.55, 0.375, 1.1]
@@ -129,13 +137,6 @@ WipingController_LeftHandCircle:
         - [0.55, 0.375, 1.34]
         - [0.55, 0.55, 1.12]
       oriWaypoints: []
-      # FIXME same remark regarding contact free in X/Y
-    KeepHand:
-      name: KeepLeftHand
-      type: surfaceTransform
-      surface: RightHandPad
-      stiffness: 5.0
-      dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
 
 ###
 # FIXME 
@@ -265,4 +266,4 @@ Wiping::Stabilized::MoveHandsBack:
     UpSlope::Stabilizer::GoCenter:
       stiffness: 5
       completion:
-        dcmEval: [0.01, 0.01, 0.1]
+        dcmEval: [0.01, 0.02, 0.1]

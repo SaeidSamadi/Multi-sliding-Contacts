@@ -37,15 +37,13 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
 
   ctl.leftHandTask->reset();
   ctl.leftHandTask->setGains(1, 300);
-  //ctl.leftHandTask->stiffness(1.);
-  //ctl.leftHandTask->damping(300.);
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 0., 0., 1.;
   ctl.leftHandTask->dimWeight(dimW);
   ctl.leftHandTask->admittance(admittance_);
   ctl.leftHandTask->targetCoP(Eigen::Vector2d::Zero());
   ctl.setTargetFromCoMQP();
-  ctl.addRightHandForceControl();
+  ctl.addLeftHandForceControl();
 
   //ctl.setFeetTargetFromCoMQP();
   //ctl.addLeftFootForceControl();
@@ -75,8 +73,6 @@ bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
   auto & ctl = static_cast<WipingController &>(ctl_);
 
   ctl.setTargetFromCoMQP();
-  //ctl.setFeetTargetFromCoMQP();
-  // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
 
   output("OK");
   return true;
@@ -85,7 +81,7 @@ bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
 void WipingController_WipeItBaby_lh::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  ctl.removeRightHandForceControl();
+  ctl.removeLeftHandForceControl();
   //ctl.removeLeftFootForceControl();
   ctl.removeFootForceControl();
   ctl.solver().removeTask(ctl.comTask);

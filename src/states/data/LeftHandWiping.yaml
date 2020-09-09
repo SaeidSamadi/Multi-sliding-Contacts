@@ -41,7 +41,7 @@ LeftHand::PrepareWipingJSON:
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
   tasks:
-    LeftHandConstantVelocity:
+    LeftHandContactConstantVelocity:
       type: surfaceTransform
       surface: LeftHandPad
       refVel: [0,0,0,0,0,-0.05]
