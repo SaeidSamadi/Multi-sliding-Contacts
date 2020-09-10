@@ -12,6 +12,14 @@ project(${PROJECT_NAME} CXX)
 find_package(mc_rtc REQUIRED)
 find_package(eigen-quadprog REQUIRED)
 
+if(EXISTS "${MC_RTC_LIBDIR}/mc_controller/etc/WipingController.conf")
+message(FATAL_ERROR "\n \
+############################################################ \n \
+   Please uninstall the previous version (make uninstall)    \n \
+############################################################ \n \
+")
+endif()
+
 add_subdirectory(src)
 
 set(AROBASE "@")
