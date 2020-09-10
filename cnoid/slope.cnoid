@@ -61,7 +61,7 @@ items:
                 confFileName: "Virtual-HRP4LIRMM-RTC.conf"
                 configurationMode: "Use Configuration File"
                 autoConnect: true
-                instanceName: "HRP4ComanoidController(Robot)0"
+                instanceName: "HRP4LIRMMController(Robot)0"
                 bodyPeriodicRate: 0.005
                 baseDirectory: "RTC directory"
             - 
