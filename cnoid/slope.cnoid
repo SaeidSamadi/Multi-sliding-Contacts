@@ -58,7 +58,7 @@ items:
                 isNoDelayMode: true
                 controllerOptions: ""
                 moduleName: "PDservo"
-                confFileName: "Virtual-HRP4Comanoid-RTC.conf"
+                confFileName: "Virtual-HRP4LIRMM-RTC.conf"
                 configurationMode: "Use Configuration File"
                 autoConnect: true
                 instanceName: "HRP4ComanoidController(Robot)0"
