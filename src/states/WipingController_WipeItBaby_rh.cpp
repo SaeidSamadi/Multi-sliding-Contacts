@@ -36,14 +36,21 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.solver().addTask(ctl.lookAtTask);
 
   ctl.rightHandTask->reset();
-  ctl.rightHandTask->setGains(1, 300);
+  //ctl.rightHandTask->setGains(1, 300);
   //ctl.rightHandTask->stiffness(1.);
   //ctl.rightHandTask->damping(300.);
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 0., 0., 1.;
+  sva::MotionVecd stiffnessGain, dampingGain;
+  stiffnessGain.angular() << 10, 10, 10;
+  stiffnessGain.linear() << 10, 10, 5;
+  dampingGain.angular() << 6, 6, 6;
+  dampingGain.linear() << 6, 6, 300;
+  ctl.rightHandTask->setGains(stiffnessGain, dampingGain);
   ctl.rightHandTask->dimWeight(dimW);
   ctl.rightHandTask->admittance(admittance_);
   ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.rightHandTask->targetPose();
   ctl.setTargetFromCoMQP();
   ctl.addRightHandForceControl();
 
@@ -94,7 +101,19 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  ctl.frictionEstimator.update(ctl.robot());
+  Eigen::Vector3d delta;
+  delta << 0.0003, 0.0, 0.0003; //This should generate straight line wiping on 45deg tilted_board
+  sva::PTransformd poseOutput = ctl.rightHandTask->targetPose();
+  auto rotationPose = poseOutput.rotation();
+  auto translationPose = poseOutput.translation();
+  Eigen::Vector6d rightHandPose_ = ctl.comQP().rh_pose();
+  sva::PTransformd target;
+  //target = poseOutput; //To keep the same rotation for hand
+  //target.translation() = rightHandPose_.tail<3>() + delta; //To add value for translation of hand
+  target.rotation() = rotationPose;
+  target.translation() = translationPose + delta;
+  ctl.rightHandTask->targetPose(target);
+  //ctl.frictionEstimator.update(ctl.robot());
   //double EstimatedFriction = ctl.frictionEstimator.mu_calc();
   //mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
   ctl.setTargetFromCoMQP();

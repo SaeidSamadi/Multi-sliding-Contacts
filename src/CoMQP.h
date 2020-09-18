@@ -76,6 +76,11 @@ public:
     N_lf = v;
   }
 
+  Eigen::Vector6d rh_pose() const
+  {
+    return rightHandPose;
+  }
+
   Eigen::Vector2d muYZ_rh() const
   {
     return {mu_x_rh, mu_y_rh};
@@ -155,6 +160,7 @@ protected:
   Eigen::VectorXd Y_desired;
   Eigen::VectorXd q, q_st;
   Eigen::Vector3d PG_d;
+  Eigen::Vector6d rightHandPose;
   double tmp = 0.0;
 
   double P_PG = 1;

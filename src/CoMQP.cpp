@@ -177,6 +177,18 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const auto bodyPT_rh = robot.bodyPosW(bodyName_rh);
   const auto bodyPT_lh = robot.bodyPosW(bodyName_lh);
 
+  const double Px_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(0,0);
+  const double Py_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(1,1);
+  const double Pz_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(2,2);
+  //rightHandPose_x = Px_rh_rot;
+  //rightHandPose_y = Py_rh_rot;
+  //rightHandPose_z = Pz_rh_rot;
+  rightHandPose(0) = Px_rh_rot;
+  rightHandPose(1) = Py_rh_rot;
+  rightHandPose(2) = Pz_rh_rot;
+  rightHandPose(3) = Px_rh;
+  rightHandPose(4) = Py_rh;
+  rightHandPose(5) = Pz_rh;
   Eigen::Matrix3d constRot_rf; // Rotation from body local link to desired surface orien.
   Eigen::Matrix3d constRot_lf;
   Eigen::Matrix3d constRot_rh;
