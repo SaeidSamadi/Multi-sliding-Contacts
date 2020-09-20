@@ -12,12 +12,31 @@ void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & con
   {
     feetForceControl_ = config("feetForceControl");
   }
+  if(config.has("linearWiping"))
+  {
+    linearWiping_ = config("linearWiping");
+  }
+  if(config.has("circleWiping_CCW"))
+  {
+    circleWiping_CCW_ = config("circleWiping_CCW");
+  }
+  if(config.has("circleWiping_CW"))
+  {
+    circleWiping_CW_ = config("circleWiping_CW");
+  }
+  if(config.has("circleRadius"))
+  {
+    circleRadius_ = config("circleRadius");
+  }
+  if(config.has("wipingDuration"))
+  {
+    wipingDuration_ = config("wipingDuration");
+  }
 }
 
 void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-
 
   if(feetForceControl_)
   {
@@ -40,7 +59,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   //ctl.rightHandTask->stiffness(1.);
   //ctl.rightHandTask->damping(300.);
   Eigen::Vector6d dimW;
-  dimW << 1., 1., 1., 0., 0., 1.;
+  dimW << 1., 1., 1., 1., 1., 1.;
   sva::MotionVecd stiffnessGain, dampingGain;
   stiffnessGain.angular() << 10, 10, 10;
   stiffnessGain.linear() << 10, 10, 5;
@@ -101,18 +120,68 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  Eigen::Vector3d delta;
-  delta << 0.0003, 0.0, 0.0003; //This should generate straight line wiping on 45deg tilted_board
+  if(linearWiping_){
+    double linearVelocity = circleRadius_ / wipingDuration_;
+    local_x = ctl.timeStep * linearVelocity;
+    local_y = 0.0;
+  }
+  else if(circleWiping_CCW_ || circleWiping_CW_)
+  {
+    double theta_net = M_PI;
+    double angularVelocity = theta_net / wipingDuration_;
+    double delta_theta = angularVelocity * ctl.timeStep;
+    if(circleWiping_CCW_){
+      local_y_initial = - circleRadius_ * sin(theta);
+    }
+    else if(circleWiping_CW_){
+      local_y_initial = circleRadius_ * sin(theta);
+    }
+
+    if(theta <= M_PI/2.0){
+      local_x_initial = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
+    }
+    else{
+      local_x_initial = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
+    }
+    theta += delta_theta;
+    if(circleWiping_CCW_){
+      local_y_final = - circleRadius_ * sin(theta);
+    }
+    else if(circleWiping_CW_){
+      local_y_final = circleRadius_ * sin(theta);
+    }
+
+    if(theta <= M_PI/2.0){
+      local_x_final = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
+    }
+    else{
+      local_x_final = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
+    }
+    local_x = local_x_final - local_x_initial;
+    local_y = local_y_final - local_y_initial;
+  }
+  else if(circleWiping_CW_)
+  {
+  }
+
+  delta_line << local_x, local_y, 0.0; //This should generate straight line wiping on 45deg tilted_board
+  delta_lineW = ctl.tiltedboardPosInvW * delta_line;
+  wipingTime += ctl.timeStep;
   sva::PTransformd poseOutput = ctl.rightHandTask->targetPose();
   auto rotationPose = poseOutput.rotation();
   auto translationPose = poseOutput.translation();
-  Eigen::Vector6d rightHandPose_ = ctl.comQP().rh_pose();
   sva::PTransformd target;
-  //target = poseOutput; //To keep the same rotation for hand
-  //target.translation() = rightHandPose_.tail<3>() + delta; //To add value for translation of hand
   target.rotation() = rotationPose;
-  target.translation() = translationPose + delta;
+  if(wipingTime <= wipingDuration_){
+    target.translation() = translationPose + delta_lineW;
+  }
+  else{
+    target.translation() = translationPose;
+  }
   ctl.rightHandTask->targetPose(target);
+
+
+
   //ctl.frictionEstimator.update(ctl.robot());
   //double EstimatedFriction = ctl.frictionEstimator.mu_calc();
   //mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);

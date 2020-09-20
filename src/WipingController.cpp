@@ -16,12 +16,15 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   leftHandTask->setGains(1, 300);
   leftHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
 
+
   leftFootTask.reset(new mc_tasks::force::CoPTask("LeftFootCenter", robots(), robots().robotIndex(), 100, 1000));
   rightFootTask.reset(new mc_tasks::force::CoPTask("RightFootCenter", robots(), robots().robotIndex(), 100000, 10000));
 
   lookAtTask.reset(new mc_tasks::LookAtSurfaceTask(robots(), robots().robotIndex(), "xtion_link", {1., 0., 0.},
                                                    robots().robotIndex(), "RightHandPad", 1.0, 10.));
   //solver().addTask(lookAtTask);
+
+  tiltedboardPosInvW = robots().robot("tilted_board").posW().rotation().inverse();
 
   auto handForceConfig = mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(0., 1., 0.));
   handForceConfig.force_scale *= 3;
@@ -71,6 +74,14 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
+}
+
+void WipingController::createLinearTrajectory()
+{
+
+  //wallPosW = robots().robot("wall").posW().rotation();
+  //slopePosW = robots().robot("slope").posW().rotation();
+  //mc_rtc::log::info("boardPosW: \n {} \n wallPosW: \n {} slopePosW \n {}", boardPosW, wallPosW, slopePosW);
 }
 
 bool WipingController::computeCoMQP()

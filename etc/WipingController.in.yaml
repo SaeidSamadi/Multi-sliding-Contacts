@@ -59,6 +59,11 @@ robots:
     init_pos:
       translation: [7.4, 0.0, 7.6]
       rotation: [0.0, -0.78, 0.0]
+  slope:
+    module: env/ground
+    init_pos:
+      translation: [0.0, 0.2, 0.0]
+      rotation: [0.523, 0.0, 0.0]
 constraints:
   - type: contact
   - type: dynamics
@@ -616,6 +621,12 @@ states:
       WipingController_ChooseTransition:
         actions:
           Wipe right hand: WipeRightHand
+    RemoveContactsAfter:
+      - r1: hrp4
+        r2: tilted_board
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+        dof: [0, 0, 0, 0, 0, 0]
 
   Choose::Slope::WipeBothHands:
     base: Choose
@@ -629,6 +640,18 @@ states:
     base: Choose::Slope::WipeBothHands
     #states: [WipingController_WipeItStateCircle_rh, Message, WipingController_ChooseTransition]
     states: [WipingController_WipeItBabyState_rh, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_WipeItBabyState_rh:
+        #linearWiping: true
+       circleWiping_CCW: true
+       circleRadius: 0.1
+       wipingDuration: 6.0
+    AddContacts:
+      - r1: hrp4
+        r2: tilted_board
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 0, 0, 0]
 
 
 transitions:

@@ -17,7 +17,8 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
   bool run() override;
 
   void reset(const mc_control::ControllerResetData & reset_data) override;
-
+  
+  void createLinearTrajectory();
   bool computeCoMQP();
   void setTargetFromCoMQP();
 	void setFeetTargetFromCoMQP();
@@ -48,6 +49,7 @@ public:
 
   std::shared_ptr<mc_tasks::force::CoPTask> leftFootTask;
   std::shared_ptr<mc_tasks::force::CoPTask> rightFootTask;
+  Eigen::Matrix3d tiltedboardPosInvW;
   double dfzAdmittance_ = 1e-4; /**< Admittance for vertical foot force control */
   double vdcDamping_ = 0.; /**< Vertical Drift Compensation damping */
   double vdcFrequency_ = 1.; /**< Vertical Drift Compensation frequency */
