@@ -88,7 +88,7 @@ WipingController_HandTrajectoryBase:
 # FIXME: The reference trajectory should be an actual circle in the surface plane,
 # not a weird bspline that's not even parallel to the surface ;)
 # That's like a 10 lines c++ state to write ;)
-##
+
 WipingController_RightHandCircle:
   base: WipingController_HandTrajectoryBase
   AddContacts:
@@ -160,7 +160,7 @@ WipingController_WipeItStateCircle_lh:
 ##
 WipingController_WipeItStateCoWipe:
   base: Parallel
-  states: [WipingController_WipeItStateCircle_rh, WipingController_WipeItStateCircle_lh]
+  states: [WipingController_WipeItBabyState_rh, WipingController_WipeItBabyState_lh]
   
 WipingController_PushWallCoMQP_lh:
   base: WipingController_PushWall_lh

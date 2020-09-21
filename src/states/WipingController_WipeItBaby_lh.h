@@ -15,4 +15,15 @@ struct WipingController_WipeItBaby_lh : mc_control::fsm::State
  protected:
 	Eigen::Vector6d admittance_ = Eigen::Vector6d::Zero();
   bool feetForceControl_ = true;
+  bool linearWiping_ = false;
+  bool circleWiping_CCW_ = false;
+  bool circleWiping_CW_ = false;
+  double circleRadius_ = 0.0; 
+  double wipingDuration_ = 0.0;
+  double local_x, local_y;
+  double local_x_initial, local_y_initial;
+  double local_x_final, local_y_final;
+  double wipingTime = 0;
+  double theta = 0.0;
+  Eigen::Vector3d delta_line, delta_lineW;
 };

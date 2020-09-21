@@ -25,6 +25,8 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //solver().addTask(lookAtTask);
 
   tiltedboardPosInvW = robots().robot("tilted_board").posW().rotation().inverse();
+  wallPosInvW = robots().robot("wall").posW().rotation().inverse();
+  slopePosInvW = robots().robot("slope").posW().rotation().inverse();
 
   auto handForceConfig = mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(0., 1., 0.));
   handForceConfig.force_scale *= 3;
@@ -74,14 +76,6 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
   LOG_SUCCESS("WipingController init done " << this)
-}
-
-void WipingController::createLinearTrajectory()
-{
-
-  //wallPosW = robots().robot("wall").posW().rotation();
-  //slopePosW = robots().robot("slope").posW().rotation();
-  //mc_rtc::log::info("boardPosW: \n {} \n wallPosW: \n {} slopePosW \n {}", boardPosW, wallPosW, slopePosW);
 }
 
 bool WipingController::computeCoMQP()

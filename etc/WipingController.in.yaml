@@ -604,7 +604,8 @@ states:
     configs:
       WipingController_ChooseTransition:
         actions:
-          Prepare Wiping: PrepareWiping_rh
+          #Prepare Wiping: PrepareWiping_rh
+          Prepare Wiping: PrepareWiping
 
   Choose::Slope::PrepareWipingAndChooseBothHands:
     base: Choose
@@ -621,12 +622,6 @@ states:
       WipingController_ChooseTransition:
         actions:
           Wipe right hand: WipeRightHand
-    RemoveContactsAfter:
-      - r1: hrp4
-        r2: tilted_board
-        r1Surface: RightHandPad
-        r2Surface: AllGround
-        dof: [0, 0, 0, 0, 0, 0]
 
   Choose::Slope::WipeBothHands:
     base: Choose
@@ -635,15 +630,36 @@ states:
       WipingController_ChooseTransition:
         actions:
           Release hands: Release
+      WipingController_WipeItStateCoWipe:
+        configs:
+          WipingController_WipeItBabyState_rh:
+            circleWiping_CCW: true
+            circleRadius: 0.1
+            wipingDuration: 6.0
+          WipingController_WipeItBabyState_lh:
+            circleWiping_CW: true
+            circleRadius: 0.08
+            wipingDuration: 6.0
+    AddContacts:
+      - r1: hrp4
+        r2: tilted_board
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 0, 0, 0]
+      - r1: hrp4
+        r2: wall
+        r1Surface: LeftHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 0, 0, 0]
+
 
   Choose::Slope::WipeRightHand:
     base: Choose::Slope::WipeBothHands
-    #states: [WipingController_WipeItStateCircle_rh, Message, WipingController_ChooseTransition]
-    states: [WipingController_WipeItBabyState_rh, Message, WipingController_ChooseTransition]
+    states: [WipingController_WipeItStateCircle_rh, Message, WipingController_ChooseTransition]
     configs:
-      WipingController_WipeItBabyState_rh:
+      WipingController_WipeItBabyState_lh:
         #linearWiping: true
-       circleWiping_CCW: true
+       circleWiping_CW: true
        circleRadius: 0.1
        wipingDuration: 6.0
     AddContacts:
@@ -670,10 +686,10 @@ transitions:
     #   Make sure things get done once and only once
     # - Same remark concerning code duplication in YAML. If things are doing the same for left and right hand,
     # then factorize the code in a common base state and inherit from it, then only adjust the parameters you need
-  - [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
-    #- [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
-    #- [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
-    #- [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
+    #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
+  - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
+  - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
+  - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized::MoveHandsBack, Auto]
   - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]

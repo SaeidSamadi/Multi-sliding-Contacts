@@ -49,7 +49,7 @@ public:
 
   std::shared_ptr<mc_tasks::force::CoPTask> leftFootTask;
   std::shared_ptr<mc_tasks::force::CoPTask> rightFootTask;
-  Eigen::Matrix3d tiltedboardPosInvW;
+  Eigen::Matrix3d tiltedboardPosInvW, wallPosInvW, slopePosInvW;
   double dfzAdmittance_ = 1e-4; /**< Admittance for vertical foot force control */
   double vdcDamping_ = 0.; /**< Vertical Drift Compensation damping */
   double vdcFrequency_ = 1.; /**< Vertical Drift Compensation frequency */

@@ -12,6 +12,26 @@ void WipingController_WipeItBaby_lh::configure(const mc_rtc::Configuration & con
   {
     feetForceControl_ = config("feetForceControl");
   }
+  if(config.has("linearWiping"))
+  {
+    linearWiping_ = config("linearWiping");
+  }
+  if(config.has("circleWiping_CCW"))
+  {
+    circleWiping_CCW_ = config("circleWiping_CCW");
+  }
+  if(config.has("circleWiping_CW"))
+  {
+    circleWiping_CW_ = config("circleWiping_CW");
+  }
+  if(config.has("circleRadius"))
+  {
+    circleRadius_ = config("circleRadius");
+  }
+  if(config.has("wipingDuration"))
+  {
+    wipingDuration_ = config("wipingDuration");
+  }
 }
 
 void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
@@ -36,12 +56,18 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
   ctl.solver().addTask(ctl.lookAtTask);
 
   ctl.leftHandTask->reset();
-  ctl.leftHandTask->setGains(1, 300);
   Eigen::Vector6d dimW;
-  dimW << 1., 1., 1., 0., 0., 1.;
+  dimW << 1., 1., 1., 1., 1., 1.;
+  sva::MotionVecd stiffnessGain, dampingGain;
+  stiffnessGain.angular() << 10, 10, 10;
+  stiffnessGain.linear() << 10, 10, 5;
+  dampingGain.angular() << 6, 6, 6;
+  dampingGain.linear() << 6, 6, 300;
+  ctl.leftHandTask->setGains(stiffnessGain, dampingGain);
   ctl.leftHandTask->dimWeight(dimW);
   ctl.leftHandTask->admittance(admittance_);
   ctl.leftHandTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.leftHandTask->targetPose();
   ctl.setTargetFromCoMQP();
   ctl.addLeftHandForceControl();
 
@@ -71,6 +97,65 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
+
+  if(linearWiping_){
+    double linearVelocity = circleRadius_ / wipingDuration_;
+    local_x = ctl.timeStep * linearVelocity;
+    local_y = 0.0;
+  }
+  else if(circleWiping_CCW_ || circleWiping_CW_)
+  {
+    double theta_net = M_PI;
+    double angularVelocity = theta_net / wipingDuration_;
+    double delta_theta = angularVelocity * ctl.timeStep;
+    mc_rtc::log::info("theta: {}, \n delta_theta: {}", theta, delta_theta);
+    if(circleWiping_CCW_){
+      local_y_initial = - circleRadius_ * sin(theta);
+    }
+    else if(circleWiping_CW_){
+      local_y_initial = circleRadius_ * sin(theta);
+    }
+
+    if(theta <= M_PI/2.0){
+      local_x_initial = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
+    }
+    else{
+      local_x_initial = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
+    }
+    theta += delta_theta;
+    if(circleWiping_CCW_){
+      local_y_final = - circleRadius_ * sin(theta);
+    }
+    else if(circleWiping_CW_){
+      local_y_final = circleRadius_ * sin(theta);
+    }
+
+    if(theta <= M_PI/2.0){
+      local_x_final = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
+    }
+    else{
+      local_x_final = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
+    }
+    local_x = local_x_final - local_x_initial;
+    local_y = local_y_final - local_y_initial;
+  }
+
+  delta_line << local_x, local_y, 0.0; 
+  delta_lineW = ctl.wallPosInvW * delta_line;
+  wipingTime += ctl.timeStep;
+  sva::PTransformd poseOutput = ctl.leftHandTask->targetPose();
+  auto rotationPose = poseOutput.rotation();
+  auto translationPose = poseOutput.translation();
+  sva::PTransformd target;
+  target.rotation() = rotationPose;
+
+  if(wipingTime <= wipingDuration_){
+    target.translation() = translationPose + delta_lineW;
+  }
+  else{
+    target.translation() = translationPose;
+  }
+  ctl.leftHandTask->targetPose(target);
 
   ctl.setTargetFromCoMQP();
 
