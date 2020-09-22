@@ -230,6 +230,12 @@ states:
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
     admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
     admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
+    stiffness_rh: [1, 1, 1, 1, 1, 1]
+    stiffness_lh: [1, 1, 1, 1, 1, 1]
+    stiffness_lf: [1, 1, 1, 1, 1, 1]
+    damping_rh: [300, 300, 300, 300, 300, 300]
+    damping_lh: [300, 300, 300, 300, 300, 300]
+    damping_lf: [300, 300, 300, 300, 300, 300]
     initFromCoMQP: false
     comStiffness: 60
   WipingController_RightHandConstantVelocity:
@@ -493,9 +499,12 @@ states:
     maxForce_rh: 10
     maxForce_lh: 15
     maxForce_lf: 30
+    duration: 3
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
     admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
-    admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+    admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
+    stiffness_lf: [1, 1, 1, 1, 1, 3]
+    damping_lf: [3, 3, 3, 3, 3, 3]
     comStiffness: 30
   WipingController_PrepareWipingState_lf:
     base: WipingController_PreparePushWallAuto_lf
@@ -505,38 +514,35 @@ states:
   WipingController_PrepareShuffleState:
     base: Parallel
     states: [KeepFeetState, WipingController_PrepareShuffleState_]
-    AddCollisions:
+    AddContacts:
+      - r1: hrp4
+        r2: wall  
+        r1Surface: LeftHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 0]
       - r1: hrp4
         r2: tilted_board
-        collisions:
-          - body1: torso
-            body2: ground
-            iDist: 1.0
-            sDist: 0.04
-            damping: 0.0
-          - body1: body
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-          - body1: NECK_P_LINK
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 0]
       - r1: hrp4
-        r2: wall
-        collisions:
-          - body1: torso
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
-          - body1: NECK_P_LINK
-            body2: ground
-            iDist: 0.5
-            sDist: 0.02
-            damping: 0.0
+        r2: ground
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 0]
+    RemoveContactsAfter:
+      - r1: hrp4
+        r2: tilted_board
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+      - r1: hrp4
+        r2: wall  
+        r1Surface: LeftHandPad
+        r2Surface: AllGround
+      - r1: hrp4
+        r2: ground
+        r1Surface: LeftFoot
+        r2Surface: AllGround
   KeepHandsState:
     base: MetaTasks
     tasks:
@@ -633,6 +639,7 @@ states:
       WipingController_WipeItStateCoWipe:
         configs:
           WipingController_WipeItBabyState_rh:
+            linearWiping: false
             circleWiping_CCW: true
             circleRadius: 0.1
             wipingDuration: 6.0
@@ -689,7 +696,8 @@ transitions:
     #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
   - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
   - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
-  - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
+    ###- [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
+  - [Choose::Slope::WipeBothHands, Release, WipingController_PrepareShuffleState, Auto]
   - [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized::MoveHandsBack, Auto]
   - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]

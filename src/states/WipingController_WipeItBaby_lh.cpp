@@ -108,7 +108,6 @@ bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
     double theta_net = M_PI;
     double angularVelocity = theta_net / wipingDuration_;
     double delta_theta = angularVelocity * ctl.timeStep;
-    mc_rtc::log::info("theta: {}, \n delta_theta: {}", theta, delta_theta);
     if(circleWiping_CCW_){
       local_y_initial = - circleRadius_ * sin(theta);
     }

@@ -52,12 +52,6 @@ void WipingController_ShufflePosture::configure(const mc_rtc::Configuration & co
   {
     comStiffness_ = config("comStiffness");
   }
-  stiffness_rh_ << 1,1,1,1,1,1;
-  damping_rh_ << 300,300,300,300,300,300;
-  stiffness_lh_ << 1,1,1,1,1,1;
-  damping_lh_ << 300,300,300,300,300,300;
-  stiffness_lf_ << 1,1,1,1,1,1;
-  damping_lf_ << 300,300,300,300,300,300;
   if(config.has("stiffness_rh"))
   {
     stiffness_rh_ = config("stiffness_rh");
