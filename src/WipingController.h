@@ -46,7 +46,9 @@ public:
   std::shared_ptr<mc_tasks::force::CoPTask> leftHandTask;
   std::shared_ptr<mc_tasks::LookAtSurfaceTask> lookAtTask;
   FrictionEstimator frictionEstimator;
-
+  //sva::PTransformd leftFootPose;
+  Eigen::Vector3d leftFootPose;
+  Eigen::Matrix3d leftFootRot;
   std::shared_ptr<mc_tasks::force::CoPTask> leftFootTask;
   std::shared_ptr<mc_tasks::force::CoPTask> rightFootTask;
   Eigen::Matrix3d tiltedboardPosInvW, wallPosInvW, slopePosInvW;
@@ -56,6 +58,7 @@ public:
   sva::PTransformd lfTarget_, rfTarget_;
 
   bool comQPComputed = false;
+  sva::PTransformd realLeftFootPose;
 private:
   mc_rtc::Configuration config_;
   CoMQP comQP_;

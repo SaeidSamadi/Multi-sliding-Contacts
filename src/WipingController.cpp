@@ -7,6 +7,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
   useFeetForceControl_ = config("UseFeetForceControl", false);
 
+
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));
 
   rightHandTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));//Stiff, Weight
@@ -260,6 +261,11 @@ bool WipingController::run()
                                           std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
   auto start_run_t = clock::now();
 
+
+  realLeftFootPose = robot().surface("LeftFoot").X_0_s(robot());
+  //leftFootPose = robot().surface("RightHandPad").X_0_s(robot()).translation();
+  //leftFootRot = robot().surface("LeftFoot").X_0_s(robot()).rotation();
+  //mc_rtc::log::info("real.leftFootPose: \n {}", leftFootPose);
   computeCoMQP();
   comqp_dt_ = clock::now() - start_run_t;
   setFeetTargetFromCoMQP();

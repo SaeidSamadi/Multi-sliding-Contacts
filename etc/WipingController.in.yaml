@@ -70,6 +70,8 @@ constraints:
     damper: [0.1, 0.01, 0.5]
 collisions:
   - type: collision
+    r1Index: 0
+    r2Index: 0
     useMinimal: true
 contacts:
   - r1: hrp4
@@ -635,7 +637,7 @@ states:
     configs:
       WipingController_ChooseTransition:
         actions:
-          Release hands: Release
+          Prepare shuffling: PrepareShuffling
       WipingController_WipeItStateCoWipe:
         configs:
           WipingController_WipeItBabyState_rh:
@@ -662,9 +664,9 @@ states:
 
   Choose::Slope::WipeRightHand:
     base: Choose::Slope::WipeBothHands
-    states: [WipingController_WipeItStateCircle_rh, Message, WipingController_ChooseTransition]
+    states: [WipingController_WipeItBabyState_rh, Message, WipingController_ChooseTransition]
     configs:
-      WipingController_WipeItBabyState_lh:
+      WipingController_WipeItBabyState_rh:
         #linearWiping: true
        circleWiping_CW: true
        circleRadius: 0.1
@@ -676,11 +678,51 @@ states:
         r2Surface: AllGround
         dof: [1, 1, 1, 0, 0, 0]
 
+  Choose::Slope::PrepareShuffleState:
+    base: Choose
+    states: [WipingController_PrepareShuffleState, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Shuffle Left Foot: ShuffleLeftFoot
+
+  Choose::Slope::ShuffleLeftFoot:
+    base: Choose
+    states: [WipingController_WipeItBabyState_lf, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Release Hands: ReleaseHands
+      WipingController_WipeItBabyState_lf:
+       linearWiping: true
+       circleWiping_CW: false
+       circleRadius: 0.15
+       wipingDuration: 6.0
+       admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+       #stiffness_lf: [1, 1, 1, 1, 1, 3]
+       #damping_lf: [3, 3, 3, 3, 3, 3]
+    AddContacts:
+      - r1: hrp4
+        r2: slope
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [1, 1, 1, 0, 0, 0]
+      - r1: hrp4
+        r2: wall  
+        r1Surface: LeftHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 1]
+      - r1: hrp4
+        r2: tilted_board
+        r1Surface: RightHandPad
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 1]
 
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
 
   # Triggered by StepUpSlope
+  #- [UpSlope::FSM::StepUpSlope, trigger, Choose::Slope::ShuffleLeftFoot, Auto]
   - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
@@ -697,7 +739,9 @@ transitions:
   - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
   - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
     ###- [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
-  - [Choose::Slope::WipeBothHands, Release, WipingController_PrepareShuffleState, Auto]
+  - [Choose::Slope::WipeBothHands, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]
+  - [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, Choose::Slope::ShuffleLeftFoot, Auto]
+  - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized::MoveHandsBack, Auto]
   - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
@@ -749,8 +793,8 @@ transitions:
   - [WipingController_PrepareWipingState_lh, VelocityVertical, WipingController_WipeItStateConstantVelocityVertical_lh]
   - [WipingController_PrepareWipingState, ShuffleState, WipingController_PrepareShuffleState]
   - [WipingController_PrepareShuffleState, Shuffle, WipingController_WipeItStateConstantVelocity_lf]
-  - [WipingController_PrepareShuffleState, Shuffle, WipingController_WipeItStateCircle_lf]
-  - [WipingController_PrepareShuffleState, Back, WipingController_PrepareLeftFootBack]
+    #- [WipingController_PrepareShuffleState, Shuffle, WipingController_WipeItStateCircle_lf]
+    #- [WipingController_PrepareShuffleState, Back, WipingController_PrepareLeftFootBack]
   - [WipingController_PrepareLeftFootBack, Release, WipingController_ReleasePushWallCoMQP]
   - [WipingController_PrepareWipingState, Abort, WipingController_ReleasePushWallCoMQP]
   - [WipingController_WipeItStateCircle_rh, SwitchToLeftHand, WipingController_WipeItStateCircle_lh]
