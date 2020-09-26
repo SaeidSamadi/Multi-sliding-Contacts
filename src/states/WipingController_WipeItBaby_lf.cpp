@@ -4,10 +4,30 @@
 
 void WipingController_WipeItBaby_lf::configure(const mc_rtc::Configuration & config)
 {
-	if(config.has("admittance"))
-	{
-	  admittance_ = config("admittance");
-	}
+  if(config.has("maxForce_rh"))
+  {
+    maxForce_rh_ = config("maxForce_rh");
+  }
+  if(config.has("maxForce_lh"))
+  {
+    maxForce_lh_ = config("maxForce_lh");
+  }
+  if(config.has("maxForce_lf"))
+  {
+    maxForce_lf_ = config("maxForce_lf");
+  }
+  if(config.has("admittance_rh"))
+  {
+    admittance_rh_ = config("admittance_rh");
+  }
+  if(config.has("admittance_lh"))
+  {
+    admittance_lh_ = config("admittance_lh");
+  }
+  if(config.has("admittance_lf"))
+  {
+    admittance_lf_ = config("admittance_lf");
+  }
   if(config.has("feetForceControl"))
   {
     feetForceControl_ = config("feetForceControl");
@@ -32,6 +52,34 @@ void WipingController_WipeItBaby_lf::configure(const mc_rtc::Configuration & con
   {
     wipingDuration_ = config("wipingDuration");
   }
+  if(config.has("comStiffness"))
+  {
+    comStiffness_ = config("comStiffness");
+  }
+  if(config.has("stiffness_rh"))
+  {
+    stiffness_rh_ = config("stiffness_rh");
+  }
+  if(config.has("stiffness_lh"))
+  {
+    stiffness_lh_ = config("stiffness_lh");
+  }
+  if(config.has("stiffness_lf"))
+  {
+    stiffness_lf_ = config("stiffness_lf");
+  }
+  if(config.has("damping_rh"))
+  {
+    damping_rh_ = config("damping_rh");
+  }
+  if(config.has("damping_lh"))
+  {
+    damping_lh_ = config("damping_lh");
+  }
+  if(config.has("damping_lf"))
+  {
+    damping_lf_ = config("damping_lf");
+  }
 }
 
 void WipingController_WipeItBaby_lf::start(mc_control::fsm::Controller & ctl_)
@@ -39,11 +87,26 @@ void WipingController_WipeItBaby_lf::start(mc_control::fsm::Controller & ctl_)
   auto & ctl = static_cast<WipingController &>(ctl_);
   ctl.comTask->reset();
   ctl.comTask->weight(2000);
+  ctl.comTask->com(ctl.robot().com()); //XXX Check
   ctl.comTask->stiffness(60);
 
  // ctl.lookAtTask->stiffness(5);
  // ctl.lookAtTask->weight(10);
  // ctl.solver().addTask(ctl.lookAtTask);
+ 
+  ctl.rightHandTask->reset();
+  ctl.rightHandTask->dimWeight(Eigen::Vector6d::Ones());
+  ctl.rightHandTask->admittance(admittance_rh_);
+  ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.rightHandTask->stiffness(sva::MotionVecd(stiffness_rh_));
+  ctl.rightHandTask->damping(sva::MotionVecd(damping_rh_));
+
+  ctl.leftHandTask->reset();
+  ctl.leftHandTask->dimWeight(Eigen::Vector6d::Ones());
+  ctl.leftHandTask->admittance(admittance_lh_);
+  ctl.leftHandTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.leftHandTask->stiffness(sva::MotionVecd(stiffness_lh_));
+  ctl.leftHandTask->damping(sva::MotionVecd(damping_lh_));
 
   ctl.leftFootTask->reset();
   Eigen::Vector6d dimW;
@@ -59,12 +122,23 @@ void WipingController_WipeItBaby_lf::start(mc_control::fsm::Controller & ctl_)
   //dampingGain.linear() << 3, 3, 3;
   ctl.leftFootTask->setGains(stiffnessGain, dampingGain);
   ctl.leftFootTask->dimWeight(dimW);
-  ctl.leftFootTask->admittance(admittance_);
+  ctl.leftFootTask->admittance(admittance_lf_);
   ctl.leftFootTask->targetCoP(Eigen::Vector2d::Zero());
   //ctl.leftFootTask->targetPose();
   ctl.setTargetFromCoMQP();
+  ctl.addRightHandForceControl();
+  ctl.addLeftHandForceControl();
   ctl.addLeftFootForceControl();
-  
+
+  ctl.comQP().rh_desiredNormalForce(-maxForce_rh_);
+  ctl.comQP().lh_desiredNormalForce(-maxForce_lh_);
+  ctl.comQP().lf_desiredNormalForce(maxForce_lf_);
+  forceTarget_rh_ = sva::ForceVecd({0.,0.,0.}, {0.,0.,maxForce_rh_});
+  forceTarget_lh_ = sva::ForceVecd({0.,0.,0.}, {0.,0.,maxForce_lh_});
+  forceTarget_lf_ = sva::ForceVecd({0.,0.,0.}, {0.,0.,maxForce_lf_});
+  ctl.rightHandTask->targetForce(forceTarget_rh_.force());
+  ctl.leftHandTask->targetForce(forceTarget_lh_.force());
+  ctl.leftFootTask->targetForce(forceTarget_lf_.force());
   shift = ctl.realLeftFootPose;
   //ctl.leftFootTask->targetPose(ctl.realLeftFootPose);
   //mc_rtc::log::info("Start.realLeftFoot.translation: {}, \n", ctl.realLeftFootPose.translation());
@@ -95,14 +169,17 @@ void WipingController_WipeItBaby_lf::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
+  ctl.comQP().rh_desiredNormalForce(-maxForce_rh_);
+  ctl.comQP().lh_desiredNormalForce(-maxForce_lh_);
+  ctl.comQP().lf_desiredNormalForce(maxForce_lf_);
   //ctl.leftFootTask->targetPose(ctl.realLeftFootPose);
-  if(ii == 0){
-    mc_rtc::log::info("Run.realLeftFoot.translation: {}, \n", ctl.realLeftFootPose.translation());
-    mc_rtc::log::info("Run.realLeftFoot.rotation: {}, \n", ctl.realLeftFootPose.rotation());
-    mc_rtc::log::info("Run.target.translation: {}, \n", ctl.leftFootTask->targetPose().translation());
-    mc_rtc::log::info("Run.target.rotation: {} \n", ctl.leftFootTask->targetPose().rotation());
-  }
-  ii += 1;
+  //if(ii == 0){
+  //  mc_rtc::log::info("Run.realLeftFoot.translation: {}, \n", ctl.realLeftFootPose.translation());
+  //  mc_rtc::log::info("Run.realLeftFoot.rotation: {}, \n", ctl.realLeftFootPose.rotation());
+  //  mc_rtc::log::info("Run.target.translation: {}, \n", ctl.leftFootTask->targetPose().translation());
+  //  mc_rtc::log::info("Run.target.rotation: {} \n", ctl.leftFootTask->targetPose().rotation());
+  //}
+  //ii += 1;
   if(linearWiping_){
     double linearVelocity = circleRadius_ / wipingDuration_;
     local_x = ctl.timeStep * linearVelocity;
@@ -186,6 +263,8 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
 void WipingController_WipeItBaby_lf::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
+  ctl.removeRightHandForceControl();
+  ctl.removeLeftHandForceControl();
   ctl.removeLeftFootForceControl();
   ctl.solver().removeTask(ctl.comTask);
   //ctl.solver().removeTask(ctl.lookAtTask);

@@ -13,7 +13,13 @@ struct WipingController_WipeItBaby_lf : mc_control::fsm::State
   void teardown(mc_control::fsm::Controller & ctl) override;
 
  protected:
-	Eigen::Vector6d admittance_ = Eigen::Vector6d::Zero();
+  Eigen::Vector6d admittance_rh_, admittance_lh_, admittance_lf_;
+  Eigen::Vector6d stiffness_rh_, stiffness_lh_, stiffness_lf_;
+  Eigen::Vector6d damping_rh_, damping_lh_, damping_lf_;
+  double maxForce_rh_ = 20.0;
+  double maxForce_lh_ = 20.0;
+  double maxForce_lf_ = 30.0;
+  double comStiffness_ = 20;
   bool feetForceControl_ = false;
   bool linearWiping_ = false;
   bool circleWiping_CCW_ = false;
@@ -25,6 +31,7 @@ struct WipingController_WipeItBaby_lf : mc_control::fsm::State
   double local_x_final, local_y_final;
   double wipingTime = 0;
   double theta = 0.0;
+  sva::ForceVecd forceTarget_rh_, forceTarget_lh_, forceTarget_lf_;
   int ii = 0;
   sva::PTransformd shift;
   Eigen::Vector3d delta_line, delta_lineW;
