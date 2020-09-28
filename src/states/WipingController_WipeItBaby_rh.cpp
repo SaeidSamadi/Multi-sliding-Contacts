@@ -127,9 +127,9 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   }
   else if(circleWiping_CCW_ || circleWiping_CW_)
   {
-    double theta_net = M_PI;
-    double angularVelocity = theta_net / wipingDuration_;
-    double delta_theta = angularVelocity * ctl.timeStep;
+    double theta_net = 2 * M_PI;
+    double angleRate = theta_net / wipingDuration_;
+    double delta_theta = angleRate * ctl.timeStep;
     if(circleWiping_CCW_){
       local_y_initial = - circleRadius_ * sin(theta);
     }
@@ -137,7 +137,7 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
       local_y_initial = circleRadius_ * sin(theta);
     }
 
-    if(theta <= M_PI/2.0){
+    if((theta <= M_PI/2.0) || (theta >= 1.5 * M_PI && theta <= 2 * M_PI)){
       local_x_initial = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
     }
     else{
@@ -151,7 +151,7 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
       local_y_final = circleRadius_ * sin(theta);
     }
 
-    if(theta <= M_PI/2.0){
+    if((theta <= M_PI/2.0) || (theta >= 1.5 * M_PI && theta <= 2 * M_PI)){
       local_x_final = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
     }
     else{
@@ -159,9 +159,6 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
     }
     local_x = local_x_final - local_x_initial;
     local_y = local_y_final - local_y_initial;
-  }
-  else if(circleWiping_CW_)
-  {
   }
 
   delta_line << local_x, local_y, 0.0; //This should generate straight line wiping on 45deg tilted_board

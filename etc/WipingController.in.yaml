@@ -644,11 +644,11 @@ states:
             linearWiping: false
             circleWiping_CCW: true
             circleRadius: 0.1
-            wipingDuration: 6.0
+            wipingDuration: 12.0
           WipingController_WipeItBabyState_lh:
             circleWiping_CW: true
             circleRadius: 0.08
-            wipingDuration: 6.0
+            wipingDuration: 12.0
     AddContacts:
       - r1: hrp4
         r2: tilted_board
