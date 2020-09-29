@@ -505,8 +505,8 @@ states:
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
     admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
     admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
-    stiffness_lf: [1, 1, 1, 1, 1, 3]
-    damping_lf: [3, 3, 3, 3, 3, 3]
+    stiffness_lf: [1, 1, 1, 1, 1, 6.5]
+    damping_lf: [3, 3, 3, 3, 3, 25]
     comStiffness: 30
   WipingController_PrepareWipingState_lf:
     base: WipingController_PreparePushWallAuto_lf
@@ -694,10 +694,10 @@ states:
         actions:
           Release Hands: ReleaseHands
       WipingController_WipeItBabyState_lf:
-       linearWiping: true
-       circleWiping_CW: false
-       circleRadius: 0.15
-       wipingDuration: 6.0
+       linearWiping: false
+       circleWiping_CW: true
+       circleRadius: 0.08
+       wipingDuration: 7.0
        maxForce_rh: 10
        maxForce_lh: 15
        maxForce_lf: 30
@@ -706,10 +706,12 @@ states:
        admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
        stiffness_rh: [1, 1, 1, 1, 1, 1]
        stiffness_lh: [1, 1, 1, 1, 1, 1]
-       stiffness_lf: [1, 1, 1, 1, 1, 10]
+       #stiffness_lf: [10, 10, 10, 10, 10, 5]
        damping_rh: [150, 150, 150, 150, 150, 150]
        damping_lh: [150, 150, 150, 150, 150, 150]
-       damping_lf: [1, 1, 1, 1, 1, 1]
+       #damping_lf: [6, 6, 6, 6, 6, 6]
+       stiffness_lf: [10, 10, 10, 10, 10, 5]
+       damping_lf: [20, 20, 20, 20, 20, 100]
        #damping_rh: [300, 300, 300, 300, 300, 300]
        #damping_lh: [300, 300, 300, 300, 300, 300]
        #damping_lf: [300, 300, 300, 300, 300, 300]
@@ -735,7 +737,6 @@ transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
 
   # Triggered by StepUpSlope
-  #- [UpSlope::FSM::StepUpSlope, trigger, Choose::Slope::ShuffleLeftFoot, Auto]
   - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
@@ -750,6 +751,7 @@ transitions:
     # then factorize the code in a common base state and inherit from it, then only adjust the parameters you need
     #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
   - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
+    #- [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareShuffleState, Auto]
   - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
     ###- [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::WipeBothHands, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]

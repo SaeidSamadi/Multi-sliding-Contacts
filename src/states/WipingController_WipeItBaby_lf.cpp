@@ -111,19 +111,21 @@ void WipingController_WipeItBaby_lf::start(mc_control::fsm::Controller & ctl_)
   ctl.leftFootTask->reset();
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 1., 1., 1.;
-  sva::MotionVecd stiffnessGain, dampingGain;
-  stiffnessGain.angular() << 10, 10, 10;
-  stiffnessGain.linear() << 10, 10, 5;
-  dampingGain.angular() << 6, 6, 6;
-  dampingGain.linear() << 6, 6, 300;
+  //sva::MotionVecd stiffnessGain, dampingGain;
+  //stiffnessGain.angular() << 10, 10, 10;
+  //stiffnessGain.linear() << 10, 10, 5;
+  //dampingGain.angular() << 6, 6, 6;
+  //dampingGain.linear() << 6, 6, 300;
   //stiffnessGain.angular() << 1, 1, 1;
   //stiffnessGain.linear() << 1, 1, 3;
   //dampingGain.angular() << 3, 3, 3;
   //dampingGain.linear() << 3, 3, 3;
-  ctl.leftFootTask->setGains(stiffnessGain, dampingGain);
+  //ctl.leftFootTask->setGains(stiffnessGain, dampingGain);
   ctl.leftFootTask->dimWeight(dimW);
   ctl.leftFootTask->admittance(admittance_lf_);
   ctl.leftFootTask->targetCoP(Eigen::Vector2d::Zero());
+  ctl.leftFootTask->stiffness(sva::MotionVecd(stiffness_lf_));
+  ctl.leftFootTask->damping(sva::MotionVecd(damping_lf_));
   //ctl.leftFootTask->targetPose();
   ctl.setTargetFromCoMQP();
   ctl.addRightHandForceControl();
@@ -187,7 +189,7 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   }
   else if(circleWiping_CCW_ || circleWiping_CW_)
   {
-    double theta_net = M_PI*3/4;
+    double theta_net = M_PI * 3 / 4;
     double angularVelocity = theta_net / wipingDuration_;
     double delta_theta = angularVelocity * ctl.timeStep;
     if(circleWiping_CCW_){
@@ -247,6 +249,7 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   }
   else{
     target.translation() = shift.translation();
+    
     //target.translation() = ctl.realLeftFootPose.translation();
   }
   //mc_rtc::log::info("delta_line: \n {}, \n delta_lineW: \n {}", delta_line, delta_lineW);
