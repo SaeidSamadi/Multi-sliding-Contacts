@@ -22,7 +22,7 @@ ObserverPipelines:
     - type: KinematicInertial
 
 
-UseFeetForceControl: true
+UseFeetForceControl: false
 CoMQPConfig:
   debug: false
   com:
@@ -622,6 +622,17 @@ states:
       WipingController_ChooseTransition:
         actions:
           Wipe both hands: WipeBothHands
+    AddContacts:
+      - r1: hrp4
+        r2: ground
+        r1Surface: RightFoot
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 1]
+      - r1: hrp4
+        r2: ground
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [1, 1, 1, 1, 1, 1]
 
   Choose::Slope::PrepareWipingAndChooseRightHand:
     base: Choose
