@@ -1,12 +1,12 @@
-Stabilized_StandingBack:
-  base: UpSlope::Stabilizer::GoCenter
+###Stabilized_StandingBack:
+###  base: UpSlope::Stabilizer::GoCenter
+###
+###Stabilized_GoRightBack:
+###  base: WipingController::Stabilizer::RightFootFlatSupport
+###  completion:
+###    dcmEval: [0.01, 0.01, 0.1]
 
-Stabilized_GoRightBack:
-  base: WipingController::Stabilizer::RightFootFlatSupport
-  completion:
-    dcmEval: [0.01, 0.01, 0.1]
-
-LiftLeftFoot_Back:
+DownSlope::LeftFootTrajectory:
   base: MetaTasks
   tasks:
     LiftFootTask:
@@ -26,20 +26,35 @@ LiftLeftFoot_Back:
         - [0.017046, 0.15, 0.15]
         - [0.017046, 0.12, 0.1]
 
-Stabilized_LiftLeftFoot_Back:
+DownSlope::Stabilized::LeftFootTrajectory:
   base: Parallel
-  states: [Stabilized_GoRightBack, LiftLeftFoot_Back]
+  states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::LeftFootTrajectory]
   RemoveContacts:
     - r1: hrp4
       r2: ground
-      r1Surface: LeftFoot
+      r1Surface: LeftFootCenter
       r2Surface: AllGround
-  AddContactsAfter:
-    - r1: hrp4
-      r2: ground
-      r1Surface: LeftFoot
-      r2Surface: AllGround
-      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
+
+###Stabilized_LiftLeftFoot_Back:
+###  base: Parallel
+###  states: [Stabilized_GoRightBack, LiftLeftFoot_Back]
+###  addContacts:
+###    - r1: hrp4
+###      r2: ground
+###      r1Surface: RightFoot
+###      r2Surface: AllGround
+###  RemoveContacts:
+###    - r1: hrp4
+###      r2: ground
+###      r1Surface: LeftFoot
+###      r2Surface: AllGround
+###      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
+###  AddContactsAfter:
+###    - r1: hrp4
+###      r2: ground
+###      r1Surface: LeftFoot
+###      r2Surface: AllGround
+###      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
 
 WipingController_HalfSitting:
   base: HalfSitting
@@ -67,13 +82,52 @@ WipingController_StabilizedHalfSitting:
   base: Parallel
   states: [Stabilized_StandingBack, WipingController_HalfSitting]
 
-Stabilized_StepBack:
-  base: Meta
-  transitions:
-    - [Stabilized_StandingBack, OK, WipingController_StabilizedHalfSitting, Auto]
-    - [WipingController_StabilizedHalfSitting, OK, Stabilized_GoRightBack, Auto]
-    - [Stabilized_GoRightBack, OK, Stabilized_LiftLeftFoot_Back, Auto]
-    - [Stabilized_LiftLeftFoot_Back, OK, WipingController::Stabilizer::GoCenterFlat, Auto]
+DownSlope::Stabilizer::GoCenter:
+  base: WipingController::Stabilizer::Go
+  stiffness: 3
+  above: CenterAnkles
+  completion:
+    dcmEval: [0.02, 0.05, 0.2]
+  StabilizerConfig:
+    contacts: [Left, Right]
+    # Target flat floor with right foot, and current orientation of the left (slope)
+    Right:
+      overwriteRPY:
+        roll: 0
+        pitch: 0
+      height: 0
+
+DownSlope::Stabilizer::GoRight:
+  base: DownSlope::Stabilizer::GoCenter
+  above: RightAnkle
+  StabilizerConfig:
+    contacts: [Left, Right]
+
+DownSlope::PutLeftFoot:
+  base: UpSlope::PutLeftFoot
+
+DownSlope::Stabilized::PutLeftFoot:
+  base: Parallel
+  states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::PutLeftFoot]
+
 
 DownSlope::FSM::StepDownSlope:
-  base: Stabilized_StepBack
+  base: Meta
+  transitions:
+    - [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
+    - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilized::LeftFootTrajectory]
+      #- [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
+    # - [Stabilized_StandingBack, OK, WipingController_StabilizedHalfSitting, Auto]
+    # - [WipingController_StabilizedHalfSitting, OK, Stabilized_GoRightBack, Auto]
+    #   #- [Stabilized_GoRightBack, OK, Stabilized_LiftLeftFoot_Back, Auto]
+    #   #- [Stabilized_LiftLeftFoot_Back, OK, WipingController::Stabilizer::GoCenterFlat, Auto]
+    #   
+#["Stabilized_StandingBack", "OK", "Stabilized_GoRightBack"],
+#["Stabilized_GoRightBack", "OK", "Stabilized_LiftLeftFoot_Back"],
+#["Stabilized_LiftLeftFoot_Back", "OK", "Stabilized_PutLeftFoot_Back"],
+#["Stabilized_PutLeftFoot_Back", "OK", "Stabilizer::GoCenter"],
+#
+#    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
+#    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory]
+#    - [UpSlope::Stabilized::LeftFootTrajectory, OK, UpSlope::Stabilized::PutLeftFoot]
+#    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
