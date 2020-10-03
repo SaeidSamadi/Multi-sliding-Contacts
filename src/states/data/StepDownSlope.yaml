@@ -1,11 +1,3 @@
-###Stabilized_StandingBack:
-###  base: UpSlope::Stabilizer::GoCenter
-###
-###Stabilized_GoRightBack:
-###  base: WipingController::Stabilizer::RightFootFlatSupport
-###  completion:
-###    dcmEval: [0.01, 0.01, 0.1]
-
 DownSlope::LeftFootTrajectory:
   base: MetaTasks
   tasks:
@@ -29,54 +21,38 @@ DownSlope::LeftFootTrajectory:
 DownSlope::Stabilized::LeftFootTrajectory:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::LeftFootTrajectory]
-  RemoveContacts:
+  AddContacts:
     - r1: hrp4
       r2: ground
-      r1Surface: LeftFootCenter
+      r1Surface: LeftFoot
       r2Surface: AllGround
-
-###Stabilized_LiftLeftFoot_Back:
-###  base: Parallel
-###  states: [Stabilized_GoRightBack, LiftLeftFoot_Back]
-###  addContacts:
-###    - r1: hrp4
-###      r2: ground
-###      r1Surface: RightFoot
-###      r2Surface: AllGround
-###  RemoveContacts:
-###    - r1: hrp4
-###      r2: ground
-###      r1Surface: LeftFoot
-###      r2Surface: AllGround
-###      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
-###  AddContactsAfter:
-###    - r1: hrp4
-###      r2: ground
-###      r1Surface: LeftFoot
-###      r2Surface: AllGround
-###      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
+      dof: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 WipingController_HalfSitting:
   base: HalfSitting
   stiffness: 5.0
   eval: 1.0
-  AddCollisions:
-    - r1: hrp4
-      r2: tilted_board
-      collisions:
-        - body1: r_wrist
-          body2: ground
-          iDist: 0.1
-          sDist: 0.02
-          damping: 0.0
-    - r1: hrp4
-      r2: wall
-      collisions:
-        - body1: l_wrist
-          body2: ground
-          iDist: 0.05
-          sDist: 0.02
-          damping: 0.0
+  #AddCollisions:
+  #  - r1: hrp4
+  #    r2: tilted_board
+  #    collisions:
+  #      - body1: r_wrist
+  #        body2: ground
+  #        iDist: 0.1
+  #        sDist: 0.02
+  #        damping: 0.0
+  #  - r1: hrp4
+  #    r2: wall
+  #    collisions:
+  #      - body1: l_wrist
+  #        body2: ground
+  #        iDist: 0.05
+  #        sDist: 0.02
+  #        damping: 0.0
+ 
+DownSlope::Stabilizer::HalfSitting:
+  base: Parallel
+  states: [WipingController::Stabilizer, WipingController_HalfSitting]
 
 WipingController_StabilizedHalfSitting:
   base: Parallel
@@ -99,9 +75,12 @@ DownSlope::Stabilizer::GoCenter:
 
 DownSlope::Stabilizer::GoRight:
   base: DownSlope::Stabilizer::GoCenter
+  stiffness: 5
   above: RightAnkle
   StabilizerConfig:
     contacts: [Left, Right]
+    #completion:
+    #  dcmEval: [0.01, 0.02, 0.2]
 
 DownSlope::PutLeftFoot:
   base: UpSlope::PutLeftFoot
@@ -110,24 +89,13 @@ DownSlope::Stabilized::PutLeftFoot:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::PutLeftFoot]
 
+DownSlope::Stabilizer::GoCenterFinal:
+  base: DownSlope::Stabilizer::GoCenter
 
 DownSlope::FSM::StepDownSlope:
   base: Meta
   transitions:
-    - [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
+    #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
     - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilized::LeftFootTrajectory]
-      #- [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
-    # - [Stabilized_StandingBack, OK, WipingController_StabilizedHalfSitting, Auto]
-    # - [WipingController_StabilizedHalfSitting, OK, Stabilized_GoRightBack, Auto]
-    #   #- [Stabilized_GoRightBack, OK, Stabilized_LiftLeftFoot_Back, Auto]
-    #   #- [Stabilized_LiftLeftFoot_Back, OK, WipingController::Stabilizer::GoCenterFlat, Auto]
-    #   
-#["Stabilized_StandingBack", "OK", "Stabilized_GoRightBack"],
-#["Stabilized_GoRightBack", "OK", "Stabilized_LiftLeftFoot_Back"],
-#["Stabilized_LiftLeftFoot_Back", "OK", "Stabilized_PutLeftFoot_Back"],
-#["Stabilized_PutLeftFoot_Back", "OK", "Stabilizer::GoCenter"],
-#
-#    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
-#    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory]
-#    - [UpSlope::Stabilized::LeftFootTrajectory, OK, UpSlope::Stabilized::PutLeftFoot]
-#    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
+    - [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
+    - [DownSlope::Stabilized::PutLeftFoot, OK, DownSlope::Stabilizer::GoCenterFinal]
