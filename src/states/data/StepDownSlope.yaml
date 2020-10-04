@@ -21,6 +21,9 @@ DownSlope::LeftFootTrajectory:
 DownSlope::Stabilized::LeftFootTrajectory:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::LeftFootTrajectory]
+  configs:
+    WipingController::Stabilizer::RightFootFlatSupport:
+      stiffness: 10
   AddContacts:
     - r1: hrp4
       r2: ground
@@ -79,8 +82,8 @@ DownSlope::Stabilizer::GoRight:
   above: RightAnkle
   StabilizerConfig:
     contacts: [Left, Right]
-    #completion:
-    #  dcmEval: [0.01, 0.02, 0.2]
+    completion:
+      dcmEval: [0.02, 0.04, 0.2]
 
 DownSlope::PutLeftFoot:
   base: UpSlope::PutLeftFoot
