@@ -77,20 +77,15 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
 
   ctl.comQP().addToLogger(ctl.logger());
 
-  ctl.logger().addLogEntry("friction_mu_x",
+  ctl.logger().addLogEntry("friction_mu_Estim_lh",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.mu_x();
+                           return ctl.frictionEstimator_lh.mu_calc();
                            });
-  ctl.logger().addLogEntry("friction_mu_y",
+  ctl.logger().addLogEntry("friction_mu_filtered_lh",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.mu_y();
-                           });
-  ctl.logger().addLogEntry("friction_mu",
-                           [&ctl]()
-                           {
-                           return ctl.frictionEstimator.mu();
+                           return ctl.frictionEstimator_lh.mu_filtered();
                            });
 }
 
@@ -156,6 +151,7 @@ bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
   }
   ctl.leftHandTask->targetPose(target);
 
+  ctl.frictionEstimator_lh.update(ctl.robot());
   ctl.setTargetFromCoMQP();
 
   output("OK");

@@ -22,7 +22,7 @@ class CoMQP
 public:
   CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config);
   int updateNumVar(const mc_rbdyn::Robot & robot);
-  bool solve(const mc_rbdyn::Robot & robot);
+  bool solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_);
   //bool solve(const mc_rbdyn::Robot & robot, const ModifiedSupportPolygon & supportPolygon);
   /*!
    * @brief  Result expressed as

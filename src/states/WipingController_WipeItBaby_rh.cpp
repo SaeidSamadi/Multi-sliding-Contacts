@@ -85,36 +85,31 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   //                         return xx;
   //                         });
 
-  ctl.logger().addLogEntry("friction_mu_Estim",
+  ctl.logger().addLogEntry("friction_mu_Estim_rh",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.mu_calc();
+                           return ctl.frictionEstimator_rh.mu_calc();
+                           });
+  ctl.logger().addLogEntry("friction_mu_filtered_rh",
+                           [&ctl]()
+                           {
+                           return ctl.frictionEstimator_rh.mu_filtered();
                            });
   ctl.logger().addLogEntry("SurfaceWrench_x",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.forceX();
+                           return ctl.frictionEstimator_rh.forceX();
                            });
   ctl.logger().addLogEntry("SurfaceWrench_y",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.forceY();
+                           return ctl.frictionEstimator_rh.forceY();
                            });
   ctl.logger().addLogEntry("SurfaceWrench_z",
                            [&ctl]()
                            {
-                           return ctl.frictionEstimator.forceZ();
+                           return ctl.frictionEstimator_rh.forceZ();
                            });
-  //ctl.logger().addLogEntry("friction_mu_y",
-  //                         [&ctl]()
-  //                         {
-  //                         return ctl.frictionEstimator.mu_y();
-  //                         });
-  //ctl.logger().addLogEntry("friction_mu",
-  //                         [&ctl]()
-  //                         {
-  //                         return ctl.frictionEstimator.mu();
-  //                         });
 }
 
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
@@ -179,8 +174,8 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 
 
 
-  //ctl.frictionEstimator.update(ctl.robot());
-  //double EstimatedFriction = ctl.frictionEstimator.mu_calc();
+  ctl.frictionEstimator_rh.update(ctl.robot());
+  //double EstimatedFriction = ctl.frictionEstimator_rh.mu_calc();
   //mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
   ctl.setTargetFromCoMQP();
   //ctl.setFeetTargetFromCoMQP();

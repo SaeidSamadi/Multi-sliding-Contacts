@@ -152,8 +152,10 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 //  }
 //}
 
-bool CoMQP::solve(const mc_rbdyn::Robot & robot)
+bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_)
 {
+  mu_rh = mu_rh_; 
+  mu_lh = mu_lh_;
   const double Px_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().x();
   const double Py_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().y();
   const double Pz_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().z();
@@ -634,7 +636,7 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
     logger.addLogEntry("CoMQP_gains_Wrench_rh", [this]() { return P_Wrench_rh; });
     logger.addLogEntry("CoMQP_mu_y", [this]() { return mu_x_rh; });
     logger.addLogEntry("CoMQP_mu_z", [this]() { return mu_y_rh; });
-    logger.addLogEntry("CoMQP_mu_sum", [this]() { return mu_x_rh+mu_y_rh; });
+    logger.addLogEntry("CoMQP_mu_sum", [this]() { return mu_rh; });
 
     logger.addLogEntry("CoMQP_pos", [this]() { return result().comPos; });
     logger.addLogEntry("CoMQP_rightFootForce", [this]() { return result().rightFootForce; });
