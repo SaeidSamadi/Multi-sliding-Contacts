@@ -1,0 +1,1813 @@
+#VRML V2.0 utf8
+#2013.05.03 : fix mass, CoM and Inertia of N_PICK, *_WRIST_R for HRP4LIRMM
+
+PROTO Joint [
+    exposedField     SFVec3f      center              0 0 0
+    exposedField     MFNode       children            []
+    exposedField     MFFloat      llimit              []
+    exposedField     MFFloat      lvlimit              []
+    exposedField     SFRotation   limitOrientation    0 0 1 0
+    exposedField     SFString     name                ""
+    exposedField     SFRotation   rotation            0 0 1 0
+    exposedField     SFVec3f      scale               1 1 1
+    exposedField     SFRotation   scaleOrientation    0 0 1 0
+    exposedField     MFFloat      stiffness           [ 0 0 0 ]
+    exposedField     SFVec3f      translation         0 0 0
+    exposedField     MFFloat      ulimit              []
+    exposedField     MFFloat      uvlimit              []
+    exposedField     SFString     jointType           ""
+    exposedField     SFInt32      jointId             -1
+    exposedField     SFString     jointAxis           "Z"
+
+    exposedField     SFFloat    equivalentInertia   0
+    exposedField     SFFloat      gearRatio     1
+    exposedField     SFFloat      rotorInertia  1
+    exposedField     SFFloat      rotorResistor 0
+    exposedField     SFFloat      torqueConst   1
+    exposedField     SFFloat      encoderPulse  1
+]
+{
+    Transform {
+        center           IS center
+        children         IS children
+        rotation         IS rotation
+        scale            IS scale
+        scaleOrientation IS scaleOrientation
+        translation      IS translation
+    }
+}
+
+PROTO Segment [
+    field           SFVec3f     bboxCenter        0 0 0
+    field           SFVec3f     bboxSize          -1 -1 -1
+    exposedField    SFVec3f     centerOfMass      0 0 0
+    exposedField    MFNode      children          [ ]
+    exposedField    SFNode      coord             NULL
+    exposedField    MFNode      displacers        [ ]
+    exposedField    SFFloat     mass              0
+    exposedField    MFFloat     momentsOfInertia  [ 0 0 0 0 0 0 0 0 0 ]
+    exposedField    SFString    name              ""
+    eventIn         MFNode      addChildren
+    eventIn         MFNode      removeChildren
+]
+{
+    Group {
+        addChildren    IS addChildren
+        bboxCenter     IS bboxCenter
+        bboxSize       IS bboxSize
+        children       IS children
+        removeChildren IS removeChildren
+    }
+}
+
+PROTO Humanoid [
+    field           SFVec3f    bboxCenter            0 0 0
+    field           SFVec3f    bboxSize              -1 -1 -1
+    exposedField    SFVec3f    center                0 0 0
+    exposedField    MFNode     humanoidBody          [ ]
+    exposedField    MFString   info                  [ ]
+    exposedField    MFNode     joints                [ ]
+    exposedField    SFString   name                  ""
+    exposedField    SFRotation rotation              0 0 1 0
+    exposedField    SFVec3f    scale                 1 1 1
+    exposedField    SFRotation scaleOrientation      0 0 1 0
+    exposedField    MFNode     segments              [ ]
+    exposedField    MFNode     sites                 [ ]
+    exposedField    SFVec3f    translation           0 0 0
+    exposedField    SFString   version               "1.1"
+    exposedField    MFNode     viewpoints            [ ]
+]
+{
+  Transform {
+    bboxCenter       IS bboxCenter
+    bboxSize         IS bboxSize
+    center           IS center
+    rotation         IS rotation
+    scale            IS scale
+    scaleOrientation IS scaleOrientation
+    translation      IS translation
+    children [
+      Group {
+        children IS viewpoints
+      }
+      Group {
+        children IS humanoidBody
+      }
+    ]
+  }
+}
+
+PROTO VisionSensor [
+  exposedField SFVec3f    translation       0 0 0
+  exposedField SFRotation rotation              0 0 1 0
+  #exposedField SFRotation orientation       0 0 1 0
+  exposedField SFFloat    fieldOfView       0.785398
+  exposedField SFString   name              ""
+  exposedField SFFloat    frontClipDistance 0.01
+  exposedField SFFloat    backClipDistance  10.0
+  exposedField SFString   type              "NONE"
+  exposedField SFInt32    sensorId          -1
+  exposedField SFInt32    width             320  #
+  exposedField SFInt32    height            240  #
+  #exposedField MFNode       children            [] # for me
+]
+{
+  Transform {
+    rotation         IS rotation
+    translation      IS translation
+    #children IS children # for me
+  }
+}
+
+
+PROTO ForceSensor [
+exposedField SFVec3f maxForce -1 -1 -1
+  exposedField SFVec3f maxTorque -1 -1 -1
+  exposedField SFVec3f translation 0 0 0
+  exposedField SFRotation rotation 0 0 1 0
+  exposedField SFInt32 sensorId -1
+]
+{
+  Transform {
+translation IS translation
+    rotation IS rotation
+  }
+}
+
+PROTO Gyro [
+  exposedField SFVec3f maxAngularVelocity -1 -1 -1
+  exposedField SFVec3f translation 0 0 0
+  exposedField SFRotation rotation 0 0 1 0
+  exposedField SFInt32 sensorId -1
+]
+{
+  Transform {
+    translation IS translation
+    rotation IS rotation
+  }
+}
+
+PROTO AccelerationSensor [
+  exposedField SFVec3f maxAcceleration -1 -1 -1
+  exposedField SFVec3f translation 0 0 0
+  exposedField SFRotation rotation 0 0 1 0
+  exposedField SFInt32 sensorId -1
+]
+{
+  Transform {
+    translation IS translation
+    rotation IS rotation
+  }
+}
+
+PROTO PressureSensor [
+  exposedField SFFloat maxPressure -1
+  exposedField SFVec3f translation 0 0 0
+  exposedField SFRotation rotation 0 0 1 0
+  exposedField SFInt32 sensorId -1
+]
+{
+  Transform {
+    translation IS translation
+    rotation IS rotation
+  }
+}
+
+PROTO PhotoInterrupter [
+  exposedField SFVec3f transmitter 0 0 0
+  exposedField SFVec3f receiver 0 0 0
+  exposedField SFInt32 sensorId -1
+]
+{
+  Transform{
+    children [
+      Transform{
+        translation IS transmitter
+      }
+      Transform{
+        translation IS receiver
+      }
+    ]
+  }
+}
+
+PROTO CylinderSensorZ [
+    exposedField    SFFloat    maxAngle        -1
+    exposedField    SFFloat    minAngle        0
+    exposedField    MFNode     children        [ ]
+]
+{
+  Transform{
+    rotation 1 0 0 1.5708
+    children [
+      DEF SensorY CylinderSensor{
+  maxAngle IS maxAngle
+  minAngle IS minAngle
+      }
+      DEF AxisY Transform{
+        children [
+          Transform{
+            rotation 1 0 0 -1.5708
+            children IS children
+          }
+        ]
+      }
+    ]
+  }
+  ROUTE SensorY.rotation_changed TO AxisY.set_rotation
+}
+
+PROTO CylinderSensorY [
+    exposedField    SFFloat    maxAngle        -1
+    exposedField    SFFloat    minAngle        0
+    exposedField    MFNode     children        [ ]
+]
+{
+  Transform{
+    rotation 0 1 0 1.5708
+    children [
+      DEF SensorX CylinderSensor{
+  maxAngle IS maxAngle
+  minAngle IS minAngle
+      }
+      DEF AxisX Transform{
+        children [
+          Transform{
+            rotation 0 1 0 -1.5708
+            children IS children
+          }
+        ]
+      }
+    ]
+  }
+  ROUTE SensorX.rotation_changed TO AxisX.set_rotation
+}
+
+PROTO CylinderSensorX [
+    exposedField    SFFloat    maxAngle        -1
+    exposedField    SFFloat    minAngle        0
+    exposedField    MFNode     children        [ ]
+]
+{
+  Transform{
+    rotation 0 0 1 -1.5708
+    children [
+      DEF SensorZ CylinderSensor{
+  maxAngle IS maxAngle
+  minAngle IS minAngle
+      }
+      DEF AxisZ Transform{
+        children [
+          Transform{
+            rotation 0 0 1 1.5708
+            children IS children
+          }
+        ]
+      }
+    ]
+  }
+  ROUTE SensorZ.rotation_changed TO AxisZ.set_rotation
+}
+
+NavigationInfo {
+  avatarSize    0.5
+  headlight     TRUE
+  type  ["EXAMINE", "ANY"]
+}
+
+Background {
+  #skyColor 0.6 0.4 0.4
+  skyColor 0.4 0.6 0.4
+}
+
+Viewpoint {
+  position    3 0 0.835
+  orientation 0.5770 0.5775 0.5775 2.0935
+}
+
+DEF HRP4LIRMM Humanoid {
+
+humanoidBody [
+
+DEF WAIST Joint {
+  translation 0 0 0.791
+  #rotation 0 0 0 0
+  jointType "free"
+  children [
+
+  DEF BODY Segment {
+    centerOfMass -0.02156090 0.00145914 0.14111505
+    mass 6.93472000
+    momentsOfInertia [ 0.05776087 0.00007331 0.00148890 0.00007331 0.02852080 -0.00075717 0.00148890 -0.00075717 0.05527734 ]
+    children [
+                DEF gsensor AccelerationSensor {
+      sensorId 0
+      translation -0.0325 0 0.1095
+    }
+    DEF gyrometer Gyro {
+      sensorId 0
+      translation -0.0325 0 0.1095
+    }
+
+    Inline {
+      url "WAIST_LINK.wrl"
+    }
+
+    ]
+  }   # End of BODY
+
+  DEF R_HIP_Y Joint {
+    jointId 0
+    translation 0 -0.0875 0
+    #rotation 0.0 0.0 0.0 0.0
+    jointType "rotate"
+    jointAxis "Z"
+    rotorInertia 4.741e-2
+    llimit [-0.7853981633974]  #-45.000
+    ulimit [0.7853981633974]  #45.000
+    children [
+
+    DEF R_HIP_Y_MOV CylinderSensorZ {
+      minAngle -0.7853981633974  #-45.000
+      maxAngle 0.7853981633974  #45.000
+      children [
+
+      DEF R_HIP_Y_LINK Segment {
+        centerOfMass -0.01667657 0.00000002 0.04993135
+        mass 1.13560000
+        momentsOfInertia [ 0.00151524 -0.00000028 -0.00048566 -0.00000028 0.00231285 -0.00000000 -0.00048566 -0.00000000 0.00149651 ]
+        children [
+
+        Inline {
+          url "CHEST_R.wrl"
+        }
+
+        ]
+      }   # End of R_HIP_Y_LINK
+
+      DEF R_HIP_R Joint {
+        jointId 1
+        translation 0 0 0
+        #rotation 0.0 0.0 0.0 0.0
+        jointType "rotate"
+        jointAxis "X"
+        rotorInertia 3.423e-1
+        llimit [-0.4363323129986]  #-25.000
+        ulimit [0.4363323129986]  #25.000
+        children [
+
+        DEF R_HIP_R_MOV CylinderSensorX {
+          minAngle -0.4363323129986  #-25.000
+          maxAngle 0.4363323129986  #25.000
+          children [
+
+          DEF R_HIP_R_LINK Segment {
+            centerOfMass -0.00431692 0.00595121 -0.00052352
+            mass 0.58494148
+            momentsOfInertia [ 0.00046475 -0.00001508 -0.00000065 -0.00001508 0.00029804 0.00000239 -0.00000065 0.00000239 0.00061763 ]
+            children [
+
+            Inline {
+              url "CHEST_P.wrl"
+            }
+
+            ]
+          }   # End of R_HIP_R_LINK
+
+          DEF R_HIP_P Joint {
+            jointId 2
+            translation 0 0 0
+            #rotation 0.0 0.0 0.0 0.0
+            jointType "rotate"
+            jointAxis "Y"
+            rotorInertia 8.942e-2
+            llimit [-1.3439035240356]  #-77.000
+            ulimit [0.4188790204786]  #24.000
+            children [
+
+            DEF R_HIP_P_MOV CylinderSensorY {
+              minAngle -1.3439035240356  #-77.000
+              maxAngle 0.4188790204786  #24.000
+              children [
+
+              DEF R_HIP_P_LINK Segment {
+                centerOfMass 0.00401404 0.01530275 -0.18851723
+                mass 2.06480000
+                momentsOfInertia [ 0.03160432 -0.00000338 0.00063965 -0.00000338 0.03070237 0.00133966 0.00063965 0.00133966 0.00275655 ]
+                children [
+
+                Inline {
+                  url "R_HIP_P.wrl"
+                }
+
+                ]
+              }   # End of R_HIP_P_LINK
+
+              DEF R_KNEE_P Joint {
+                jointId 3
+                translation 0 0.01905 -0.358
+                #rotation 0.0 0.0 0.0 0.0
+                jointType "rotate"
+                jointAxis "Y"
+                rotorInertia 3.988e-1
+                llimit [-0.0122173047640]  #-0.7
+                ulimit [2.1764255772369]  #124.7
+                children [
+
+                DEF R_KNEE_P_MOV CylinderSensorY {
+                  minAngle -0.0122173047640  #-0.7
+                  maxAngle 2.1764255772369  #124.7
+                  children [
+
+                  DEF R_KNEE_P_LINK Segment {
+                    centerOfMass -0.01122115 -0.00133701 -0.15252868
+                    mass 2.08123000
+                    momentsOfInertia [ 0.01900442 -0.00000475 -0.00145890 -0.00000475 0.01944097 0.00002008 -0.00145890 0.00002008 0.00189659 ]
+                    children [
+                    Transform {
+                      rotation  0 1 0 -0.082167522
+                      children[
+                      Inline {
+                        url "KNEE_P.wrl"
+                      }
+                      ]
+                    }
+                    ]
+                  }   # End of R_KNEE_P_LINK
+
+                  DEF R_ANKLE_P Joint {
+                    jointId 4
+                    #translation -0.028 0 -0.340
+                    translation 0 0 -0.3411509929635264
+                    #rotation 0.0 0.0 0.0 0.0
+                    jointType "rotate"
+                    jointAxis "Y"
+                    rotorInertia 1.226e-1
+                    llimit [-0.9896016858808]  #-56.7
+                    ulimit [0.2670353755551]   #15.3
+                    children [
+
+                    DEF R_ANKLE_P_MOV CylinderSensorY {
+                      minAngle -0.9896016858808  #-56.7
+                      maxAngle 0.2670353755551   #15.3
+                      children [
+
+                      DEF R_ANKLE_P_LINK Segment {
+                        centerOfMass -0.00368911 -0.00015844 0.00129883
+                        mass 0.26784726
+                        momentsOfInertia [ 0.00008094 -0.00000016 -0.00000133 -0.00000016 0.00015522 -0.00000007 -0.00000133 -0.00000007 0.00017313 ]
+                        children [
+
+                        Inline {
+                          url "L_ANKLE_P.wrl"
+                        }
+
+                        ]
+                      }   # End of R_ANKLE_P_LINK
+
+                      DEF R_ANKLE_R Joint {
+                        jointId 5
+                        translation 0 0 0
+                        #rotation 0.0 0.0 0.0 0.0
+                        jointType "rotate"
+                        jointAxis "X"
+                        rotorInertia 4.837e-2
+                        llimit [-0.5934119456781]  #-34.000
+                        ulimit [0.5934119456781]  #34.000
+                        children [
+
+                        DEF R_ANKLE_R_MOV CylinderSensorX {
+                          minAngle -0.5934119456781 #-34.000
+                          maxAngle 0.5934119456781  #34.000
+                          children [
+
+                          DEF R_ANKLE_R_LINK Segment {
+                            centerOfMass -0.00340792 0.00000001 -0.04591586
+                            mass 0.72287828
+                            momentsOfInertia [ 0.00092215 0.00000000 0.00011963 0.00000000 0.00102289 0.00000000 0.00011963 0.00000000 0.00089314 ]
+                            children [
+
+                            Inline {
+                              url "R_ANKLE_R.wrl"
+                            }
+
+                            ]
+                          }   # End of R_ANKLE_R_LINK
+
+                          DEF R_FOOT Joint {
+                            translation 0 0 0
+                            #rotation 0.0 0.0 0.0 0.0
+                            jointType "fixed"
+                            children [
+                            DEF rfsensor ForceSensor {
+                              translation 0 0 -0.093
+                              rotation 1 0 0 0
+                              sensorId 0
+                            }
+
+                            DEF R_FOOT_LINK Segment {
+                              centerOfMass 0.01130279 -0.01139641 -0.07868422
+                              mass 0.57831553
+                              momentsOfInertia [ 0.00121526 0.00000851 0.00002787 0.00000851 0.00254705 -0.00000210 0.00002787 -0.00000210 0.00362666 ]
+                              children [
+
+                              Inline {
+                                url "R_FOOT.wrl"
+                              }
+
+                              ]
+                            }   # End of R_FOOT_LINK
+                          ]
+                        }   # End of R_FOOT
+                          ]
+                        }   # End of R_ANKLE_R_MOV
+                        ]
+                      }   # End of R_ANKLE_R
+                      ]
+                    }   # End of R_ANKLE_P_MOV
+                    ]
+                  }   # End of R_ANKLE_P
+                  ]
+                }   # End of R_KNEE_P_MOV
+                ]
+              }   # End of R_KNEE_P
+              ]
+            }   # End of R_HIP_P_MOV
+            ]
+          }   # End of R_HIP_P
+          ]
+        }   # End of R_HIP_R_MOV
+        ]
+      }   # End of R_HIP_R
+      ]
+    }   # End of R_HIP_Y_MOV
+    ]
+  }   # End of R_HIP_Y
+
+  DEF L_HIP_Y Joint {
+    jointId 6
+    translation 0 0.0875 0
+    #rotation 0.0 0.0 0.0 0.0
+    jointType "rotate"
+    jointAxis "Z"
+    rotorInertia 4.741e-2
+    llimit [-0.7853981633974]  #-45.000
+    ulimit [0.7853981633974]  #45.000
+    children [
+
+    DEF L_HIP_Y_MOV CylinderSensorZ {
+      minAngle -0.7853981633974  #-45.000
+      maxAngle 0.7853981633974  #45.000
+      children [
+
+      DEF L_HIP_Y_LINK Segment {
+        centerOfMass -0.01667657 0.00000002 0.04993135
+        mass 1.13560000
+        momentsOfInertia [ 0.00151524 -0.00000028 -0.00048566 -0.00000028 0.00231285 -0.00000000 -0.00048566 -0.00000000 0.00149651 ]
+        children [
+
+        Inline {
+          url "CHEST_R.wrl"
+        }
+
+        ]
+      }   # End of L_HIP_Y_LINK
+
+      DEF L_HIP_R Joint {
+        jointId 7
+        translation 0 0 0
+        #rotation 0.0 0.0 0.0 0.0
+        jointType "rotate"
+        jointAxis "X"
+        rotorInertia 3.423e-1
+        llimit [-0.4363323129986]  #-25.000
+        ulimit [0.4363323129986]  #25.000
+        children [
+
+        DEF L_HIP_R_MOV CylinderSensorX {
+          minAngle -0.4363323129986  #-25.000
+          maxAngle 0.4363323129986  #25.000
+          children [
+
+          DEF L_HIP_R_LINK Segment {
+            centerOfMass -0.00431692 0.00595121 -0.00052352
+            mass 0.58494148
+            momentsOfInertia [ 0.00046475 -0.00001508 -0.00000065 -0.00001508 0.00029804 0.00000239 -0.00000065 0.00000239 0.00061763 ]
+            children [
+
+            Inline {
+              url "CHEST_P.wrl"
+            }
+
+            ]
+          }   # End of L_HIP_R_LINK
+
+          DEF L_HIP_P Joint {
+            jointId 8
+            translation 0 0 0
+            #rotation 0.0 0.0 0.0 0.0
+            jointType "rotate"
+            jointAxis "Y"
+            rotorInertia 8.943e-2
+            llimit [-1.3439035240356]  #-77.000
+            ulimit [0.4188790204786]  #24.000
+            children [
+
+            DEF L_HIP_P_MOV CylinderSensorY {
+              minAngle -1.3439035240356  #-77.000
+              maxAngle 0.4188790204786  #24.000
+              children [
+
+              DEF L_HIP_P_LINK Segment {
+                centerOfMass 0.00400906 -0.00541624 -0.18827632
+                mass 2.06366000
+                momentsOfInertia [ 0.03174381 0.00009784 0.00063909 0.00009784 0.03068623 -0.00254187 0.00063909 -0.00254187 0.00291548 ]
+                children [
+
+                Inline {
+                  url "L_HIP_P.wrl"
+                }
+
+                ]
+              }   # End of L_HIP_P_LINK
+
+              DEF L_KNEE_P Joint {
+                jointId 9
+                translation 0 -0.01905 -0.358
+                #rotation 0.0 0.0 0.0 0.0
+                jointType "rotate"
+                jointAxis "Y"
+                llimit [-0.0122173047640]  #-0.7
+                ulimit [2.1764255772369]  #124.7
+                children [
+
+                DEF L_KNEE_P_MOV CylinderSensorY {
+                  minAngle -0.0122173047640  #-0.7
+                  maxAngle 2.1764255772369  #124.7
+                  children [
+
+                  DEF L_KNEE_P_LINK Segment {
+                    centerOfMass -0.01122115 -0.00133701 -0.15252868
+                    mass 2.08123000
+                    momentsOfInertia [ 0.01900442 -0.00000475 -0.00145890 -0.00000475 0.01944097 0.00002008 -0.00145890 0.00002008 0.00189659 ]
+                    children [
+                    Transform{
+                      rotation 0 1 0 -0.082167522
+                      children [
+                      Inline {
+                        url "KNEE_P.wrl"
+                      }
+                      ]
+                    }
+                    ]
+                  }   # End of L_KNEE_P_LINK
+
+                  DEF L_ANKLE_P Joint {
+                    jointId 10
+                    #translation -0.028 0 -0.340
+                    translation 0 0 -0.3411509929635264
+                    #rotation 0.0 0.0 0.0 0.0
+                    jointType "rotate"
+                    jointAxis "Y"
+                    rotorInertia 1.226e-1
+                    llimit [-0.9896016858808]  #-56.7
+                    ulimit [0.2670353755551]   #15.3
+                    children [
+
+                    DEF L_ANKLE_P_MOV CylinderSensorY {
+                      minAngle -0.9896016858808  #-56.7
+                      maxAngle 0.2670353755551   #15.3
+                      children [
+
+                      DEF L_ANKLE_P_LINK Segment {
+                        centerOfMass -0.00368911 -0.00015844 0.00129883
+                        mass 0.26784726
+                        momentsOfInertia [ 0.00008094 -0.00000016 -0.00000133 -0.00000016 0.00015522 -0.00000007 -0.00000133 -0.00000007 0.00017313 ]
+                        children [
+
+                        Inline {
+                          url "L_ANKLE_P.wrl"
+                        }
+
+                        ]
+                      }   # End of L_ANKLE_P_LINK
+
+                      DEF L_ANKLE_R Joint {
+                        jointId 11
+                        translation 0 0 0
+                        #rotation 0.0 0.0 0.0 0.0
+                        jointType "rotate"
+                        jointAxis "X"
+                        rotorInertia 4.837e-2
+                        llimit [-0.5934119456781]  #-34
+                        ulimit [0.5934119456781]  #34
+                        children [
+
+                        DEF L_ANKLE_R_MOV CylinderSensorX {
+                          minAngle -0.5934119456781 #-34.000
+                          maxAngle 0.5934119456781  #34.000
+                          children [
+
+                          DEF L_ANKLE_R_LINK Segment {
+                            centerOfMass -0.00340792 0.00000000 -0.04591586
+                            mass 0.72287828
+                            momentsOfInertia [ 0.00092215 -0.00000000 0.00011963 -0.00000000 0.00102289 -0.00000000 0.00011963 -0.00000000 0.00089314 ]
+                            children [
+                            Inline {
+                              url "L_ANKLE_R.wrl"
+                            }
+
+                            ]
+                          }   # End of L_ANKLE_R_LINK
+
+                          DEF L_FOOT Joint {
+                            translation 0 0 0
+                            #rotation 0.0 0.0 0.0 0.0
+                            jointType "fixed"
+                            children [
+                             DEF lfsensor ForceSensor {
+                              translation 0 0 -0.093
+                              rotation 1 0 0 0
+                              sensorId 1
+                            }
+
+                            DEF L_FOOT_LINK Segment {
+                              centerOfMass 0.01130279 0.01139641 -0.07868422
+                              mass 0.57831553
+                              momentsOfInertia [ 0.00121526 -0.00000851 0.00002787 -0.00000851 0.00254705 0.00000210 0.00002787 0.00000210 0.00362666 ]
+                              children [
+
+                              Inline {
+                                url "L_FOOT.wrl"
+                              }
+
+                              ]
+                            }   # End of L_FOOT_LINK
+                            ]
+                          }   # End of L_FOOT
+                          ]
+                        }   # End of L_ANKLE_R_MOV
+                        ]
+                      }   # End of L_ANKLE_R
+                      ]
+                    }   # End of L_ANKLE_P_MOV
+                    ]
+                  }   # End of L_ANKLE_P
+                  ]
+                }   # End of L_KNEE_P_MOV
+                ]
+              }   # End of L_KNEE_P
+              ]
+            }   # End of L_HIP_P_MOV
+            ]
+          }   # End of L_HIP_P
+          ]
+        }   # End of L_HIP_R_MOV
+        ]
+      }   # End of L_HIP_R
+      ]
+    }   # End of L_HIP_Y_MOV
+    ]
+  }   # End of L_HIP_Y
+
+  DEF CHEST_P Joint {
+    jointId 12
+    translation 0.010 0 0.197
+    #rotation 0.0 0.0 0.0 0.0
+    jointType "rotate"
+    jointAxis "Y"
+    rotorInertia 8.943e-2
+    llimit [-0.2094395102393]  #-12.000
+    ulimit [0.5235987755983]   #30.000
+    children [
+
+    DEF CHEST_P_MOV CylinderSensorY {
+      minAngle -0.2094395102393 #-12.000
+      maxAngle 0.5235987755983  #30.000
+      children [
+
+      DEF CHEST_P_LINK Segment {
+        centerOfMass -0.00442006 0.00280574 0.03664874
+        mass 1.24072000
+        momentsOfInertia [ 0.00250228 -0.00001572 -0.00001986 -0.00001572 0.00266086 0.00013179 -0.00001986 0.00013179 0.00154610 ]
+        children [
+
+        Inline {
+          url "CHEST_P.wrl"
+        }
+        Inline {
+          url "CHEST_R.wrl"
+        }
+
+        ]
+      }   # End of CHEST_P_LINK
+
+      DEF CHEST_Y Joint {
+        jointId 13
+        translation 0 0 0
+        #rotation 0.0 0.0 0.0 0.0
+        jointType "rotate"
+        jointAxis "Z"
+        rotorInertia 7.763e-2
+        llimit [-0.6108652381980]  #-35.000
+        ulimit [0.6108652381980]   #35.000
+        children [
+
+        DEF CHEST_Y_MOV CylinderSensorZ {
+          minAngle -0.6108652381980  #-35.000
+          maxAngle 0.6108652381980   #35.000
+          children [
+
+          DEF CHEST_Y_LINK Segment {
+            centerOfMass -0.02868847 -0.00245957 0.20400698
+            mass 6.67348000
+            momentsOfInertia [ 0.06656275 -0.00009681 0.00599103 -0.00009681 0.05508979 -0.00017557 0.00599103 -0.00017557 0.04262738 ]
+            children [
+
+            Inline {
+              url "CHEST_Y.wrl"
+            }
+
+            ]
+          }   # End of CHEST_Y_LINK
+
+          DEF NECK_Y Joint {
+            jointId 14
+            translation -0.040 0 0.434
+            #rotation 0.0 0.0 0.0 0.0
+            jointType "rotate"
+            jointAxis "Z"
+            rotorInertia 2.544e-1
+            llimit [-1.2217304763960]  #-70.000
+            ulimit [1.2217304763960]  #70.000
+            children [
+
+            DEF NECK_Y_MOV CylinderSensorZ {
+              minAngle -1.2217304763960  #-70.000
+              maxAngle 1.2217304763960   #70.000
+              children [
+
+              DEF NECK_Y_LINK Segment {
+                centerOfMass -0.01142441 0.00157484 -0.02134892
+                mass 0.41214752
+                momentsOfInertia [ 0.00061014 0.00000435 0.00007329 0.00000435 0.00068918 -0.00001384 0.00007329 -0.00001384 0.00040587 ]
+                children [
+
+                Inline {
+                  url "NECK_Y.wrl"
+                }
+
+                ]
+              }   # End of NECK_Y_LINK
+
+
+              DEF NECK_P Joint {
+                jointId 15
+                translation 0 0 0
+                #rotation 0.0 0.0 0.0 0.0
+                jointType "rotate"
+                jointAxis "Y"
+                rotorInertia 1.272e-1
+                llimit [-0.5235987755983]  #-30.000
+                ulimit [0.4363323129986]  #25.000
+                children [
+
+                DEF NECK_P_MOV CylinderSensorY {
+                  minAngle -0.5235987755983  #-30.000
+                  maxAngle 0.4363323129986  #25.000
+                  children [
+
+                  DEF NECK_P_LINK Segment {
+                    centerOfMass 0.00532833 -0.00053047 0.01769360
+                    mass 0.22297511
+                    momentsOfInertia [ 0.00069884 -0.00000070 0.00003330 -0.00000070 0.00093286 -0.00000151 0.00003330 -0.00000151 0.00100342 ]
+                    children [
+
+                    Inline {
+                      url "NECK_P.wrl"
+                    }
+
+                    ]
+                  }   # End of NECK_P_LINK
+                          ]
+                }   # End of NECK_P_MOV
+                ]
+              }   # End of NECK_P
+              ]
+            }   # End of NECK_Y_MOV
+            ]
+          }   # End of NECK_Y
+
+          DEF R_SHOULDER_P Joint {
+            jointId 16
+            translation -0.040 -0.170 0.285
+            #rotation 0.0 0.0 0.0 0.0
+            jointType "rotate"
+            jointAxis "Y"
+            rotorInertia 1.553
+            llimit [-2.5656340004317]  #-147.000
+            ulimit [1.0471975511966]   #60.000
+            children [
+
+            DEF R_SHOULDER_P_MOV CylinderSensorY {
+              minAngle -2.5656340004317  #-147.000
+              maxAngle 1.0471975511966   #60.000
+              children [
+
+              DEF R_SHOULDER_P_LINK Segment {
+                centerOfMass 0.00141599 0.04257567 0.00031503
+                mass 0.42049079
+                momentsOfInertia [ 0.00044203 -0.00000493 -0.00000061 -0.00000493 0.00014181 -0.00000334 -0.00000061 -0.00000334 0.00044502 ]
+                children [
+
+                Inline {
+                  url "R_SHOULDER_P.wrl"
+                }
+
+                ]
+              }   # End of R_SHOULDER_P_LINK
+
+              DEF R_SHOULDER_R Joint {
+                jointId 17
+                translation 0 0 0
+                #rotation 0.0 0.0 0.0 0.0
+                jointType "rotate"
+                jointAxis "X"
+                rotorInertia 3.201e-1
+                llimit [-1.5533430342750]  #-89.000
+                ulimit [0.1745329251994]  #10.000
+                children [
+
+                DEF R_SHOULDER_R_MOV CylinderSensorX {
+                  minAngle -1.5533430342750  #-89.000
+                  maxAngle 0.1745329251994   #10.000
+                  children [
+
+                  DEF R_SHOULDER_R_LINK Segment {
+                    centerOfMass 0.00019752 -0.00272557 -0.04191141
+                    mass 0.52070922
+                    momentsOfInertia [ 0.00062647 -0.00000730 -0.00006476 -0.00000730 0.00071812 0.00001818 -0.00006476 0.00001818 0.00029856 ]
+                    children [
+
+                    Inline {
+                      url "R_SHOULDER_R.wrl"
+                    }
+
+                    ]
+                  }   # End of R_SHOULDER_R_LINK
+
+                  DEF R_SHOULDER_Y Joint {
+                    jointId 18
+                    translation 0 0 0
+                    #rotation 0.0 0.0 0.0 0.0
+                    jointType "rotate"
+                    jointAxis "Z"
+                    rotorInertia 1.646e-1
+                    llimit [-1.6057029118348]  #-92.000
+                    ulimit [1.6057029118348]   #92.000
+                    children [
+
+                    DEF R_SHOULDER_Y_MOV CylinderSensorZ {
+                      minAngle -1.6057029118348  #-92.000
+                      maxAngle 1.6057029118348   #92.000
+                      children [
+
+                      DEF R_SHOULDER_Y_LINK Segment {
+                        centerOfMass -0.00273859 -0.00036268 -0.17426645
+                        mass 1.08740000
+                        momentsOfInertia [ 0.00553694 0.00001180 -0.00004295 0.00001180 0.00556222 -0.00009379 -0.00004295 -0.00009379 0.00071841 ]
+                        children [
+
+                        Inline {
+                          url "SHOULDER_Y.wrl"
+                        }
+
+                        ]
+                      }   # End of R_SHOULDER_Y_LINK
+
+                      DEF R_ELBOW_P Joint {
+                        jointId 19
+                        translation 0 0 -0.283
+                        #rotation 0.0 0.0 0.0 0.0
+                        jointType "rotate"
+                        jointAxis "Y"
+                        rotorInertia 1.925e-1
+                        llimit [-2.1467549799530]  #-123.000
+                        ulimit [0.0349065850399]  #2.000
+                        children [
+
+                        DEF R_ELBOW_P_MOV CylinderSensorY {
+                          minAngle -2.1467549799530  #-123.000
+                          maxAngle 0.0349065850399   #2.000
+                          children [
+
+                          DEF R_ELBOW_P_LINK Segment {
+                            centerOfMass -0.01222096 0.00049299 -0.07271909
+                            mass 0.65940310
+                            momentsOfInertia [ 0.00121955 0.00000390 0.00004220 0.00000390   0.00135563 -0.00001497 0.00004220 -0.00001497 0.00047041 ]
+                            children [
+
+                            Inline {
+                              url "ELBOW_P.wrl"
+                            }
+
+                            ]
+                          }   # End of R_ELBOW_P_LINK
+
+                          DEF R_WRIST_Y Joint {
+                            jointId 20
+                            translation 0 0 0
+                            #rotation 0 0 0 0
+                            jointType "rotate"
+                            jointAxis "Z"
+                            rotorInertia 2.544e-2
+                            llimit [-1.6057029118348]  #-92.000
+                            ulimit [1.6057029118348]   #92.000
+                            children [
+
+                            DEF R_WRIST_Y_MOV CylinderSensorZ {
+                              minAngle -1.6057029118348  #-92.000
+                              maxAngle 1.6057029118348   #92.000
+                              children [
+
+                              DEF R_WRIST_Y_LINK Segment {
+                                centerOfMass -0.00749481 0.00009419 -0.17044123
+                                mass 0.38384092
+                                momentsOfInertia [ 0.00027044 -0.00000974 0.00001069 -0.00000974 0.00027334 0.00001745 0.00001069 0.00001745 0.00022347 ]
+                                children [
+
+                                Inline {
+                                  url "R_WRIST_Y.wrl"
+                                }
+
+                                ]
+                              }   # End of R_WRIST_Y_LINK
+
+                              DEF R_WRIST_P Joint {
+                                jointId 21
+                                translation 0 0 -0.234
+                                jointType "rotate"
+                                jointAxis "Y"
+                                rotorInertia 5.088e-2
+                                llimit [-0.7155849933177]  #-41.000
+                                ulimit [0.7155849933177]  #41.000
+                                children [
+
+                                DEF R_WRIST_P_MOV CylinderSensorY {
+                                  minAngle -0.7155849933177  #-41.000
+                                  maxAngle 0.7155849933177   #41.000
+                                  children [
+
+                                  DEF R_WRIST_P_LINK Segment {
+                                    centerOfMass 0.00255098 0.00162183 0.01074678
+                                    mass 0.25425855
+                                    momentsOfInertia [ 0.00008763 0.00000153 -0.00000348 0.00000153 0.00009159 0.00000448 -0.00000348 0.00000448 0.00005571 ]
+                                    children [
+                                    Transform {
+                                      rotation 0 0 1 3.1415926535898
+                                      children [
+                                      Inline {
+                                        url "WRIST_P.wrl"
+                                      }
+                                      ]
+                                    }
+                                    ]
+                                  }   # End of R_WRIST_P_LINK
+
+                                  DEF R_WRIST_R Joint {
+                                    jointId 22
+                                    translation 0 0 0.0
+                                    jointType "rotate"
+                                    jointAxis "X"
+                                    rotorInertia 5.088e-2
+                                    llimit [-1.6057029118348]  #-92.000
+                                    ulimit [1.6057029118348]  #92.000
+                                    children [
+
+                                    DEF R_WRIST_R_MOV CylinderSensorX {
+                                      minAngle -1.6057029118348  #-92.000
+                                      maxAngle 1.6057029118348   #92.000
+                                      children [
+                                      DEF rhsensor ForceSensor {
+                                        translation 0 0 -0.04435
+                                        rotation -0.707109 0.7071045 0.0 3.1415908
+                                        sensorId 2
+                                      }
+
+                                      DEF R_WRIST_R_LINK Segment {
+                                        centerOfMass -0.00357307 -0.00756083 -0.07562434
+                                        mass 0.38811052
+                                        momentsOfInertia [ 0.00041744 -0.00000258 -0.00003079 -0.00000258 0.00053272 -0.00004178 -0.00003079 -0.00004178 0.00022506 ]
+                                        children [
+                                        Inline {
+                                          url "R_WRIST_R.wrl"
+                                        }
+                                        Transform { #w.r.t wrist frame
+                                           translation -0.016 0.01 -0.085
+                                           # axis-angle
+                                           rotation 0.5775032 0.5770443 0.5775032 4.1869506
+                                           children [
+                                              Inline {
+                                                 url "hand_block.wrl"
+                                              }
+                                             ]
+                                        }
+                                        ]
+                                      }   # End of R_WRIST_R_LINK
+
+                                      DEF R_HAND_J0 Joint {
+                                        jointId 23
+                                        #translation 0.03419 0 -0.039
+                                        translation 0.03419 0 -0.063
+                                        rotation 0 1 0 0.4118977034707
+                                        jointType "rotate"
+                                        jointAxis "Z"
+                                        rotorInertia 5.955e-1
+                                        llimit [0.0000000000000]  #0.000
+                                        ulimit [1.5707963267949]  #90.000
+                                        children [
+
+                                        DEF R_HAND_J0_MOV CylinderSensorZ {
+                                          minAngle 0.0000000000000  #0.000
+                                          maxAngle 1.5707963267949  #90.000
+                                          children [
+
+                                          DEF R_HAND_J0_LINK Segment {
+                                            centerOfMass 0.03905018 0.01034470 -0.02583122
+                                            mass 0.02982352
+                                            momentsOfInertia [ 0.00001307 -0.00000620 0.00001249 -0.00000620 0.00002885 0.00000436 0.00001249 0.00000436 0.00002119 ]
+                                            #children [
+
+                                            #Inline {
+                                            #  url "R_THUMB.wrl"
+                                            #}
+
+                                            #]
+                                          }   # End of R_HAND_J0_LINK
+                                          ]
+                                        }   # End of R_HAND_J0_MOV
+                                        ]
+                                      }   # End of R_HAND_J0
+
+                                      DEF R_HAND_J1 Joint {
+                                        jointId 24
+                                        #translation 0 0 -0.111
+                                        translation 0 0 -0.135
+                                        #rotation 0.0 0.0 0.0 0.0
+                                        jointType "rotate"
+                                        jointAxis "X"
+                                        rotorInertia 1.340
+                                        llimit [-0.1745329251994]  #-10.000
+                                        ulimit [1.5707963267949]  #90.000
+                                        children [
+
+                                        DEF R_HAND_J1_MOV CylinderSensorX {
+                                          minAngle -0.1745329251994  #-10.000
+                                          maxAngle 1.5707963267949  #90.000
+                                          children [
+
+                                          DEF R_HAND_J1_LINK Segment {
+                                            centerOfMass -0.00520681 -0.00008854 -0.01902284
+                                            mass 0.07696483
+                                            momentsOfInertia [ 0.00002170 -0.00000003 -0.00000022 -0.00000003 0.00005741 0.00000010 -0.00000022 0.00000010 0.00003728 ]
+                                            children [
+
+                                            Inline {
+                                              url "R_F1.wrl"
+                                            }
+
+                                            ]
+                                          }   # End of R_HAND_J1_LINK
+
+                                          DEF R_F22 Joint {
+                                            translation 0.0253 0 -0.045
+                                            rotation 0 0 1 3.1415926535
+                                            jointType "rotate"
+                                            jointAxis "X"
+                                            llimit [-1.2217304763960]  #-70.000
+                                            ulimit [0.0000000000000]  #0.000
+                                            children [
+
+                                            DEF R_F22_MOV CylinderSensorX {
+                                              minAngle -1.2217304763960  #-70.000
+                                              maxAngle 0.0000000000000  #0.000
+                                              children [
+
+                                              DEF R_F22_LINK Segment {
+                                                centerOfMass -0.00031853 0.00034526 -0.01168186
+                                                mass 0.00446884
+                                                momentsOfInertia [ 0.00000032 -0.00000000 -0.00000000 -0.00000000 0.00000034 -0.00000000 -0.00000000 -0.00000000 0.00000009 ]
+                                                children [
+
+                                                Inline {
+                                                  url "F2.wrl"
+                                                }
+
+                                                ]
+                                              }   # End of R_F22_LINK
+
+                                              DEF R_F23 Joint {
+                                                translation 0 0 -0.024
+                                                #rotation 0.0 0.0 0.0 0.0
+                                                jointType "rotate"
+                                                jointAxis "X"
+                                                llimit [-1.2217304763960]  #-70.000
+                                                ulimit [0.0000000000000]  #0.000
+                                                children [
+
+                                                DEF R_F23_MOV CylinderSensorX {
+                                                  minAngle -1.2217304763960  #-70.000
+                                                  maxAngle 0.0000000000000  #0.000
+                                                  children [
+
+                                                  DEF R_F23_LINK Segment {
+                                                    centerOfMass -0.00035576 -0.00103228 -0.00714888
+                                                    mass 0.00287450
+                                                    momentsOfInertia [ 0.00000016 0.00000000 0.00000001 0.00000000 0.00000021 -0.00000002 0.00000001 -0.00000002 0.00000007 ]
+                                                    children [
+
+                                                    Inline {
+                                                      url "F3.wrl"
+                                                    }
+
+                                                    ]
+                                                  }   # End of R_F23_LINK
+                                                  ]
+                                                }   # End of R_F23_MOV
+                                                ]
+                                              }   # End of R_F23
+                                              ]
+                                            }   # End of R_F22_MOV
+                                            ]
+                                          }   # End of R_F22
+
+                                          DEF R_F32 Joint {
+                                            translation 0.0051 0 -0.045
+                                            rotation 0 0 1 3.1415926535
+                                            jointType "rotate"
+                                            jointAxis "X"
+                                            llimit [-1.2217304763960]  #-70.000
+                                            ulimit [0.0000000000000]  #0.000
+                                            children [
+
+                                            DEF R_F32_MOV CylinderSensorX {
+                                              minAngle -1.2217304763960  #-70.000
+                                              maxAngle 0.0000000000000  #0.000
+                                              children [
+
+                                              DEF R_F32_LINK Segment {
+                                                centerOfMass -0.00031853 0.00034526 -0.01168186
+                                                mass 0.00446884
+                                                momentsOfInertia [ 0.00000032 -0.00000000 -0.00000000 -0.00000000 0.00000034 -0.00000000 -0.00000000 -0.00000000 0.00000009 ]
+                                                children [
+
+                                                Inline {
+                                                  url "F2.wrl"
+                                                }
+
+                                                ]
+                                              }   # End of R_F32_LINK
+
+                                              DEF R_F33 Joint {
+                                                translation 0 0 -0.024
+                                                #rotation 0.0 0.0 0.0 0.0
+                                                jointType "rotate"
+                                                jointAxis "X"
+                                                llimit [-1.2217304763960]  #-70.000
+                                                ulimit [0.0000000000000]  #0.000
+                                                children [
+
+                                                DEF R_F33_MOV CylinderSensorX {
+                                                  minAngle -1.2217304763960  #-70.000
+                                                  maxAngle 0.0000000000000  #0.000
+                                                  children [
+
+                                                  DEF R_F33_LINK Segment {
+                                                    centerOfMass -0.00035576 -0.00103228 -0.00714888
+                                                    mass 0.00287450
+                                                    momentsOfInertia [ 0.00000016 0.00000000 0.00000001 0.00000000 0.00000021 -0.00000002 0.00000001 -0.00000002 0.00000007 ]
+                                                    children [
+
+                                                    Inline {
+                                                      url "F3.wrl"
+                                                    }
+
+                                                    ]
+                                                  }   # End of R_F33_LINK
+                                                  ]
+                                                }   # End of R_F33_MOV
+                                                ]
+                                              }   # End of R_F33
+                                              ]
+                                            }   # End of R_F32_MOV
+                                            ]
+                                          }   # End of R_F32
+
+                                          DEF R_F42 Joint {
+                                            translation -0.0151 0 -0.045
+                                            rotation 0 0 1 3.1415926535
+                                            jointType "rotate"
+                                            jointAxis "X"
+                                            llimit [-1.2217304763960]  #-70.000
+                                            ulimit [0.0000000000000]  #0.000
+                                            children [
+
+                                            DEF R_F42_MOV CylinderSensorX {
+                                              minAngle -1.2217304763960  #-70.000
+                                              maxAngle 0.0000000000000  #0.000
+                                              children [
+
+                                              DEF R_F42_LINK Segment {
+                                                centerOfMass -0.00031853 0.00034526 -0.01168186
+                                                mass 0.00446884
+                                                momentsOfInertia [ 0.00000032 -0.00000000 -0.00000000 -0.00000000 0.00000034 -0.00000000 -0.00000000 -0.00000000 0.00000009 ]
+                                                children [
+
+                                                Inline {
+                                                  url "F2.wrl"
+                                                }
+
+                                                ]
+                                              }   # End of R_F42_LINK
+
+                                              DEF R_F43 Joint {
+                                                translation 0 0 -0.024
+                                                #rotation 0.0 0.0 0.0 0.0
+                                                jointType "rotate"
+                                                jointAxis "X"
+                                                llimit [-1.2217304763960]  #-70.000
+                                                ulimit [0.0000000000000]  #0.000
+                                                children [
+
+                                                DEF R_F43_MOV CylinderSensorX {
+                                                  minAngle -1.2217304763960  #-70.000
+                                                  maxAngle 0.0000000000000  #0.000
+                                                  children [
+
+                                                  DEF R_F43_LINK Segment {
+                                                    centerOfMass -0.00035576 -0.00103228 -0.00714888
+                                                    mass 0.00287450
+                                                    momentsOfInertia [ 0.00000016 0.00000000 0.00000001 0.00000000 0.00000021 -0.00000002 0.00000001 -0.00000002 0.00000007 ]
+                                                    children [
+
+                                                    Inline {
+                                                      url "F3.wrl"
+                                                    }
+
+                                                    ]
+                                                  }   # End of R_F43_LINK
+                                                  ]
+                                                }   # End of R_F43_MOV
+                                                ]
+                                              }   # End of R_F43
+                                              ]
+                                            }   # End of R_F42_MOV
+                                            ]
+                                          }   # End of R_F42
+
+                                          DEF R_F52 Joint {
+                                            translation -0.0353 0 -0.045
+                                            rotation 0 0 1 3.1415926535
+                                            jointType "rotate"
+                                            jointAxis "X"
+                                            llimit [-1.2217304763960]  #-70.000
+                                            ulimit [0.0000000000000]  #0.000
+                                            children [
+
+                                            DEF R_F52_MOV CylinderSensorX {
+                                              minAngle -1.2217304763960  #-70.000
+                                              maxAngle 0.0000000000000  #0.000
+                                              children [
+
+                                              DEF R_F52_LINK Segment {
+                                                centerOfMass -0.00031853 0.00034526 -0.01168186
+                                                mass 0.00446884
+                                                momentsOfInertia [ 0.00000032 -0.00000000 -0.00000000 -0.00000000 0.00000034 -0.00000000 -0.00000000 -0.00000000 0.00000009 ]
+                                                children [
+
+                                                Inline {
+                                                  url "F2.wrl"
+                                                }
+
+                                                ]
+                                              }   # End of R_F52_LINK
+
+                                              DEF R_F53 Joint {
+                                                translation 0 0 -0.024
+                                                #rotation 0.0 0.0 0.0 0.0
+                                                jointType "rotate"
+                                                jointAxis "X"
+                                                llimit [-1.2217304763960]  #-70.000
+                                                ulimit [0.0000000000000]  #0.000
+                                                children [
+
+                                                DEF R_F53_MOV CylinderSensorX {
+                                                  minAngle -1.2217304763960  #-70.000
+                                                  maxAngle 0.0000000000000  #0.000
+                                                  children [
+
+                                                  DEF R_F53_LINK Segment {
+                                                    centerOfMass -0.00035576 -0.00103228 -0.00714888
+                                                    mass 0.00287450
+                                                    momentsOfInertia [ 0.00000016 0.00000000 0.00000001 0.00000000 0.00000021 -0.00000002 0.00000001 -0.00000002 0.00000007 ]
+                                                    children [
+
+                                                    Inline {
+                                                      url "F3.wrl"
+                                                    }
+
+                                                    ]
+                                                  }   # End of R_F53_LINK
+                                                  ]
+                                                }   # End of R_F53_MOV
+                                                ]
+                                              }   # End of R_F53
+                                              ]
+                                            }   # End of R_F52_MOV
+                                            ]
+                                          }   # End of R_F52
+                                          ]
+                                        }   # End of R_HAND_J1_MOV
+                                        ]
+                                      }   # End of R_HAND_J1
+                                      ]
+                                    }   # End of R_WRIST_R_MOV
+                                    ]
+                                  }   # End of R_WRIST_R
+                                  ]
+                                }   # End of R_WRIST_P_MOV
+                                ]
+                              }   # End of R_WRIST_P
+                              ]
+                            }   # End of R_WRIST_Y_MOV
+                            ]
+                          }   # End of R_WRIST_Y
+                          ]
+                        }   # End of R_ELBOW_P_MOV
+                        ]
+                      }   # End of R_ELBOW_P
+                      ]
+                    }   # End of R_SHOULDER_Y_MOV
+                    ]
+                  }   # End of R_SHOULDER_Y
+                  ]
+                }   # End of R_SHOULDER_R_MOV
+                ]
+              }   # End of R_SHOULDER_R
+              ]
+            }   # End of R_SHOULDER_P_MOV
+            ]
+          }   # End of R_SHOULDER_P
+
+          DEF L_SHOULDER_P Joint {
+            jointId 25
+            translation -0.040 0.170 0.285
+            #rotation 0.0 0.0 0.0 0.0
+            jointType "rotate"
+            jointAxis "Y"
+            rotorInertia 1.553
+            llimit [-2.5656340004317]  #-147.000
+            ulimit [1.0471975511966]   #60.000
+            children [
+
+            DEF L_SHOULDER_P_MOV CylinderSensorY {
+              minAngle -2.5656340004317  #-147.000
+              maxAngle 1.0471975511966   #60.000
+              children [
+
+              DEF L_SHOULDER_P_LINK Segment {
+                centerOfMass 0.00141599 -0.04257567 -0.00031503
+                mass 0.42049079
+                momentsOfInertia [ 0.00044203 0.00000493 0.00000061 0.00000493 0.00014181 -0.00000334 0.00000061 -0.00000334 0.00044502 ]
+                children [
+
+                Inline {
+                  url "L_SHOULDER_P.wrl"
+                }
+
+                ]
+              }   # End of L_SHOULDER_P_LINK
+
+              DEF L_SHOULDER_R Joint {
+                jointId 26
+                translation 0 0 0
+                #rotation 0.0 0.0 0.0 0.0
+                jointType "rotate"
+                jointAxis "X"
+                rotorInertia 3.201e-1
+                llimit [-0.1745329251994]  #-10.000
+                ulimit [1.5533430342750]  #89.000
+                children [
+
+                DEF L_SHOULDER_R_MOV CylinderSensorX {
+                  minAngle -0.1745329251994  #-10.000
+                  maxAngle 1.5533430342750   #89.000
+                  children [
+
+                  DEF L_SHOULDER_R_LINK Segment {
+                    centerOfMass 0.00019752 -0.00008916 -0.04191141
+                    mass 0.52070922
+                    momentsOfInertia [ 0.00063033 -0.00000601 -0.00006476 -0.00000601 0.00071812 -0.00002895 -0.00006476 -0.00002895 0.00030242 ]
+                    children [
+
+                    Inline {
+                      url "L_SHOULDER_R.wrl"
+                    }
+
+                    ]
+                  }   # End of L_SHOULDER_R_LINK
+
+                  DEF L_SHOULDER_Y Joint {
+                    jointId 27
+                    translation 0 0 0
+                    #rotation 0.0 0.0 0.0 0.0
+                    jointType "rotate"
+                    jointAxis "Z"
+                    rotorInertia 1.646e-1
+                    llimit [-1.6057029118348]  #-92.000
+                    ulimit [1.6057029118348]   #92.000
+                    children [
+
+                    DEF L_SHOULDER_Y_MOV CylinderSensorZ {
+                      minAngle -1.6057029118348  #-92.000
+                      maxAngle 1.6057029118348   #92.000
+                      children [
+
+                      DEF L_SHOULDER_Y_LINK Segment {
+                        centerOfMass -0.00273859 -0.00036268 -0.17426645
+                        mass 1.08740000
+                        momentsOfInertia [ 0.00553694 0.00001180 -0.00004295 0.00001180 0.00556222 -0.00009379 -0.00004295 -0.00009379 0.00071841 ]
+                        children [
+
+                        Inline {
+                          url "SHOULDER_Y.wrl"
+                        }
+
+                        ]
+                      }   # End of L_SHOULDER_Y_LINK
+
+                      DEF L_ELBOW_P Joint {
+                        jointId 28
+                        translation 0 0 -0.283
+                        #rotation 0.0 0.0 0.0 0.0
+                        jointType "rotate"
+                        jointAxis "Y"
+                        rotorInertia 1.925e-1
+                        llimit [-2.1467549799530]  #-123.000
+                        ulimit [0.0349065850399]  #2.000
+                        children [
+
+                        DEF L_ELBOW_P_MOV CylinderSensorY {
+                          minAngle -2.1467549799530  #-123.000
+                          maxAngle 0.0349065850399   #2.000
+                          children [
+
+                          DEF L_ELBOW_P_LINK Segment {
+                            centerOfMass -0.01222096 0.00049299 -0.07271909
+                            mass 0.65940310
+                            momentsOfInertia [ 0.00121955 0.00000390 0.00004220 0.00000390   0.00135563 -0.00001497 0.00004220 -0.00001497 0.00047041 ]
+                            children [
+
+                            Inline {
+                              url "ELBOW_P.wrl"
+                            }
+
+                            ]
+                          }   # End of L_ELBOW_P_LINK
+
+                          DEF L_WRIST_Y Joint {
+                            jointId 29
+                            translation 0 0 0
+                            #rotation 0 0 0 0
+                            jointType "rotate"
+                            jointAxis "Z"
+                            rotorInertia 5.088e-2
+                            llimit [-1.6057029118348]  #-92.000
+                            ulimit [1.6057029118348]   #92.000
+                            children [
+
+                            DEF L_WRIST_Y_MOV CylinderSensorZ {
+                              minAngle -1.6057029118348  #-92.000
+                              maxAngle 1.6057029118348   #92.000
+                              children [
+
+                              DEF L_WRIST_Y_LINK Segment {
+                                centerOfMass -0.00749574 -0.00009418 -0.17044123
+                                mass 0.38384092
+                                momentsOfInertia [ 0.00027044 0.00000976 0.00001070 0.00000976 0.00027334 -0.00001745 0.00001070 -0.00001745 0.00022346 ]
+                                children [
+
+                                Inline {
+                                  url "L_WRIST_Y.wrl"
+                                }
+
+                                ]
+                              }   # End of L_WRIST_Y_LINK
+
+                              DEF L_WRIST_P Joint {
+                                jointId 30
+                                translation 0 0 -0.234
+                                #rotation 0 0 0 0
+                                jointType "rotate"
+                                jointAxis "Y"
+                                rotorInertia 5.088e-2
+                                llimit [-0.7155849933177]  #-41.000
+                                ulimit [0.7155849933177]  #41.000
+                                children [
+
+                                DEF L_WRIST_P_MOV CylinderSensorY {
+                                  minAngle -0.7155849933177  #-41.000
+                                  maxAngle 0.7155849933177   #41.000
+                                  children [
+
+                                  DEF L_WRIST_P_LINK Segment {
+                                    centerOfMass -0.00255098 -0.00162183 0.01074678
+                                    mass 0.25425855
+                                    momentsOfInertia [ 0.00008763 0.00000153 0.00000348 0.00000153 0.00009159 -0.00000448 0.00000348 -0.00000448 0.00005571 ]
+                                    children [
+
+                                    Inline {
+                                      url "WRIST_P.wrl"
+                                    }
+
+                                    ]
+                                  }   # End of L_WRIST_P_LINK
+
+                                  DEF L_WRIST_R Joint {
+                                    jointId 31
+                                    translation 0 0 0
+                                    #rotation 0.0 0.0 0.0 0.0
+                                    jointType "rotate"
+                                    jointAxis "X"
+                                    rotorInertia 5.088e-2
+                                    llimit [-1.6057029118348]  #-92.000
+                                    ulimit [1.6057029118348]  #92.000
+                                    children [
+
+                                    DEF L_WRIST_R_MOV CylinderSensorX {
+                                      minAngle -1.6057029118348  #-92.000
+                                      maxAngle 1.6057029118348   #92.000
+                                      children [
+                                      DEF lhsensor ForceSensor {
+                                        translation 0 0 -0.04435
+                                        rotation -0.707109 0.7071045 0.0 3.1415908
+                                        sensorId 3
+                                      }
+
+				      Transform {
+				      	translation 0.0 0.0 -0.06005
+					rotation 1.0 0.0 0.0 3.141509
+					children [
+						 DEF L_WRIST_R_LINK Segment {
+				        	 centerOfMass 0.0 0.0 -0.0129
+						 mass 0.050
+                                        	 momentsOfInertia [ 0.0000938 0.00 0.00 0.00 0.0000938 0.00 0.00 0.00 0.000281 ]
+				        	 children [
+						 	  Inline {
+					      		  	 url "hand_block/hand_adapter.wrl" # Hand Adapter
+					    			 }
+							  Transform {
+				          		  	    translation 0.0 0.0 0.0055
+					  			    rotation 0.0 0.0 1.0 0.0
+					  			    children [
+					    			    	     Inline {
+					      				     	    url "hand_block/square_hand.wrl" # Hand Block
+					    					    }
+					  				]
+				        		  }
+				        	]
+				        	} # end of L_WRIST_R_LINK	
+					]	 
+				        }# end of transform
+				      ]
+                                    }   # End of L_WRIST_R_MOV
+                                    ]
+                                  }   # End of L_WRIST_R
+                                  ]
+                                }   # End of L_WRIST_P_MOV
+                                ]
+                              }   # End of L_WRIST_P
+                              ]
+                            }   # End of L_WRIST_Y_MOV
+                            ]
+                          }   # End of L_WRIST_Y
+                          ]
+                        }   # End of L_ELBOW_P_MOV
+                        ]
+                      }   # End of L_ELBOW_P
+                      ]
+                    }   # End of L_SHOULDER_Y_MOV
+                    ]
+                  }   # End of L_SHOULDER_Y
+                  ]
+                }   # End of L_SHOULDER_R_MOV
+                ]
+              }   # End of L_SHOULDER_R
+              ]
+            }   # End of L_SHOULDER_P_MOV
+            ]
+          }   # End of L_SHOULDER_P
+          ]
+        }   # End of CHEST_Y_MOV
+        ]
+      }   # End of CHEST_Y
+      ]
+    }   # End of CHEST_P_MOV
+    ]
+  }   # End of CHEST_P
+]
+}   # End of WAIST_LINK
+]   # End of humanoidBody
+
+joints [
+  USE WAIST,
+  USE R_HIP_Y,
+  USE R_HIP_R,
+  USE R_HIP_P,
+  USE R_KNEE_P,
+  USE R_ANKLE_P,
+  USE R_ANKLE_R,
+  USE R_FOOT,
+  USE L_HIP_Y,
+  USE L_HIP_R,
+  USE L_HIP_P,
+  USE L_KNEE_P,
+  USE L_ANKLE_P,
+  USE L_ANKLE_R,
+  USE L_FOOT,
+  USE CHEST_P,
+  USE CHEST_Y,
+  USE NECK_Y,
+  USE NECK_P,
+  USE R_SHOULDER_P,
+  USE R_SHOULDER_R,
+  USE R_SHOULDER_Y,
+  USE R_ELBOW_P,
+  USE R_WRIST_Y,
+  USE R_WRIST_P,
+  USE R_WRIST_R,
+  USE R_HAND_J0,
+  USE R_HAND_J1,
+  USE R_F22,
+  USE R_F23,
+  USE R_F32,
+  USE R_F33,
+  USE R_F42,
+  USE R_F43,
+  USE R_F52,
+  USE R_F53,
+  USE L_SHOULDER_P,
+  USE L_SHOULDER_R,
+  USE L_SHOULDER_Y,
+  USE L_ELBOW_P,
+  USE L_WRIST_Y,
+  USE L_WRIST_P,
+  USE L_WRIST_R,
+]   # End of joints
+
+segments [
+  USE BODY,
+  USE R_HIP_Y_LINK,
+  USE R_HIP_R_LINK,
+  USE R_HIP_P_LINK,
+  USE R_KNEE_P_LINK,
+  USE R_ANKLE_P_LINK,
+  USE R_ANKLE_R_LINK,
+  USE R_FOOT_LINK,
+  USE L_HIP_Y_LINK,
+  USE L_HIP_R_LINK,
+  USE L_HIP_P_LINK,
+  USE L_KNEE_P_LINK,
+  USE L_ANKLE_P_LINK,
+  USE L_ANKLE_R_LINK,
+  USE L_FOOT_LINK,
+  USE CHEST_P_LINK,
+  USE CHEST_Y_LINK,
+  USE NECK_Y_LINK,
+  USE NECK_P_LINK,
+  USE R_SHOULDER_P_LINK,
+  USE R_SHOULDER_R_LINK,
+  USE R_SHOULDER_Y_LINK,
+  USE R_ELBOW_P_LINK,
+  USE R_WRIST_Y_LINK,
+  USE R_WRIST_P_LINK,
+  USE R_WRIST_R_LINK,
+  USE R_HAND_J0_LINK,
+  USE R_HAND_J1_LINK,
+  USE R_F22_LINK,
+  USE R_F23_LINK,
+  USE R_F32_LINK,
+  USE R_F33_LINK,
+  USE R_F42_LINK,
+  USE R_F43_LINK,
+  USE R_F52_LINK,
+  USE R_F53_LINK,
+  USE L_SHOULDER_P_LINK,
+  USE L_SHOULDER_R_LINK,
+  USE L_SHOULDER_Y_LINK,
+  USE L_ELBOW_P_LINK,
+  USE L_WRIST_Y_LINK,
+  USE L_WRIST_P_LINK,
+  USE L_WRIST_R_LINK,
+]   # End of segments
+}   # End of Humanoid
