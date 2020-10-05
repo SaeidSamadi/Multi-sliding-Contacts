@@ -269,7 +269,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
     mu_x_rh = mu_rh * fabs(localVel_rh(0)) / velNorm_rh;
     mu_y_rh = mu_rh * fabs(localVel_rh(1)) / velNorm_rh;
   }
-
+  
   if( fabs(rh_fs_rot(2)) > 5.0 && //f_z > 1.0
       fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) >= 0.1 && //0.1 < mu < 3.0
       fabs(rh_fs_rot(0)) / fabs(rh_fs_rot(2)) <= 3.0 ){
@@ -287,6 +287,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   sliding_rh = sliding_rh1 - sliding_rh2;
   sliding_rh = sliding_rh * Rot_rh;
 
+  
   if(velNorm_lh < 10e-5)
   {
     mu_x_lh = mu_lh/2.;
@@ -677,6 +678,11 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
     logger.addLogEntry("muN", [this]() { return muN;});
     logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
     logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
+
+    logger.addLogEntry("CoMQP_RFPose", [this](){ return rfPose; });
+    logger.addLogEntry("CoMQP_LFPose", [this](){ return lfPose; });
+    logger.addLogEntry("CoMQP_RHPose", [this](){ return rhPose; });
+    logger.addLogEntry("CoMQP_LHPose", [this](){ return lhPose; });
   }
   inLogger_ = true;
 }
@@ -710,6 +716,12 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("muN");
   logger.removeLogEntry("RH_fs_rot");
   logger.removeLogEntry("muXcalc");
+
+  logger.removeLogEntry("CoMQP_RFPose");
+  logger.removeLogEntry("CoMQP_LFPose");
+  logger.removeLogEntry("CoMQP_RHPose");
+  logger.removeLogEntry("CoMQP_LHPose");
+  
   inLogger_ = false;
 }
 
