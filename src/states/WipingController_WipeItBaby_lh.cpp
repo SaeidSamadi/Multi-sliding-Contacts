@@ -155,7 +155,8 @@ bool WipingController_WipeItBaby_lh::run(mc_control::fsm::Controller & ctl_)
     target.translation() = translationPose;
   }
   ctl.leftHandTask->targetPose(target);
-
+  ctl.comQP().updateLHPose(target);
+  
   ctl.setTargetFromCoMQP();
 
   output("OK");

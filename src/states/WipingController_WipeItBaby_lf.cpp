@@ -256,6 +256,7 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   //mc_rtc::log::info("target.translation: \n {}", target.translation());
   //mc_rtc::log::info("target.rotation: \n {},", target.rotation());
   ctl.leftFootTask->targetPose(target);
+  ctl.comQP().updateLFPose(target);
 
   ctl.setTargetFromCoMQP();
 

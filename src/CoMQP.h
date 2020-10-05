@@ -91,11 +91,20 @@ public:
   }
   double mu_x_calc;
 
+  void resetContactPoses();
+  void updateContactPoses(const mc_rbdyn::Robot & robot);
+  void updateRFPose(sva::PTransformd const pose);
+  void updateLFPose(sva::PTransformd const pose);
+  void updateRHPose(sva::PTransformd const pose);
+  void updateLHPose(sva::PTransformd const pose);
+  
   void addToGUI(mc_rtc::gui::StateBuilder &);
   void removeFromGUI(mc_rtc::gui::StateBuilder &);
   void addToLogger(mc_rtc::Logger &);
   void removeFromLogger(mc_rtc::Logger &);
 
+  Eigen::MatrixXd graspMatrixFromTranslation(Eigen::Vector3d const trans) const;
+  
 protected:
   int nrVar() const
   {
@@ -202,6 +211,10 @@ protected:
   Eigen::MatrixXd x_;
   Eigen::QuadProgDense solver_;
 
+  // Store the contact positions so that they can be updated from different places
+  sva::PTransformd lfPose, rfPose, lhPose, rhPose;
+  bool lfPoseUpdated, rfPoseUpdated, lhPoseUpdated, rhPoseUpdated;
+  
   /**
    * FIXME: Hack to ensure that the ComQP is only added once to the logger
    * The states should be written properly such that it does not happen instead

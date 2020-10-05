@@ -44,6 +44,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
   E_lh.resize(6, 6);
   E_lh.setZero();
 
+  
   sliding_rh1.resize(6, 6);
   sliding_rh1.setZero();
   sliding_rh1(0, 0) = 1.0;
@@ -154,18 +155,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 
 bool CoMQP::solve(const mc_rbdyn::Robot & robot)
 {
-  const double Px_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().x();
-  const double Py_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().y();
-  const double Pz_rf = robot.surface(rightFootSurface).X_0_s(robot).translation().z();
-  const double Px_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().x();
-  const double Py_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().y();
-  const double Pz_lf = robot.surface(leftFootSurface).X_0_s(robot).translation().z();
-  const double Px_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().x();
-  const double Py_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().y();
-  const double Pz_rh = robot.surface(rightHandSurface).X_0_s(robot).translation().z();
-  const double Px_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().x();
-  const double Py_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().y();
-  const double Pz_lh = robot.surface(leftHandSurface).X_0_s(robot).translation().z();
+  updateContactPoses(robot);
 
   const auto bodyName_rf = robot.surface(rightFootSurface).bodyName();
   const auto bodyName_lf = robot.surface(leftFootSurface).bodyName();
@@ -176,10 +166,24 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   const auto bodyPT_lf = robot.bodyPosW(bodyName_lf);
   const auto bodyPT_rh = robot.bodyPosW(bodyName_rh);
   const auto bodyPT_lh = robot.bodyPosW(bodyName_lh);
+ 
+  const double Px_rh = rhPose.translation().x();
+  const double Py_rh = rhPose.translation().y();
+  const double Pz_rh = rhPose.translation().z();
 
-  const double Px_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(0,0);
-  const double Py_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(1,1);
-  const double Pz_rh_rot = robot.surface(rightHandSurface).X_0_s(robot).rotation()(2,2);
+  const double Px_lh = lhPose.translation().x();
+  const double Py_lh = lhPose.translation().y();
+  const double Pz_lh = lhPose.translation().z();
+    
+  const double Px_rh_rot = rhPose.rotation()(0,0);
+  const double Py_rh_rot = rhPose.rotation()(1,1);
+  const double Pz_rh_rot = rhPose.rotation()(2,2);
+  
+  E_rf = graspMatrixFromTranslation(rfPose.translation());
+  E_rh = graspMatrixFromTranslation(rhPose.translation());
+  E_lf = graspMatrixFromTranslation(lfPose.translation());
+  E_lh = graspMatrixFromTranslation(lhPose.translation());
+  
   //rightHandPose_x = Px_rh_rot;
   //rightHandPose_y = Py_rh_rot;
   //rightHandPose_z = Pz_rh_rot;
@@ -189,6 +193,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   rightHandPose(3) = Px_rh;
   rightHandPose(4) = Py_rh;
   rightHandPose(5) = Pz_rh;
+  
   Eigen::Matrix3d constRot_rf; // Rotation from body local link to desired surface orien.
   Eigen::Matrix3d constRot_lf;
   Eigen::Matrix3d constRot_rh;
@@ -228,37 +233,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   Rot_rh.block<3, 3>(3, 3) = bodyRot_rh;
   Rot_lh.block<3, 3>(0, 0) = bodyRot_lh;
   Rot_lh.block<3, 3>(3, 3) = bodyRot_lh;
-  // clang-format off
-  E_rf << 1., 0., 0., 0., 0., 0.,
-         0., 1., 0., 0., 0., 0.,
-         0., 0., 1., 0., 0., 0.,
-         0., -Pz_rf, Py_rf, 1., 0., 0.,
-         Pz_rf, 0., -Px_rf, 0., 1., 0.,
-         -Py_rf, Px_rf, 0., 0., 0., 1.;
-
-  E_lf << 1., 0., 0., 0., 0., 0.,
-         0., 1., 0., 0., 0., 0.,
-         0., 0., 1., 0., 0., 0.,
-         0., -Pz_lf, Py_lf, 1., 0., 0.,
-         Pz_lf, 0., -Px_lf, 0., 1., 0.,
-         -Py_lf, Px_lf, 0., 0., 0., 1.;
-
-  E_rh <<
-          1., 0., 0., 0., 0., 0.,
-          0., 1., 0., 0., 0., 0.,
-          0., 0., 1., 0., 0., 0.,
-          0., -Pz_rh, Py_rh, 1., 0., 0.,
-          Pz_rh, 0., -Px_rh, 0., 1., 0.,
-          -Py_rh, Px_rh, 0., 0., 0., 1.;
-  E_lh <<
-          1., 0., 0., 0., 0., 0.,
-          0., 1., 0., 0., 0., 0.,
-          0., 0., 1., 0., 0., 0.,
-          0., -Pz_lh, Py_lh, 1., 0., 0.,
-          Pz_lh, 0., -Px_lh, 0., 1., 0.,
-          -Py_lh, Px_lh, 0., 0., 0., 1.;
-  // clang-format on
-
+  
+  
   // XXX measure mu_y and mu_z from force sensor here.
   // Usually Saeid sets it according to the trajectory
   // Let's see what's better
@@ -566,6 +542,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   }
 
   bool ret = solver_.solve(P, q, A_st, b, G_st, h_st);
+  resetContactPoses();  
   return ret;
 }
 
@@ -601,6 +578,55 @@ void CoMQP::errorMessage() const
   //solver_.inform(stream);
   mc_rtc::log::error(stream.str());
 }
+
+void CoMQP::resetContactPoses()
+{
+  lfPoseUpdated = false;
+  rfPoseUpdated = false;
+  lhPoseUpdated = false;
+  rhPoseUpdated = false;
+}
+
+void CoMQP::updateContactPoses(const mc_rbdyn::Robot & robot)
+{
+  updateRFPose(robot.surface(rightFootSurface).X_0_s(robot));
+  updateLFPose(robot.surface(leftFootSurface).X_0_s(robot));
+  updateRHPose(robot.surface(rightHandSurface).X_0_s(robot));
+  updateLHPose(robot.surface(leftHandSurface).X_0_s(robot));
+}
+
+void CoMQP::updateRFPose(sva::PTransformd const pose)
+{
+  if (!rfPoseUpdated){
+      rfPose = pose;
+      rfPoseUpdated = true;
+  }
+}
+
+void CoMQP::updateLFPose(sva::PTransformd const pose)
+{
+  if (!lfPoseUpdated){
+    lfPose = pose;
+    lfPoseUpdated = true;
+  }
+}
+
+void CoMQP::updateRHPose(sva::PTransformd const pose)
+{
+  if (!rhPoseUpdated){
+    rhPose = pose;
+    rhPoseUpdated = true;
+  }
+}
+
+void CoMQP::updateLHPose(sva::PTransformd const pose)
+{
+  if (!lhPoseUpdated){
+    lhPose = pose;
+    lhPoseUpdated = true;
+  }
+}
+
 
 void CoMQP::addToGUI(mc_rtc::gui::StateBuilder & gui)
 {
@@ -685,4 +711,25 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("RH_fs_rot");
   logger.removeLogEntry("muXcalc");
   inLogger_ = false;
+}
+
+Eigen::MatrixXd CoMQP::graspMatrixFromTranslation(Eigen::Vector3d trans) const
+{
+  const double Px = trans[0];
+  const double Py = trans[1];
+  const double Pz = trans[2];
+
+  Eigen::MatrixXd graspMatrix;
+  graspMatrix.resize(6,6);
+
+  // clang-format off
+  graspMatrix << 1., 0., 0., 0., 0., 0.,
+                 0., 1., 0., 0., 0., 0.,
+                 0., 0., 1., 0., 0., 0.,
+                 0., -Pz, Py, 1., 0., 0.,
+                 Pz, 0., -Px, 0., 1., 0.,
+                 -Py, Px, 0., 0., 0., 1.;
+  // clang-format on
+  
+  return graspMatrix;
 }
