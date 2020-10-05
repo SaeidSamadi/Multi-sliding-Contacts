@@ -198,9 +198,12 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   constRot_rh << 0.0,  0.0, -1.0,
                  1.0,  0.0,  0.0,
                  0.0, -1.0,  0.0;
-  constRot_lh <<  0.0,  0.0, -1.0,
-                 -1.0,  0.0,  0.0,
-                  0.0,  1.0,  0.0;
+  // constRot_lh <<  0.0,  0.0, -1.0,
+  //                -1.0,  0.0,  0.0,
+  //                 0.0,  1.0,  0.0;
+  constRot_lh <<  1.0,  0.0,  0.0,
+                  0.0,  1.0,  0.0,
+                  0.0,  0.0,  1.0;
   //constRot_lh = constRot_rh;
 
   const auto bodyRot_rf = constRot_rf * bodyPT_rf.rotation();
