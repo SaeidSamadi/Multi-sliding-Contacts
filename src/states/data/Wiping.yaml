@@ -42,7 +42,7 @@ WipingController_PrepareWipingState:
   AddContacts:
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
@@ -57,7 +57,7 @@ WipingController_PrepareWipingState:
       r2Surface: AllGround
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
 ##
 # FIXED: The action of these states is the same for left/right, make them inherit from each other and only change 
@@ -80,7 +80,7 @@ WipingController_HandTrajectoryBase:
         # No point in keephand here, the hand motion is fully constrained by the trajectory
         # KeepHand:
         #   type: surfaceTransform
-        #   surface: LeftHandPad
+        #   surface: BlockLeftHand
         #   stiffness: 5.0
         #   dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
 
@@ -121,13 +121,13 @@ WipingController_LeftHandCircle:
   AddContacts:
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 0, 0, 0]
   tasks:
     HandTrajectory:
       name: LeftHandTrajectoryCircle
-      surface: LeftHandPad
+      surface: BlockLeftHand
       dimWeight: [0, 0, 0, 0, 1, 1]
       target:
         # XXX should be target relative to a surface (more generic)
@@ -216,7 +216,7 @@ WipingController_ReleasePushWallCoMQP:
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
 
@@ -229,7 +229,7 @@ WipingController_PrepareMoveHandBack:
       r2Surface: AllGround
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
   tasks:
     MoveRightHand:
@@ -247,7 +247,7 @@ WipingController_PrepareMoveHandBack:
               - speed: 0.01
     MoveLeftHand:
       type: surfaceTransform
-      surface: LeftHandPad
+      surface: BlockLeftHand
       stiffness: 5.0
       weight: 500
       moveWorld:

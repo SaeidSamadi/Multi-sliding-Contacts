@@ -194,7 +194,7 @@ protected:
   std::string leftFootForceSensor = "LeftFootForceSensor";
 
   std::string rightHandSurface = "RightHandPad";
-  std::string leftHandSurface = "LeftHandPad";
+  std::string leftHandSurface = "BlockLeftHand";
   std::string rightFootSurface = "RightFoot";
   std::string leftFootSurface = "LeftFoot";
 

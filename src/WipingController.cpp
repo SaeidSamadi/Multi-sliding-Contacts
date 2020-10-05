@@ -13,7 +13,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   rightHandTask.reset(new mc_tasks::force::CoPTask("RightHandPad", robots(), robots().robotIndex(), 5., 500));//Stiff, Weight
   rightHandTask->setGains(1, 300);
   rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
-  leftHandTask.reset(new mc_tasks::force::CoPTask("LeftHandPad", robots(), robots().robotIndex(), 5., 500));
+  leftHandTask.reset(new mc_tasks::force::CoPTask("BlockLeftHand", robots(), robots().robotIndex(), 5., 500));
   leftHandTask->setGains(1, 300);
   leftHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
 
@@ -38,7 +38,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
                          [this]() { return robot().surface("RightHandPad").X_0_s(robot()); }),
       mc_rtc::gui::Force("LeftHandForce", handForceConfig,
                          [this]() { return robot().forceSensor("LeftHandForceSensor").worldWrench(robot()); },
-                         [this]() { return robot().surface("LeftHandPad").X_0_s(robot()); }),
+                         [this]() { return robot().surface("BlockLeftHand").X_0_s(robot()); }),
       mc_rtc::gui::Force("RightFootForce", mc_rtc::gui::ForceConfig(mc_rtc::gui::Color(1., 0.2, 0.)),
                          [this]() { return robot().forceSensor("RightFootForceSensor").wrenchWithoutGravity(robot()); },
                          [this]() { return robot().surface("RightFoot").X_0_s(robot()); }),
@@ -164,7 +164,7 @@ void WipingController::addLeftHandForceControl()
   gui()->addElement(
       {"WipingController", "Markers", "Forces"},
       mc_rtc::gui::Point3D("LeftHandCoP",
-                           [this]() { return robot().copW("LeftHandPad"); }),
+                           [this]() { return robot().copW("BlockLeftHand"); }),
       mc_rtc::gui::Point3D("LeftHandCoPTarget",
                            mc_rtc::gui::PointConfig(mc_rtc::gui::Color{0.,1.,0.}),
                            [this]() { return leftHandTask->targetCoPW(); })

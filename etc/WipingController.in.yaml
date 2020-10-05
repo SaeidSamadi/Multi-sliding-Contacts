@@ -138,7 +138,7 @@ states:
         dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
       KeepLeftHand:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         stiffness: 5.0
         dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
     AddContacts:
@@ -177,7 +177,7 @@ states:
         weight: 1000.0
       KeepLeftHand:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         stiffness: 5.0
         dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
       KeepRightHand:
@@ -187,7 +187,7 @@ states:
         dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
       LeftHandAdmittance:
         type: admittance
-        surface: LeftHandPad
+        surface: BlockLeftHand
         wrench:
           couple: [0.0, 0.0, 0.0]
           force: [0.0, 0.0, 2.5]
@@ -283,7 +283,7 @@ states:
     tasks:
       LeftHandTrajectoryConstantVelocity:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         weight: 1000.0
         damping: 20.0
         stiffness: 0.0
@@ -293,7 +293,7 @@ states:
           timeout: 2.0
       KeepLeftHand:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         weight: 1000.0
         stiffness: 10.0
         dimWeight: [1, 1, 1, 1, 0, 0]
@@ -318,7 +318,7 @@ states:
         dimWeight: [1, 1, 1, 1, 1, 1]
       KeepLeftHand:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         weight: 1000.0
         stiffness: 10.0
         dimWeight: [1, 1, 1, 1, 1, 1]
@@ -519,7 +519,7 @@ states:
     AddContacts:
       - r1: hrp4
         r2: wall  
-        r1Surface: LeftHandPad
+        r1Surface: BlockLeftHand
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 0]
       - r1: hrp4
@@ -539,7 +539,7 @@ states:
         r2Surface: AllGround
       - r1: hrp4
         r2: wall  
-        r1Surface: LeftHandPad
+        r1Surface: BlockLeftHand
         r2Surface: AllGround
       - r1: hrp4
         r2: ground
@@ -556,7 +556,7 @@ states:
         dimWeight: [1, 1, 1, 1, 1, 1]
       KeepLeftHand:
         type: surfaceTransform
-        surface: LeftHandPad
+        surface: BlockLeftHand
         weight: 1000.0
         stiffness: 10.0
         dimWeight: [1, 1, 1, 1, 1, 1]
@@ -669,7 +669,7 @@ states:
         dof: [1, 1, 1, 0, 0, 0]
       - r1: hrp4
         r2: wall
-        r1Surface: LeftHandPad
+        r1Surface: BlockLeftHand
         r2Surface: AllGround
         dof: [1, 1, 1, 0, 0, 0]
 
@@ -755,7 +755,7 @@ states:
         dof: [1, 1, 1, 0, 0, 0]
       - r1: hrp4
         r2: wall  
-        r1Surface: LeftHandPad
+        r1Surface: BlockLeftHand
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 0]
       - r1: hrp4
@@ -768,10 +768,13 @@ transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
 
   # Triggered by StepUpSlope
-  #- [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
-  - [UpSlope::FSM::StepUpSlope, OK, DownSlope::FSM::StepDownSlope, Auto]
+  #- [UpSlope::FSM::StepUpSlope, OK, DownSlope::FSM::StepDownSlope, Auto]
+  - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
+  # - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
+  # - [UpSlope::FSM::LeftHandToWhiteboard, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
+  # - [UpSlope::FSM::RightHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
     # Wipe both hands with left foot on the slope
     # FIXME: See notes in Wiping.yaml, main points are
@@ -795,9 +798,9 @@ transitions:
   - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
   - [DownSlope::FSM::StepDownSlope, OK, Choose::Initial, Auto]
 
-  - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
-  - [WipingController_GoStandingCenter, StableRightHandToBoard, Stabilized_RightHandToWhiteboard] # broken, same target as slope
-  - [WipingController_GoStandingCenter, LeftHandToBoard, WipingController_LeftHandToWhiteboard]
+  # - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
+  # - [WipingController_GoStandingCenter, StableRightHandToBoard, Stabilized_RightHandToWhiteboard] # broken, same target as slope
+  # - [WipingController_GoStandingCenter, LeftHandToBoard, WipingController_LeftHandToWhiteboard]
   - [WipingController_GoStandingCenter, Slope, UpSlope::FSM::StepUpSlope]
   - [WipingController_GoStandingCenter, Stair, Stabilized_StepUpStair]
 
@@ -818,16 +821,16 @@ transitions:
   - [WipingController_WipeItStateConstantVelocity_lf, OK, Pause1sec]
   - [WipingController_WipeItStateCircle_lf, OK, Pause1sec]
   - [Pause1sec, Release, WipingController_PrepareLeftFootBack]
-  - [WipingController_RightHandToWhiteboard, OK, WipingController_PrepareWipingJSON_rh]
-  - [WipingController_PrepareWipingJSON_rh, goWiping, WipingController_PrepareWipingState_rh]
-  - [WipingController_PrepareWipingJSON_rh, LeftHandToBoard, WipingController_LeftHandToWhiteboard]
-  - [WipingController_LeftHandToWhiteboard, OK, WipingController_PrepareWipingJSON_lh]
+  # - [WipingController_RightHandToWhiteboard, OK, WipingController_PrepareWipingJSON_rh]
+  # - [WipingController_PrepareWipingJSON_rh, goWiping, WipingController_PrepareWipingState_rh]
+  # - [WipingController_PrepareWipingJSON_rh, LeftHandToBoard, WipingController_LeftHandToWhiteboard]
+  # - [WipingController_LeftHandToWhiteboard, OK, WipingController_PrepareWipingJSON_lh]
   - [WipingController_PrepareWipingJSON_lh, goWiping, WipingController_PrepareWipingState_lh]
-  - [WipingController_PrepareWipingJSON_rh, WipingExperiment, WipingController_PrepareWipingState]
+  # - [WipingController_PrepareWipingJSON_rh, WipingExperiment, WipingController_PrepareWipingState]
   - [WipingController_PrepareWipingJSON_lh, WipingExperiment, WipingController_PrepareWipingState]
   - [WipingController_PrepareWipingJSON_lh, GoShuffling, WipingController_PrepareShuffleState]
-  - [WipingController_PrepareWipingJSON_rh, PushWallExpeirment (CoMQP), WipingController_PreparePushWallAuto_rh]
-  - [WipingController_PrepareWipingJSON_rh, PushWallExperiment (No ComQP), WipingController_PushWallNoCoMQP]
+  # - [WipingController_PrepareWipingJSON_rh, PushWallExpeirment (CoMQP), WipingController_PreparePushWallAuto_rh]
+  # - [WipingController_PrepareWipingJSON_rh, PushWallExperiment (No ComQP), WipingController_PushWallNoCoMQP]
   - [WipingController_PreparePushWallAuto_rh, PushWallExperiment (ComQP), WipingController_PushWallCoMQP_rh]
   - [WipingController_PreparePushWallAuto_rh, Abort, WipingController_ReleasePushWallCoMQP_rh]
   - [WipingController_PushWallCoMQP_rh, Abort, WipingController_ReleasePushWallCoMQP_rh]

@@ -5,7 +5,7 @@ LeftHand::LookAt:
       type: lookAtSurface
       body: xtion_link
       bodyVector: [1.0, 0.0, 0.0]
-      surface: LeftHandPad
+      surface: BlockLeftHand
       stiffness: 5.0
       weight: 10.0
       activeJoints: [NECK_P, NECK_Y]
@@ -15,7 +15,7 @@ LeftHand::TrajectoryToWhiteboard:
   tasks:
     LeftHandTrajectory:
       type: bspline_trajectory
-      surface: LeftHandPad
+      surface: BlockLeftHand
       weight: 500.0
       stiffness: 50.0
       duration: 4.0
@@ -25,11 +25,11 @@ LeftHand::TrajectoryToWhiteboard:
         timeElapsed: true
       target:
         translation: [0.4, 0.4, 1.1]
-        rotation: [1.57, 0.0, -1.57]
+        rotation: [0.0, -1.57, 0.0]
       controlPoints:
         - [0.17, 0.5, 0.85]
       oriWaypoints:
-        - [3.5, [1.57, 0.0, -1.57]]
+        - [3.5, [0.0, -1.57, 0.0]]
 
 LeftHand::PrepareWipingJSON:
   base: MetaTasks
@@ -37,13 +37,13 @@ LeftHand::PrepareWipingJSON:
   AddContacts:
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
   tasks:
     LeftHandContactConstantVelocity:
       type: surfaceTransform
-      surface: LeftHandPad
+      surface: BlockLeftHand
       refVel: [0,0,0,0,0,-0.05]
       stiffness: 1
       damping: 100
@@ -58,7 +58,7 @@ LeftHand::Contact:
   AddContacts:
     - r1: hrp4
       r2: wall  
-      r1Surface: LeftHandPad
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 1]
 
