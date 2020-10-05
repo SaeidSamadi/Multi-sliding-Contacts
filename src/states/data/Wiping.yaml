@@ -220,6 +220,31 @@ WipingController_ReleasePushWallCoMQP:
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
 
+WipingController_ReleasePushWallCoMQP_AfterShuffle:
+  base: Parallel
+  states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
+  configs:
+    WipingController_ReleasePushWallCoMQP_rh:
+      comStiffness: 30
+    WipingController_ReleasePushWallCoMQP_lh:
+      comStiffness: 30
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board  
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: wall  
+      r1Surface: LeftHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: slope
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+
 WipingController_PrepareMoveHandBack:
   base: MetaTasks
   RemoveContacts:
@@ -235,10 +260,10 @@ WipingController_PrepareMoveHandBack:
     MoveRightHand:
       type: surfaceTransform
       surface: RightHandPad
-      stiffness: 5.0
+      stiffness: 10.0
       weight: 500
       moveWorld:
-        translation: [-0.35, -0.05, 0.0]
+        translation: [-0.3, 0.04, 0.05]
       completion:
         OR:
           - eval: 0.05
@@ -248,7 +273,7 @@ WipingController_PrepareMoveHandBack:
     MoveLeftHand:
       type: surfaceTransform
       surface: BlockLeftHand
-      stiffness: 5.0
+      stiffness: 10.0
       weight: 500
       moveWorld:
         translation: [-0.25, 0.15, 0.0]
@@ -259,11 +284,51 @@ WipingController_PrepareMoveHandBack:
               - timeout: 3.0
               - speed: 0.01
 
+WipingController_PrepareMoveHandBack_AfterShuffle:
+  base: WipingController_PrepareMoveHandBack
+  tasks:
+    MoveRightHand:
+      stiffness: 5.0
+      moveWorld:
+        translation: [-0.1, 0.0, 0.05]
+    MoveLeftHand:
+      stiffness: 5.0
+      moveWorld:
+        translation: [-0.1, 0.05, 0.0]
+
+
 Wiping::Stabilized::MoveHandsBack:
   base: Parallel
   states: [UpSlope::Stabilizer::GoCenter, WipingController_PrepareMoveHandBack]
   configs:
     UpSlope::Stabilizer::GoCenter:
+      stiffness: 20
+      #completion:
+      #  - dcmEval: [0.03, 0.06, 0.2]
+        #- duration: 3.0
+        #OR:
+        #  - dcmEval: [0.02, 0.05, 0.2]
+        #  - timeout: 5.0
+        #    #Pause:
+        #    #  duration: 4
+           
+Wiping::Stabilized_MoveHandsBack:
+  base: Parallel
+  states: [Stabilizer::Standing, WipingController_PrepareMoveHandBack]
+  configs:
+    Stabilizer::Standing:
+      stiffness: 20
+      StabilizerConfig:
+        Left:
+          rotation: [0.523, 0.0, 0.0]
+          #completion:
+          #  - dcmEval: [0.03, 0.06, 0.2]
+
+Wiping::Stabilized::MoveHandsBack_AfterShuffle:
+  base: Parallel
+  states: [UpSlope::Stabilizer::GoCenter, WipingController_PrepareMoveHandBack_AfterShuffle]
+  configs:
+    UpSlope::Stabilizer::GoCenter:
       stiffness: 5
       completion:
-        dcmEval: [0.01, 0.02, 0.1]
+        - dcmEval: [0.03, 0.06, 0.2]

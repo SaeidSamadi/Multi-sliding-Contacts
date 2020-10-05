@@ -742,7 +742,7 @@ states:
        damping_lh: [150, 150, 150, 150, 150, 150]
        #damping_lf: [6, 6, 6, 6, 6, 6]
        stiffness_lf: [10, 10, 10, 10, 10, 5]
-       damping_lf: [20, 20, 20, 20, 20, 100]
+       damping_lf: [40, 40, 40, 40, 40, 100] #20
        #damping_rh: [300, 300, 300, 300, 300, 300]
        #damping_lh: [300, 300, 300, 300, 300, 300]
        #damping_lf: [300, 300, 300, 300, 300, 300]
@@ -764,39 +764,41 @@ states:
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 0]
 
+  Choose::Slope::MoveHandsBack:
+    base: Choose
+    states: [Wiping::Stabilized::MoveHandsBack, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Step Down: StepDown
+
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
 
-  # Triggered by StepUpSlope
-  #- [UpSlope::FSM::StepUpSlope, OK, DownSlope::FSM::StepDownSlope, Auto]
   - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
-  # - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
-  # - [UpSlope::FSM::LeftHandToWhiteboard, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
-  # - [UpSlope::FSM::RightHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
-    # Wipe both hands with left foot on the slope
-    # FIXME: See notes in Wiping.yaml, main points are
-    # - Way too much code duplication. Don't copy paste the PrepareWiping/WipeItBaby states, instead 
-    # adapt them to be capable of handling different end effectors (through configuration)
-    # - As is, computes the CoMQP multiple times, resets/add the Com task multiple times, etc
-    #   Make sure things get done once and only once
-    # - Same remark concerning code duplication in YAML. If things are doing the same for left and right hand,
-    # then factorize the code in a common base state and inherit from it, then only adjust the parameters you need
     #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
   - [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
     #- [Choose::Slope::PrepareWiping,        PrepareWiping, Choose::Slope::PrepareShuffleState, Auto]
   - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
+    #- [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
     #- [Choose::Slope::WipeBothHands, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]
-    #- [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, Choose::Slope::ShuffleLeftFoot, Auto]
-  - [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, WipingController_ReleasePushWallCoMQP, Auto]
-  - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP, Auto]
-  - [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
-  - [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized::MoveHandsBack, Auto]
-  - [Wiping::Stabilized::MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
-  - [DownSlope::FSM::StepDownSlope, OK, Choose::Initial, Auto]
+  - [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, Choose::Slope::ShuffleLeftFoot, Auto]
+    #- [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
+  - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
+  - [WipingController_ReleasePushWallCoMQP_AfterShuffle, OK, Wiping::Stabilized::MoveHandsBack_AfterShuffle, Auto]
+  - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK, DownSlope::FSM::StepDownSlope, Auto]
+  - [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
+  - [Choose::Slope::MoveHandsBack, StepDown, DownSlope::FSM::StepDownSlope, Auto]
+    #- [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized_MoveHandsBack, Auto]
+    #- [Wiping::Stabilized_MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
+    #- [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
+    #- [Choose::Slope::MoveHandsBack, StepDown, DownSlope::FSM::StepDownSlope, Auto]
+    #- [DownSlope::FSM::StepDownSlope, OK, Choose::Initial, Auto]
+  - [DownSlope::FSM::StepDownSlope, OK, DownSlope::Stabilizer::HalfSitting, Auto]
 
   # - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
   # - [WipingController_GoStandingCenter, StableRightHandToBoard, Stabilized_RightHandToWhiteboard] # broken, same target as slope
