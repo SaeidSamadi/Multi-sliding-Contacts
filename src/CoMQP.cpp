@@ -153,9 +153,13 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 //  }
 //}
 
-bool CoMQP::solve(const mc_rbdyn::Robot & robot)
+bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_)
 {
+
   updateContactPoses(robot);
+
+  mu_rh = mu_rh_; 
+  mu_lh = mu_lh_;
 
   const auto bodyName_rf = robot.surface(rightFootSurface).bodyName();
   const auto bodyName_lf = robot.surface(leftFootSurface).bodyName();
@@ -253,11 +257,11 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   LWristVel << lhVel.linear().x(), lhVel.linear().y(), lhVel.linear().z(); //Global = [0, 0, vel]
   localVel_rh = bodyRot_rh * RWristVel;
   localVel_lh = bodyRot_lh * LWristVel;
-  double velNorm_rh = Eigen::Vector3d{localVel_rh(0), localVel_rh(1), 0.}.norm();
-  double velNorm_lh = Eigen::Vector3d{localVel_lh(0), localVel_lh(1), 0.}.norm();
+  velNorm_rh = Eigen::Vector3d{localVel_rh(0), localVel_rh(1), 0.}.norm();
+  velNorm_lh = Eigen::Vector3d{localVel_lh(0), localVel_lh(1), 0.}.norm();
   Eigen::Vector3d velRatio_ = - localVel_rh / velNorm_rh;
 
-  if(velNorm_rh < 10e-5)
+  if(velNorm_rh < 10e-2)
   {
     mu_x_rh = mu_rh/2.;
     mu_y_rh = mu_rh/2.;
@@ -288,7 +292,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   sliding_rh = sliding_rh * Rot_rh;
 
   
-  if(velNorm_lh < 10e-5)
+  if(velNorm_lh < 10e-2)
   {
     mu_x_lh = mu_lh/2.;
     mu_y_lh = mu_lh/2.;
@@ -504,11 +508,14 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot)
   //Eigen::Vector3d tau_rf_d = Eigen::Vector3d{Px_rf, Py_rf, Pz_rf}.cross(f_rf_d);
   //Eigen::Vector3d f_lf_d = f_rf_d;
   //Eigen::Vector3d tau_lf_d = Eigen::Vector3d{Px_lf, Py_lf, Pz_lf}.cross(f_lf_d);
-  Eigen::Vector3d f_rh_d{N_rh, mu_x_rh * N_rh, mu_y_rh * N_rh}; //XXX Set sliding Condition here
-  Eigen::Vector3d tau_rh_d = Eigen::Vector3d{Px_rh, Py_rh, Pz_rh}.cross(f_rh_d);
-  Eigen::Vector3d f_lh_d{N_lh, mu_x_lh * N_lh, mu_y_lh * N_lh}; //XXX Set sliding Condition here
-  Eigen::Vector3d tau_lh_d = Eigen::Vector3d{Px_lh, Py_lh, Pz_lh}.cross(f_lh_d);
-
+  // Eigen::Vector3d f_rh_d{N_rh, mu_x_rh * N_rh, mu_y_rh * N_rh}; //XXX Set sliding Condition here
+  f_rh_d = Eigen::Vector3d{N_rh, mu_x_rh * N_rh, mu_y_rh * N_rh}; //XXX Set sliding Condition here
+  // Eigen::Vector3d f_lh_d{N_lh, mu_x_lh * N_lh, mu_y_lh * N_lh}; //XXX Set sliding Condition here
+  f_lh_d = Eigen::Vector3d{N_lh, mu_x_lh * N_lh, mu_y_lh * N_lh}; //XXX Set sliding Condition here
+  // Eigen::Vector3d tau_lh_d = Eigen::Vector3d{Px_lh, Py_lh, Pz_lh}.cross(f_lh_d);
+  tau_lh_d = Eigen::Vector3d{Px_lh, Py_lh, Pz_lh}.cross(f_lh_d);
+  // Eigen::Vector3d tau_rh_d = Eigen::Vector3d{Px_rh, Py_rh, Pz_rh}.cross(f_rh_d);
+  tau_rh_d = Eigen::Vector3d{Px_rh, Py_rh, Pz_rh}.cross(f_rh_d);
   //Y_desired.block<3, 1>(0, 0) = PG_d;
   //Y_desired.block<3, 1>(3, 0) = f_rf_d;
   //Y_desired.block<3, 1>(6, 0) = tau_rf_d;
@@ -662,9 +669,9 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
     logger.addLogEntry("CoMQP_gains_Wrench_rf", [this]() { return P_Wrench_rf; });
     logger.addLogEntry("CoMQP_gains_Wrench_lf", [this]() { return P_Wrench_lf; });
     logger.addLogEntry("CoMQP_gains_Wrench_rh", [this]() { return P_Wrench_rh; });
-    logger.addLogEntry("CoMQP_mu_y", [this]() { return mu_x_rh; });
-    logger.addLogEntry("CoMQP_mu_z", [this]() { return mu_y_rh; });
-    logger.addLogEntry("CoMQP_mu_sum", [this]() { return mu_x_rh+mu_y_rh; });
+    logger.addLogEntry("CoMQP_murh_y", [this]() { return mu_x_rh; });
+    logger.addLogEntry("CoMQP_murh_z", [this]() { return mu_y_rh; });
+    logger.addLogEntry("CoMQP_murh_sum", [this]() { return mu_rh; });
 
     logger.addLogEntry("CoMQP_pos", [this]() { return result().comPos; });
     logger.addLogEntry("CoMQP_rightFootForce", [this]() { return result().rightFootForce; });
@@ -683,6 +690,16 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
     logger.addLogEntry("CoMQP_LFPose", [this](){ return lfPose; });
     logger.addLogEntry("CoMQP_RHPose", [this](){ return rhPose; });
     logger.addLogEntry("CoMQP_LHPose", [this](){ return lhPose; });
+
+    logger.addLogEntry("CoMQP_desired_RHForce", [this](){ return f_rh_d; });
+    logger.addLogEntry("CoMQP_desired_LHForce", [this](){ return f_lh_d; });
+    logger.addLogEntry("CoMQP_desired_RHTorque", [this](){ return tau_rh_d;});
+    logger.addLogEntry("CoMQP_desired_LHTorque", [this](){ return tau_lh_d;});
+
+    logger.addLogEntry("CoMQP_VelStuff_localRH", [this](){return localVel_rh;});
+    logger.addLogEntry("CoMQP_VelStuff_localLH", [this](){return localVel_lh;});
+    logger.addLogEntry("CoMQP_VelStuff_NormRH", [this](){return velNorm_rh;});
+    logger.addLogEntry("CoMQP_VelStuff_NormLH", [this](){return velNorm_lh;});
   }
   inLogger_ = true;
 }
@@ -721,6 +738,16 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("CoMQP_LFPose");
   logger.removeLogEntry("CoMQP_RHPose");
   logger.removeLogEntry("CoMQP_LHPose");
+
+  logger.removeLogEntry("CoMQP_desired_RHForce");
+  logger.removeLogEntry("CoMQP_desired_LHForce");
+  logger.removeLogEntry("CoMQP_desired_RHTorque");
+  logger.removeLogEntry("CoMQP_desired_LHTorque");
+
+  logger.removeLogEntry("CoMQP_VelStuff_localRH");
+  logger.removeLogEntry("CoMQP_VelStuff_localLH");
+  logger.removeLogEntry("CoMQP_VelStuff_NormRH");
+  logger.removeLogEntry("CoMQP_VelStuff_NormLH");
   
   inLogger_ = false;
 }

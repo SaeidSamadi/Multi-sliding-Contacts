@@ -22,7 +22,7 @@ class CoMQP
 public:
   CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config);
   int updateNumVar(const mc_rbdyn::Robot & robot);
-  bool solve(const mc_rbdyn::Robot & robot);
+  bool solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_);
   //bool solve(const mc_rbdyn::Robot & robot, const ModifiedSupportPolygon & supportPolygon);
   /*!
    * @brief  Result expressed as
@@ -191,11 +191,14 @@ protected:
   double mu_x_lh = 0, mu_y_lh = 0;
   sva::MotionVecd rhVel, lhVel;
   Eigen::Vector3d RWristVel, localVel_rh, LWristVel, localVel_lh;
+  double velNorm_rh, velNorm_lh;
   sva::ForceVecd rh_fs;
   Eigen::Vector3d rh_fs_rot;
   double muN;
   double mu_x_avg = 0.5;
 
+  Eigen::Vector3d f_rh_d, f_lh_d;
+  Eigen::Vector3d tau_rh_d, tau_lh_d;
 
   std::string rightHandForceSensor = "RightHandForceSensor";
   std::string leftHandForceSensor = "RightHandForceSensor";

@@ -2,7 +2,8 @@
 
 WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const mc_rtc::Configuration & config)
 : mc_control::fsm::Controller(rm, dt, config), comQP_(robot(), config("CoMQPConfig")),
-    frictionEstimator(robot(), "RightHandPad", Eigen::Vector3d{0.,0.,-1.})
+    frictionEstimator_rh(robot(), "RightHandPad", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("right_hand")("friction")),
+    frictionEstimator_lh(robot(), "BlockLeftHand", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_hand")("friction"))
 {
 
   useFeetForceControl_ = config("UseFeetForceControl", false);
@@ -85,7 +86,7 @@ bool WipingController::computeCoMQP()
   //double mu_y = muYZ.x();
   //double mu_z = muYZ.y();
   //comQP().updateNumVar(robot());
-  comQPComputed = this->comQP().solve(this->robot());
+  comQPComputed = this->comQP().solve(this->robot(), frictionEstimator_rh.mu_filtered(), frictionEstimator_lh.mu_filtered());
   if(!comQPComputed)
   {
     LOG_ERROR("CoMQP Failed to run with error code " << this->comQP().errorCode() << ":");
