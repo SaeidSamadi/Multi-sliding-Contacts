@@ -157,6 +157,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const doub
 {
 
   updateContactPoses(robot);
+  updateContactVelocities(robot);
 
   mu_rh = mu_rh_; 
   mu_lh = mu_lh_;
@@ -251,8 +252,6 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const doub
   rh_fs = robot.forceSensor(rightHandForceSensor).worldWrench(robot);
   rh_fs_rot << rh_fs.force().x(), rh_fs.force().y(), rh_fs.force().z();
   rh_fs_rot = bodyRot_rh * rh_fs_rot;
-  rhVel = robot.bodyVelW("r_wrist");
-  lhVel = robot.bodyVelW("l_wrist");
   RWristVel << rhVel.linear().x(), rhVel.linear().y(), rhVel.linear().z(); //Global = [0, 0, vel]
   LWristVel << lhVel.linear().x(), lhVel.linear().y(), lhVel.linear().z(); //Global = [0, 0, vel]
   localVel_rh = bodyRot_rh * RWristVel;
@@ -550,7 +549,8 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const doub
   }
 
   bool ret = solver_.solve(P, q, A_st, b, G_st, h_st);
-  resetContactPoses();  
+  resetContactPoses();
+  resetContactVelocities();
   return ret;
 }
 
@@ -635,6 +635,54 @@ void CoMQP::updateLHPose(sva::PTransformd const pose)
   }
 }
 
+void CoMQP::resetContactVelocities()
+{
+  lfVelUpdated = false;
+  rfVelUpdated = false;
+  lhVelUpdated = false;
+  rhVelUpdated = false;
+}
+
+void CoMQP::updateContactVelocities(const mc_rbdyn::Robot & robot)
+{
+  updateRFVelocity(robot.bodyVelW("r_ankle"));
+  updateLFVelocity(robot.bodyVelW("l_ankle"));
+  updateRHVelocity(robot.bodyVelW("r_wrist"));
+  updateLHVelocity(robot.bodyVelW("l_wrist"));
+}
+
+void CoMQP::updateRFVelocity(sva::MotionVecd const velocity)
+{
+  if (!rfVelUpdated){
+    rfVel = velocity;
+    rfVelUpdated = true;
+  }
+}
+
+void CoMQP::updateLFVelocity(sva::MotionVecd const velocity)
+{
+    if (!lfVelUpdated){
+    lfVel = velocity;
+    lfVelUpdated = true;
+  }
+}
+
+void CoMQP::updateRHVelocity(sva::MotionVecd const velocity)
+{
+    if (!rhVelUpdated){
+    rhVel = velocity;
+    rhVelUpdated = true;
+  }
+}
+
+void CoMQP::updateLHVelocity(sva::MotionVecd const velocity)
+{
+    if (!lhVelUpdated){
+    lhVel = velocity;
+    lhVelUpdated = true;
+  }
+}
+
 
 void CoMQP::addToGUI(mc_rtc::gui::StateBuilder & gui)
 {
@@ -686,10 +734,14 @@ void CoMQP::addToLogger(mc_rtc::Logger & logger)
     logger.addLogEntry("RH_fs_rot", [this]() { return rh_fs_rot;});
     logger.addLogEntry("muXcalc", [this]() { return mu_x_calc;});
 
-    logger.addLogEntry("CoMQP_RFPose", [this](){ return rfPose; });
-    logger.addLogEntry("CoMQP_LFPose", [this](){ return lfPose; });
-    logger.addLogEntry("CoMQP_RHPose", [this](){ return rhPose; });
-    logger.addLogEntry("CoMQP_LHPose", [this](){ return lhPose; });
+    logger.addLogEntry("CoMQP_Pose_RF", [this](){ return rfPose; });
+    logger.addLogEntry("CoMQP_Pose_LF", [this](){ return lfPose; });
+    logger.addLogEntry("CoMQP_Pose_RH", [this](){ return rhPose; });
+    logger.addLogEntry("CoMQP_Pose_LH", [this](){ return lhPose; });
+    logger.addLogEntry("CoMQP_Velocity_RF", [this](){ return rfVel; });
+    logger.addLogEntry("CoMQP_Velocity_LF", [this](){ return lfVel; });
+    logger.addLogEntry("CoMQP_Velocity_RH", [this](){ return rhVel; });
+    logger.addLogEntry("CoMQP_Velocity_LH", [this](){ return lhVel; });
 
     logger.addLogEntry("CoMQP_desired_RHForce", [this](){ return f_rh_d; });
     logger.addLogEntry("CoMQP_desired_LHForce", [this](){ return f_lh_d; });
@@ -734,10 +786,15 @@ void CoMQP::removeFromLogger(mc_rtc::Logger & logger)
   logger.removeLogEntry("RH_fs_rot");
   logger.removeLogEntry("muXcalc");
 
-  logger.removeLogEntry("CoMQP_RFPose");
-  logger.removeLogEntry("CoMQP_LFPose");
-  logger.removeLogEntry("CoMQP_RHPose");
-  logger.removeLogEntry("CoMQP_LHPose");
+  logger.removeLogEntry("CoMQP_Pose_RF");
+  logger.removeLogEntry("CoMQP_Pose_LF");
+  logger.removeLogEntry("CoMQP_Pose_RH");
+  logger.removeLogEntry("CoMQP_Pose_LH");
+
+  logger.removeLogEntry("CoMQP_Velocity_RF");
+  logger.removeLogEntry("CoMQP_Velocity_LF");
+  logger.removeLogEntry("CoMQP_Velocity_RH");
+  logger.removeLogEntry("CoMQP_Velocity_LH");
 
   logger.removeLogEntry("CoMQP_desired_RHForce");
   logger.removeLogEntry("CoMQP_desired_LHForce");

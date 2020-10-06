@@ -97,6 +97,13 @@ public:
   void updateLFPose(sva::PTransformd const pose);
   void updateRHPose(sva::PTransformd const pose);
   void updateLHPose(sva::PTransformd const pose);
+
+  void resetContactVelocities();
+  void updateContactVelocities(const mc_rbdyn::Robot & robot);
+  void updateRFVelocity(sva::MotionVecd const velocity);
+  void updateLFVelocity(sva::MotionVecd const velocity);
+  void updateRHVelocity(sva::MotionVecd const velocity);
+  void updateLHVelocity(sva::MotionVecd const velocity);					      
   
   void addToGUI(mc_rtc::gui::StateBuilder &);
   void removeFromGUI(mc_rtc::gui::StateBuilder &);
@@ -189,7 +196,7 @@ protected:
   double N_lf = 150.0;
   double mu_x_rh = 0, mu_y_rh = 0;
   double mu_x_lh = 0, mu_y_lh = 0;
-  sva::MotionVecd rhVel, lhVel;
+  
   Eigen::Vector3d RWristVel, localVel_rh, LWristVel, localVel_lh;
   double velNorm_rh, velNorm_lh;
   sva::ForceVecd rh_fs;
@@ -217,6 +224,9 @@ protected:
   // Store the contact positions so that they can be updated from different places
   sva::PTransformd lfPose, rfPose, lhPose, rhPose;
   bool lfPoseUpdated, rfPoseUpdated, lhPoseUpdated, rhPoseUpdated;
+
+  sva::MotionVecd lfVel, rfVel, lhVel, rhVel;
+  bool lfVelUpdated, rfVelUpdated, lhVelUpdated, rhVelUpdated;
   
   /**
    * FIXME: Hack to ensure that the ComQP is only added once to the logger

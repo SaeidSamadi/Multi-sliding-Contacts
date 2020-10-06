@@ -115,6 +115,9 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
+
+
+  
   if(linearWiping_){
     double linearVelocity = circleRadius_ / wipingDuration_;
     local_x = ctl.timeStep * linearVelocity;
@@ -163,9 +166,11 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   auto rotationPose = poseOutput.rotation();
   auto translationPose = poseOutput.translation();
   sva::PTransformd target;
+  sva::MotionVecd targetVelocity = sva::MotionVecd::Zero();
   target.rotation() = rotationPose;
   if(wipingTime <= wipingDuration_){
     target.translation() = translationPose + delta_lineW;
+    targetVelocity.linear() = delta_lineW / ctl.timeStep;
   }
   else{
     target.translation() = translationPose;
@@ -173,6 +178,8 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   ctl.rightHandTask->targetPose(target);
 
   ctl.comQP().updateRHPose(target);
+  ctl.comQP().updateRHVelocity(targetVelocity);
+  
   ctl.frictionEstimator_rh.update(ctl.robot());
   //double EstimatedFriction = ctl.frictionEstimator_rh.mu_calc();
 
