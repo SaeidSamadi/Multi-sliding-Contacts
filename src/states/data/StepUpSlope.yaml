@@ -18,6 +18,20 @@ UpSlope::LeftFootTrajectory:
         - [0.017046, 0.1, 0.08]
         - [0.017046, 0.12, 0.15]
 
+UpSlope::LeftFootTrajectory_10deg:
+  base: UpSlope::LeftFootTrajectory
+  tasks:
+    LiftFootTask:
+      target:
+        rotation: [0.174, 0.0, 0.0]
+
+UpSlope::LeftFootTrajectory_20deg:
+  base: UpSlope::LeftFootTrajectory
+  tasks:
+    LiftFootTask:
+      target:
+        rotation: [0.349, 0.0, 0.0]
+
 UpSlope::PutLeftFoot:
   base: MetaTasks
   # Only allow motion along foot vertical axis
@@ -62,6 +76,14 @@ UpSlope::Stabilized::LeftFootTrajectory:
       r1Surface: LeftFoot
       r2Surface: AllGround
 
+UpSlope::Stabilized::LeftFootTrajectory_10deg:
+  base: UpSlope::Stabilized::LeftFootTrajectory
+  states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory_10deg]
+
+UpSlope::Stabilized::LeftFootTrajectory_20deg:
+  base: UpSlope::Stabilized::LeftFootTrajectory
+  states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory_20deg]
+
 UpSlope::Stabilized::PutLeftFoot:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::PutLeftFoot]
@@ -96,3 +118,20 @@ UpSlope::FSM::StepUpSlope:
     - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory]
     - [UpSlope::Stabilized::LeftFootTrajectory, OK, UpSlope::Stabilized::PutLeftFoot]
     - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
+
+UpSlope::FSM::StepUpSlope_10deg:
+  base: Meta
+  transitions:
+    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
+    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory_10deg]
+    - [UpSlope::Stabilized::LeftFootTrajectory_10deg, OK, UpSlope::Stabilized::PutLeftFoot]
+    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
+
+UpSlope::FSM::StepUpSlope_20deg:
+  base: Meta
+  transitions:
+    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
+    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory_20deg]
+    - [UpSlope::Stabilized::LeftFootTrajectory_20deg, OK, UpSlope::Stabilized::PutLeftFoot]
+    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
+

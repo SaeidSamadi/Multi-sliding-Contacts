@@ -773,9 +773,9 @@ states:
           Step Down: StepDown
 
 transitions:
-  - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope, Auto]
+  - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_20deg, Auto]
 
-  - [UpSlope::FSM::StepUpSlope, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
+  - [UpSlope::FSM::StepUpSlope_20deg, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
