@@ -23,7 +23,7 @@ DownSlope::Stabilized::LeftFootTrajectory:
   states: [WipingController::Stabilizer::RightFootFlatSupport, DownSlope::LeftFootTrajectory]
   configs:
     WipingController::Stabilizer::RightFootFlatSupport:
-      stiffness: 10
+      stiffness: 15
   AddContacts:
     - r1: hrp4
       r2: ground
@@ -34,7 +34,7 @@ DownSlope::Stabilized::LeftFootTrajectory:
 WipingController_HalfSitting:
   base: HalfSitting
   stiffness: 5.0
-  eval: 1.0
+  eval: 0.5
   #AddCollisions:
   #  - r1: hrp4
   #    r2: tilted_board
@@ -56,6 +56,13 @@ WipingController_HalfSitting:
 DownSlope::Stabilizer::HalfSitting:
   base: Parallel
   states: [WipingController::Stabilizer, WipingController_HalfSitting]
+
+DownSlope::Stabilizer::HalfSitting_Slope:
+  base: Parallel
+  states: [WipingController::Stabilizer::Slope, WipingController_HalfSitting]
+  configs:
+    WipingController_HalfSitting:
+      eval: 0.75
 
 WipingController_StabilizedHalfSitting:
   base: Parallel
@@ -83,7 +90,7 @@ DownSlope::Stabilizer::GoRight:
   StabilizerConfig:
     contacts: [Left, Right]
     completion:
-      dcmEval: [0.02, 0.04, 0.2]
+      dcmEval: [0.001, 0.001, 0.05]
 
 DownSlope::PutLeftFoot:
   base: UpSlope::PutLeftFoot
@@ -98,7 +105,9 @@ DownSlope::Stabilizer::GoCenterFinal:
 DownSlope::FSM::StepDownSlope:
   base: Meta
   transitions:
-    #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
+    #- [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Stabilizer::GoRight]
+      #- [WipingController_HalfSitting, OK, DownSlope::Stabilizer::GoCenter]
+      #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
     - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilized::LeftFootTrajectory]
     - [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
     - [DownSlope::Stabilized::PutLeftFoot, OK, DownSlope::Stabilizer::GoCenterFinal]
