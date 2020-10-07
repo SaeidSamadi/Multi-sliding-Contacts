@@ -10,6 +10,16 @@ WipingController::Stabilizer:
     #   derivator_time_constant: 1
     #   integrator_time_constant: 10
 
+WipingController::Stabilizer::Slope:
+  base: StabilizerStandingState
+  StabilizerConfig:
+    contacts: [Left, Right]
+    Right:
+      overwriteRPY:
+        roll: 0
+        pitch: 0
+      height: 0
+
 WipingController::Stabilizer::Go:
   base: WipingController::Stabilizer
   completion:

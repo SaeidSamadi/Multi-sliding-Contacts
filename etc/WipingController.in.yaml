@@ -770,7 +770,7 @@ states:
     configs:
       WipingController_ChooseTransition:
         actions:
-          Step Down: StepDown
+          Half Sit Slope: HalfSitSlope
 
   Choose::Slope::StepUpSlope_20deg:
     base: Choose
@@ -778,12 +778,21 @@ states:
     configs:
       WipingController_ChooseTransition:
         actions:
-          Step Down: StepDown
+          Half Sit Slope: HalfSitSlope
+
+  Choose::Slope::HalfSitting:
+    base: Choose
+    states: [DownSlope::Stabilizer::HalfSitting_Slope, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Step Down Slope: StepDownSlope
 
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_20deg, Auto]
-  #- [Choose::Initial, StepUpSlope, Choose::Slope::StepUpSlope_20deg, Auto]
-  #- [Choose::Slope::StepUpSlope_20deg, StepDown, DownSlope::FSM::StepDownSlope]
+    #- [Choose::Initial, StepUpSlope, Choose::Slope::StepUpSlope_20deg, Auto]
+    #- [Choose::Slope::StepUpSlope_20deg, HalfSitSlope, Choose::Slope::HalfSitting]
+    #- [Choose::Slope::HalfSitting, StepDownSlope, DownSlope::FSM::StepDownSlope]
 
   - [UpSlope::FSM::StepUpSlope_20deg, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
@@ -802,12 +811,9 @@ transitions:
   - [WipingController_ReleasePushWallCoMQP_AfterShuffle, OK, Wiping::Stabilized::MoveHandsBack_AfterShuffle, Auto]
   - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK, DownSlope::FSM::StepDownSlope, Auto]
   - [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
-  - [Choose::Slope::MoveHandsBack, StepDown, DownSlope::FSM::StepDownSlope, Auto]
-    #- [WipingController_ReleasePushWallCoMQP, OK, Wiping::Stabilized_MoveHandsBack, Auto]
-    #- [Wiping::Stabilized_MoveHandsBack, OK, DownSlope::FSM::StepDownSlope, Auto]
-    #- [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
     #- [Choose::Slope::MoveHandsBack, StepDown, DownSlope::FSM::StepDownSlope, Auto]
-    #- [DownSlope::FSM::StepDownSlope, OK, Choose::Initial, Auto]
+  - [Choose::Slope::MoveHandsBack, HalfSitSlope, Choose::Slope::HalfSitting, Auto]
+  - [Choose::Slope::HalfSitting, StepDownSlope, DownSlope::FSM::StepDownSlope, Auto]
   - [DownSlope::FSM::StepDownSlope, OK, DownSlope::Stabilizer::HalfSitting, Auto]
 
   # - [WipingController_GoStandingCenter, RightHandToBoard, WipingController_RightHandToWhiteboard]
