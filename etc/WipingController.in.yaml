@@ -772,8 +772,18 @@ states:
         actions:
           Step Down: StepDown
 
+  Choose::Slope::StepUpSlope_20deg:
+    base: Choose
+    states: [UpSlope::FSM::StepUpSlope_20deg, Message, WipingController_ChooseTransition]
+    configs:
+      WipingController_ChooseTransition:
+        actions:
+          Step Down: StepDown
+
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_20deg, Auto]
+  #- [Choose::Initial, StepUpSlope, Choose::Slope::StepUpSlope_20deg, Auto]
+  #- [Choose::Slope::StepUpSlope_20deg, StepDown, DownSlope::FSM::StepDownSlope]
 
   - [UpSlope::FSM::StepUpSlope_20deg, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
