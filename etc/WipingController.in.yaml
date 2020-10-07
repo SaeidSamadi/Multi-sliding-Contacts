@@ -868,8 +868,8 @@ transitions:
   - [WipingController_WipeItStateConstantVelocity, OK, WipingController_ReleasePushWallCoMQP_rh]
   - [WipingController_WipeItStateConstantVelocityVertical, OK, WipingController_ReleasePushWallCoMQP_rh]
   - [WipingController_WipeItStateConstantAcceleration, OK, WipingController_ReleasePushWallCoMQP_rh]
-  - [WipingController_PrepareMoveHandBack, OK, Stabilized_StepBack]
-  - [Stabilized_StepBack, OK, WipingController_Finish]
+  # - [WipingController_PrepareMoveHandBack, OK, Stabilized_StepBack]
+  # - [Stabilized_StepBack, OK, WipingController_Finish]
   - [WipingController_PrepareMoveHandBackManual, Manual, WipingController_Finish]
   - [WipingController_Finish, OK, WipingController_StabilizedHalfSitting]
 init: Choose::Initial

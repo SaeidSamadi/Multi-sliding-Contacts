@@ -50,10 +50,10 @@ void WipingController_PushWall_rh::configure(const mc_rtc::Configuration & confi
 
 void WipingController_PushWall_rh::start(mc_control::fsm::Controller & ctl_)
 {
-  LOG_INFO("Starting PushWall with:");
-  LOG_INFO("admittance : " << admittance_.transpose());
-  LOG_INFO("stiffness : " << stiffness_.transpose());
-  LOG_INFO("damping : " << damping_.transpose());
+  mc_rtc::log::info("Starting PushWal RH with:");
+  mc_rtc::log::info("admittance : {}", admittance_.transpose());
+  mc_rtc::log::info("stiffness : {}", stiffness_.transpose());
+  mc_rtc::log::info("damping : {}", damping_.transpose());
 
   auto & ctl = static_cast<WipingController &>(ctl_);
 
@@ -81,15 +81,16 @@ void WipingController_PushWall_rh::start(mc_control::fsm::Controller & ctl_)
   else
   {
     forceTarget_ = ctl.rightHandTask->measuredWrench();
-     initialForce = forceTarget_.force().z();
+    initialForce = std::max(forceTarget_.force().z(), 0.00001);
+    forceTarget_.force().z() = initialForce;
     ctl.rightHandTask->targetForce(forceTarget_.force());
   }
-LOG_INFO("initial force: " << initialForce);
-LOG_INFO("max force: " << maxForce_);
+mc_rtc::log::info("initial force: {}", initialForce);
+mc_rtc::log::info("max force: {}", maxForce_);
 
   // int sign = (initialForce < maxForce_) ? -1 : 1;
   forceRate_ = (maxForce_-initialForce)*ctl.timeStep/duration_;
-LOG_INFO("force rate: "<< forceRate_);
+mc_rtc::log::info("force rate: {}", forceRate_);
 
   if(useCoMQP_)
   {
