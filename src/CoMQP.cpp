@@ -153,7 +153,7 @@ CoMQP::CoMQP(const mc_rbdyn::Robot & robot, const mc_rtc::Configuration & config
 //  }
 //}
 
-bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_)
+bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const double mu_lh_, const double mu_lf_)
 {
 
   updateContactPoses(robot);
@@ -161,6 +161,7 @@ bool CoMQP::solve(const mc_rbdyn::Robot & robot, const double mu_rh_, const doub
 
   mu_rh = mu_rh_; 
   mu_lh = mu_lh_;
+  mu_lf = mu_lf_;
 
   const auto bodyName_rf = robot.surface(rightFootSurface).bodyName();
   const auto bodyName_lf = robot.surface(leftFootSurface).bodyName();

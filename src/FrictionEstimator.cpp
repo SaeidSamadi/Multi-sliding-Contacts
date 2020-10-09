@@ -44,6 +44,18 @@ void FrictionEstimator::update(const mc_rbdyn::Robot& robot)
                  0.0,  0.0,  1.0;
     Name_fs = leftHandForceSensor;
   }
+  else if (surfaceName_ == "LeftFoot"){
+    constRot <<  1.0,  0.0,  0.0,
+                 0.0,  1.0,  0.0,
+                 0.0,  0.0,  1.0;
+    Name_fs = leftFootForceSensor;
+  }
+  else if (surfaceName_ == "RightFoot"){
+    constRot <<  1.0,  0.0,  0.0,
+                 0.0,  1.0,  0.0,
+                 0.0,  0.0,  1.0;
+    Name_fs = rightFootForceSensor;
+  }
 
   const auto bodyRot = constRot * bodyPT.rotation();
 
