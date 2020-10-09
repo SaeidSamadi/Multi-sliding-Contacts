@@ -55,7 +55,7 @@ WipingController_HalfSitting:
  
 DownSlope::Stabilizer::HalfSitting:
   base: Parallel
-  states: [WipingController::Stabilizer, WipingController_HalfSitting]
+  states: [WipingController::Stabilizer::Slope, WipingController_HalfSitting]
 
 DownSlope::Stabilizer::HalfSitting_Slope:
   base: Parallel
@@ -73,7 +73,7 @@ DownSlope::Stabilizer::GoCenter:
   stiffness: 3
   above: CenterAnkles
   completion:
-    dcmEval: [0.02, 0.05, 0.2]
+    dcmEval: [0.05, 0.05, 0.2]
   StabilizerConfig:
     contacts: [Left, Right]
     # Target flat floor with right foot, and current orientation of the left (slope)
@@ -82,15 +82,24 @@ DownSlope::Stabilizer::GoCenter:
         roll: 0
         pitch: 0
       height: 0
-
 DownSlope::Stabilizer::GoRight:
   base: DownSlope::Stabilizer::GoCenter
-  stiffness: 5
+  stiffness: 10
   above: RightAnkle
   StabilizerConfig:
     contacts: [Left, Right]
+    Right:
+      overwriteRPY:
+        roll: 0
+        pitch: 0
+      height: 0
+    Left:
+      overwritePRY:
+        roll: 20
+        pitch: 0
+      height: 0.04
     completion:
-      dcmEval: [0.001, 0.001, 0.05]
+        - dcmEval: [0.05, 0.001, 0.05]        
 
 DownSlope::PutLeftFoot:
   base: UpSlope::PutLeftFoot
@@ -105,9 +114,9 @@ DownSlope::Stabilizer::GoCenterFinal:
 DownSlope::FSM::StepDownSlope:
   base: Meta
   transitions:
-    #- [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Stabilizer::GoRight]
-      #- [WipingController_HalfSitting, OK, DownSlope::Stabilizer::GoCenter]
-      #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
+    - [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Stabilizer::GoRight]
+    #- [WipingController_HalfSitting, OK, DownSlope::Stabilizer::GoCenter]
+    #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
     - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilized::LeftFootTrajectory]
     - [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
     - [DownSlope::Stabilized::PutLeftFoot, OK, DownSlope::Stabilizer::GoCenterFinal]
