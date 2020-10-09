@@ -19,7 +19,7 @@ WipingController::Stabilizer::Slope:
         roll: 0
         pitch: 0
       height: 0
-
+      
 WipingController::Stabilizer::Go:
   base: WipingController::Stabilizer
   completion:
