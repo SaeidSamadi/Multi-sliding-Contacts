@@ -45,8 +45,7 @@ public:
   std::shared_ptr<mc_tasks::force::CoPTask> rightHandTask;
   std::shared_ptr<mc_tasks::force::CoPTask> leftHandTask;
   std::shared_ptr<mc_tasks::LookAtSurfaceTask> lookAtTask;
-  FrictionEstimator frictionEstimator_rh, frictionEstimator_lh;
-  //FrictionEstimator frictionEstimator_rf, frictionEstimator_lf;
+  FrictionEstimator frictionEstimator_rh, frictionEstimator_lh, frictionEstimator_lf;
   //sva::PTransformd leftFootPose;
   Eigen::Vector3d leftFootPose;
   Eigen::Matrix3d leftFootRot;
