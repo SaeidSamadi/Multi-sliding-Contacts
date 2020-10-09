@@ -136,14 +136,20 @@ void WipingController_ShufflePosture::start(mc_control::fsm::Controller & ctl_)
   }
   else
   {
+    double eps = 1e-5;
     forceTarget_rh_ = ctl.rightHandTask->measuredWrench();
-    initialForce_rh = forceTarget_rh_.force().z();
+    initialForce_rh = std::max(forceTarget_rh_.force().z(), eps);
+    forceTarget_rh_.force().z() = initialForce_rh;
     ctl.rightHandTask->targetForce(forceTarget_rh_.force());
+    
     forceTarget_lh_ = ctl.leftHandTask->measuredWrench();
-    initialForce_lh = forceTarget_lh_.force().z();
+    initialForce_lh = std::max(forceTarget_lh_.force().z(), eps);
+    forceTarget_lh_.force().z() = initialForce_lh;
     ctl.leftHandTask->targetForce(forceTarget_lh_.force());
+    
     forceTarget_lf_ = ctl.leftFootTask->measuredWrench();
-    initialForce_lf = forceTarget_lf_.force().z();
+    initialForce_lf = std::max(forceTarget_lf_.force().z(), eps);
+    forceTarget_lf_.force().z() = initialForce_lf;
     ctl.leftFootTask->targetForce(forceTarget_lf_.force());
   }
   mc_rtc::log::info("right hand initial force: {}", initialForce_rh);
