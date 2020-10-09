@@ -20,7 +20,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 
 
   leftFootTask.reset(new mc_tasks::force::CoPTask("LeftFootCenter", robots(), robots().robotIndex(), 100, 1000));
-  rightFootTask.reset(new mc_tasks::force::CoPTask("RightFootCenter", robots(), robots().robotIndex(), 100000, 10000));
+  rightFootTask.reset(new mc_tasks::force::CoPTask("RightFootCenter", robots(), robots().robotIndex(), 100, 10000));
 
   lookAtTask.reset(new mc_tasks::LookAtSurfaceTask(robots(), robots().robotIndex(), "xtion_link", {1., 0., 0.},
                                                    robots().robotIndex(), "RightHandPad", 1.0, 10.));
@@ -205,10 +205,10 @@ void WipingController::addFootForceControl()
     solver().addTask(rightFootTask);
     solver().addTask(leftFootTask);
 
-    Eigen::Vector6d dof;
-    dof << 1,1,1,1,1,1;
-    addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
-    addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
+    // Eigen::Vector6d dof;
+    // dof << 1,1,1,1,1,1;
+    // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
+    // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
     LOG_SUCCESS("FeetForceControlAdded");
   }
   else
@@ -221,10 +221,10 @@ void WipingController::removeFootForceControl()
 {
   solver().removeTask(rightFootTask);
   solver().removeTask(leftFootTask);
-  Eigen::Vector6d dof;
-  dof << 1,1,1,1,1,1;
-  addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
-  addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
+  // Eigen::Vector6d dof;
+  // dof << 1,1,1,1,1,1;
+  // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
+  // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
   LOG_SUCCESS("FeetForceControl removed");
 }
 

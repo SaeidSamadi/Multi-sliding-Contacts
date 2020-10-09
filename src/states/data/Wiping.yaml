@@ -41,7 +41,7 @@ WipingController_PrepareWipingState:
   states: [WipingController_PrepareWipingState_rh, WipingController_PrepareWipingState_lh]
   AddContacts:
     - r1: hrp4
-      r2: wall  
+      r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
@@ -56,11 +56,11 @@ WipingController_PrepareWipingState:
       r1Surface: RightHandPad
       r2Surface: AllGround
     - r1: hrp4
-      r2: wall  
+      r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
 ##
-# FIXED: The action of these states is the same for left/right, make them inherit from each other and only change 
+# FIXED: The action of these states is the same for left/right, make them inherit from each other and only change
 # the needed parameters
 ###
 WipingController_HandTrajectoryBase:
@@ -84,7 +84,7 @@ WipingController_HandTrajectoryBase:
         #   stiffness: 5.0
         #   dimWeight: [1.0, 1.0, 1.0, 1.0, 1.0, 0.1]
 
-## 
+##
 # FIXME: The reference trajectory should be an actual circle in the surface plane,
 # not a weird bspline that's not even parallel to the surface ;)
 # That's like a 10 lines c++ state to write ;)
@@ -120,7 +120,7 @@ WipingController_LeftHandCircle:
   base: WipingController_HandTrajectoryBase
   AddContacts:
     - r1: hrp4
-      r2: wall  
+      r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 0, 0, 0]
@@ -139,8 +139,8 @@ WipingController_LeftHandCircle:
       oriWaypoints: []
 
 ###
-# FIXME 
-# - don't duplicate WipeItBaby*rh and WipeItBaby*lh code 
+# FIXME
+# - don't duplicate WipeItBaby*rh and WipeItBaby*lh code
 ##
 WipingController_WipeItStateCircle_rh:
   base: Parallel
@@ -161,7 +161,7 @@ WipingController_WipeItStateCircle_lh:
 WipingController_WipeItStateCoWipe:
   base: Parallel
   states: [WipingController_WipeItBabyState_rh, WipingController_WipeItBabyState_lh]
-  
+
 WipingController_PushWallCoMQP_lh:
   base: WipingController_PushWall_lh
   useCoMQP: true
@@ -210,12 +210,12 @@ WipingController_ReleasePushWallCoMQP:
   states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
   AddContacts:
     - r1: hrp4
-      r2: tilted_board  
+      r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
-      r2: wall  
+      r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
@@ -230,13 +230,13 @@ WipingController_ReleasePushWallCoMQP_AfterShuffle:
       comStiffness: 30
   AddContacts:
     - r1: hrp4
-      r2: tilted_board  
+      r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
-      r2: wall  
-      r1Surface: LeftHandPad
+      r2: wall
+      r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
@@ -244,23 +244,22 @@ WipingController_ReleasePushWallCoMQP_AfterShuffle:
       r1Surface: LeftFoot
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
-
 WipingController_PrepareMoveHandBack:
   base: MetaTasks
   RemoveContacts:
     - r1: hrp4
-      r2: tilted_board  
+      r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
     - r1: hrp4
-      r2: wall  
+      r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
   tasks:
     MoveRightHand:
       type: surfaceTransform
       surface: RightHandPad
-      stiffness: 10.0
+      stiffness: 3.0
       weight: 500
       moveWorld:
         translation: [-0.3, 0.04, 0.05]
@@ -273,7 +272,7 @@ WipingController_PrepareMoveHandBack:
     MoveLeftHand:
       type: surfaceTransform
       surface: BlockLeftHand
-      stiffness: 10.0
+      stiffness: 3.0
       weight: 500
       moveWorld:
         translation: [-0.25, 0.15, 0.0]
@@ -290,7 +289,7 @@ WipingController_PrepareMoveHandBack_AfterShuffle:
     MoveRightHand:
       stiffness: 5.0
       moveWorld:
-        translation: [-0.1, 0.0, 0.05]
+        translation: [-0.2, -0.2, 0.05]
     MoveLeftHand:
       stiffness: 5.0
       moveWorld:
@@ -311,9 +310,20 @@ Wiping::Stabilized::MoveHandsBack:
         #  - timeout: 5.0
         #    #Pause:
         #    #  duration: 4
-           
+
 Wiping::Stabilized_MoveHandsBack:
   base: Parallel
+  AddContacts:
+    - r1: hrp4
+      r2: slope
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
   states: [Stabilizer::Standing, WipingController_PrepareMoveHandBack]
   configs:
     Stabilizer::Standing:
@@ -332,3 +342,14 @@ Wiping::Stabilized::MoveHandsBack_AfterShuffle:
       stiffness: 5
       completion:
         - dcmEval: [0.03, 0.06, 0.2]
+  AddContacts:
+      - r1: hrp4
+        r2: slope
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [0, 0, 1, 1, 1, 0]
+      - r1: hrp4
+        r2: ground
+        r1Surface: RightFoot
+        r2Surface: AllGround
+        dof: [0, 0, 1, 1, 1, 0]

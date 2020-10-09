@@ -527,7 +527,7 @@ states:
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 0]
       - r1: hrp4
-        r2: ground
+        r2: slope
         r1Surface: LeftFoot
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 0]
@@ -541,7 +541,7 @@ states:
         r1Surface: BlockLeftHand
         r2Surface: AllGround
       - r1: hrp4
-        r2: ground
+        r2: slope
         r1Surface: LeftFoot
         r2Surface: AllGround
   KeepHandsState:
@@ -607,7 +607,7 @@ states:
 
   Choose::Slope::PrepareWiping:
     base: Choose
-    states: [UpSlope::Stabilizer::Center, Message, WipingController_ChooseTransition]
+    states: [UpSlope::Stabilizer::Center, Message, WipingController_ChooseTransition] # There are 4 contacts so should we not not use stabilizer?
     configs:
       WipingController_ChooseTransition:
         actions:
@@ -615,7 +615,29 @@ states:
           Prepare Wiping: PrepareWiping
           Release: Release
           Prepare Shuffling: PrepareShuffling
-
+    RemoveContactsAfter:
+      - r1: hrp4
+        r2: slope
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [0,0,1,1,1,0]
+      - r1: hrp4
+        r2: ground
+        r1Surface: RightFoot
+        r2Surface: AllGround
+        dof: [0,0,1,1,1,0]
+    AddContactsAfter:
+      - r1: hrp4
+        r2: slope
+        r1Surface: LeftFoot
+        r2Surface: AllGround
+        dof: [1,1,1,1,1,1]
+      - r1: hrp4
+        r2: ground
+        r1Surface: RightFoot
+        r2Surface: AllGround
+        dof: [1,1,1,1,1,1]
+      
   Choose::Slope::PrepareWipingAndChooseBothHands:
     base: Choose
     states: [WipingController_PrepareWipingState, Message, WipingController_ChooseTransition]
@@ -631,7 +653,7 @@ states:
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 1]
       - r1: hrp4
-        r2: ground
+        r2: slope
         r1Surface: LeftFoot
         r2Surface: AllGround
         dof: [1, 1, 1, 1, 1, 1]
@@ -699,6 +721,7 @@ states:
       WipingController_ChooseTransition:
         actions:
           Shuffle Left Foot: ShuffleLeftFoot
+          Release: Release
 
   WipingController_lookAtLeftFoot:
     base: MetaTasks
@@ -729,7 +752,7 @@ states:
       WipingController_WipeItBabyState_lf:
        linearWiping: true
        circleWiping_CW: false
-       circleRadius: 0.20
+       circleRadius: 0.10
        wipingDuration: 2.0
        maxForce_rh: 20
        maxForce_lh: 20
@@ -755,6 +778,11 @@ states:
         r1Surface: LeftFoot
         r2Surface: AllGround
         dof: [1, 1, 1, 0, 0, 0]
+      # - r1: hrp4
+      #   r2: slope
+      #   r1Surface: RightFoot
+      #   r2Surface: AllGround
+      #   dof: [1, 1, 1, 1, 1, 1]
       - r1: hrp4
         r2: wall  
         r1Surface: BlockLeftHand
@@ -810,17 +838,19 @@ transitions:
     #- [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::PrepareShuffleState, Auto]
   - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::WipeBothHands, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]
+  
   - [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, Choose::Slope::ShuffleLeftFoot, Auto]
+  - [Choose::Slope::PrepareShuffleState, Release, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
+  
     #- [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
   - [WipingController_ReleasePushWallCoMQP_AfterShuffle, OK, Wiping::Stabilized::MoveHandsBack_AfterShuffle, Auto]
   - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK, DownSlope::FSM::StepDownSlope, Auto]
+
   - [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
   - [Choose::Slope::MoveHandsBack, HalfSitSlope, Choose::Slope::HalfSitting, Auto]
   # - [WipingController_ReleasePushWallCoMQP, OK, DownSlope::Stabilizer::HalfSitting_Slope, Auto]
   # - [DownSlope::Stabilizer::HalfSitting_Slope, OK, Choose::Slope::HalfSitting, Auto]
   - [Choose::Slope::HalfSitting, StepDownSlope, DownSlope::FSM::StepDownSlope, Auto]
-  # - [DownSlope::FSM::StepDownSlope, OK, DownSlope::Stabilizer::HalfSitting, Auto]
-  - [DownSlope::FSM::StepDownSlope, OK, Go_HalfSitting, Auto]
-
+  
 init: Choose::Initial

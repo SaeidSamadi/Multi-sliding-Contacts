@@ -24,6 +24,11 @@ DownSlope::Stabilized::LeftFootTrajectory:
   configs:
     WipingController::Stabilizer::RightFootFlatSupport:
       stiffness: 15
+  RemoveContacts:
+    - r1: hrp4
+      r2: slope
+      r1Surface: LeftFoot
+      r2Surface: AllGround
   AddContacts:
     - r1: hrp4
       r2: ground
@@ -84,7 +89,7 @@ DownSlope::Stabilizer::GoCenter:
       height: 0
 DownSlope::Stabilizer::GoRight:
   base: DownSlope::Stabilizer::GoCenter
-  stiffness: 10
+  stiffness: 3
   above: RightAnkle
   StabilizerConfig:
     contacts: [Left, Right]
@@ -93,16 +98,17 @@ DownSlope::Stabilizer::GoRight:
         roll: 0
         pitch: 0
       height: 0
-    Left:
-      overwritePRY:
-        roll: 20
-        pitch: 0
-      height: 0.04
     completion:
-        - dcmEval: [0.05, 0.001, 0.05]        
+        - dcmEval: [0.05, 0.05, 0.2]        
 
 DownSlope::PutLeftFoot:
   base: UpSlope::PutLeftFoot
+  AddContactsAfter:
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
 
 DownSlope::Stabilized::PutLeftFoot:
   base: Parallel

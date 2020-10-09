@@ -37,13 +37,13 @@ UpSlope::PutLeftFoot:
   # Only allow motion along foot vertical axis
   AddContacts:
     - r1: hrp4
-      r2: ground
+      r2: slope
       r1Surface: LeftFoot
       r2Surface: AllGround
       dof: [1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
   AddContactsAfter:
     - r1: hrp4
-      r2: ground
+      r2: slope
       r1Surface: LeftFoot
       r2Surface: AllGround
       dof: [0.0, 0.0, 1.0, 1.0, 1.0, 0.0]
@@ -105,7 +105,7 @@ UpSlope::Stabilizer::GoCenter:
       overwriteRPY:
         roll: 0
         pitch: 0
-      height: 0
+      height: 0   
 
 UpSlope::Stabilizer::Center:
   base: UpSlope::Stabilizer::GoCenter 
