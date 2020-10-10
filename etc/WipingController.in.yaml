@@ -673,7 +673,7 @@ states:
       WipingController_ChooseTransition:
         actions:
           Release: Release
-          # Prepare shuffling: PrepareShuffling
+          Prepare shuffling: PrepareShuffling
       WipingController_WipeItStateCoWipe:
         configs:
           WipingController_WipeItBabyState_rh:
