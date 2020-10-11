@@ -219,6 +219,17 @@ WipingController_ReleasePushWallCoMQP:
       r1Surface: BlockLeftHand
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
+  AddContactsAfter:
+    - r1: hrp4
+      r2: slope
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0,0,1,1,1,0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [0,0,1,1,1,0]
 
 WipingController_ReleasePushWallCoMQP_AfterShuffle:
   base: Parallel

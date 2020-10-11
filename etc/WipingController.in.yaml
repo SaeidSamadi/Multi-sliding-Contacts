@@ -497,9 +497,9 @@ states:
     comStiffness: 60
   WipingController_PrepareShuffleState_:
     base: WipingController_PrepareShuffleAuto
-    maxForce_rh: 20
+    maxForce_rh: 15
     maxForce_lh: 20
-    maxForce_lf: 50
+    maxForce_lf: 30
     duration: 3
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
     admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
@@ -742,42 +742,70 @@ states:
     base: Parallel
     states: [WipingController_WipeItBabyState_lf, WipingController_lookAtLeftFoot]
 
+  WipinController::ShuffleLeftFoot:
+    base: WipingController_WipeItBabyState_lf
+    maxForce_rh: 20
+    maxForce_lh: 20
+    maxForce_lf: 30
+    admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001] #0.001
+    admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+    admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
+    # admittance_rh: [0.001, 0.001, 0.0, 0.0, 0.0, 0.001] #0.001
+    # admittance_lh: [0.001, 0.001, 0.0, 0.0, 0.0, 0.001]
+    # admittance_lf: [0.0006, 0.0006, 0.0, 0.0, 0.0, 0.0006]
+    stiffness_rh: [1, 1, 1, 1, 1, 1]
+    stiffness_lh: [1, 1, 1, 1, 1, 1]
+    #stiffness_lf: [10, 10, 10, 10, 10, 5]
+    damping_rh: [150, 150, 150, 150, 150, 150]
+    damping_lh: [150, 150, 150, 150, 150, 150]
+    #damping_lf: [6, 6, 6, 6, 6, 6]
+    stiffness_lf: [10, 10, 10, 10, 10, 5]
+    damping_lf: [30, 30, 30, 30, 30, 100] #20
+    #damping_rh: [300, 300, 300, 300, 300, 300]
+    #damping_lh: [300, 300, 300, 300, 300, 300]
+    #damping_lf: [300, 300, 300, 300, 300, 300]
+    comStiffness: 30
+    
+  Shuffle::Forward1:
+    base: WipinController::ShuffleLeftFoot
+    linearWiping: true
+    circleWiping_CW: false
+    circleRadius: 0.15
+    wipingDuration: 3.0
+
+  Shuffle::Circle:
+    base: WipinController::ShuffleLeftFoot
+    linearWiping: false
+    circleWiping_CW: false
+    circleWiping_CCW: true
+    circleRadius: 0.10
+    wipingDuration: 8.0
+    
+  Shuffle::Forward2:
+    base: Shuffle::Forward1
+    circleRadius: -0.15
+
+  Shuffle::Trajectory:
+    base : Meta
+    transitions:
+      # - [Shuffle::Forward1, OK, Shuffle::Circle, Auto]
+      # - [Shuffle::Circle, OK, Shuffle::Forward2, Auto]
+      - [Shuffle::Forward2, OK, Shuffle::Forward1, Auto]
+    
   Choose::Slope::ShuffleLeftFoot:
     base: Choose
-    states: [WipingController_WipeItBabyState_lf, Message, WipingController_ChooseTransition]
+    states: [Shuffle::Trajectory, Message, WipingController_ChooseTransition]
     configs:
       WipingController_ChooseTransition:
         actions:
           Release Hands: ReleaseHands
-      WipingController_WipeItBabyState_lf:
-       linearWiping: true
-       circleWiping_CW: false
-       circleRadius: 0.10
-       wipingDuration: 2.0
-       maxForce_rh: 20
-       maxForce_lh: 20
-       maxForce_lf: 50
-       admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001] #0.001
-       admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
-       admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
-       stiffness_rh: [1, 1, 1, 1, 1, 1]
-       stiffness_lh: [1, 1, 1, 1, 1, 1]
-       #stiffness_lf: [10, 10, 10, 10, 10, 5]
-       damping_rh: [150, 150, 150, 150, 150, 150]
-       damping_lh: [150, 150, 150, 150, 150, 150]
-       #damping_lf: [6, 6, 6, 6, 6, 6]
-       stiffness_lf: [10, 10, 10, 10, 10, 5]
-       damping_lf: [30, 30, 30, 30, 30, 100] #20
-       #damping_rh: [300, 300, 300, 300, 300, 300]
-       #damping_lh: [300, 300, 300, 300, 300, 300]
-       #damping_lf: [300, 300, 300, 300, 300, 300]
-       comStiffness: 30
+       
     AddContacts:
       - r1: hrp4
         r2: slope
         r1Surface: LeftFoot
         r2Surface: AllGround
-        dof: [1, 1, 1, 0, 0, 0]
+        dof: [0, 0, 1, 0, 0, 0]
       # - r1: hrp4
       #   r2: slope
       #   r1Surface: RightFoot
@@ -787,12 +815,12 @@ states:
         r2: wall  
         r1Surface: BlockLeftHand
         r2Surface: AllGround
-        dof: [1, 1, 1, 1, 1, 0] #0 end
+        dof: [0, 0, 1, 1, 1, 0] #0 end
       - r1: hrp4
         r2: tilted_board
         r1Surface: RightHandPad
         r2Surface: AllGround
-        dof: [1, 1, 1, 1, 1, 0]
+        dof: [0, 0, 1, 1, 1, 0]
 
   Choose::Slope::MoveHandsBack:
     base: Choose

@@ -184,36 +184,19 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   }
   else if(circleWiping_CCW_ || circleWiping_CW_)
   {
-    double theta_net = M_PI * 3 / 4;
+    double theta_net = M_PI; // half circle
     double angularVelocity = theta_net / wipingDuration_;
     double delta_theta = angularVelocity * ctl.timeStep;
-    if(circleWiping_CCW_){
-      local_y_initial = - circleRadius_ * sin(theta);
-    }
-    else if(circleWiping_CW_){
-      local_y_initial = circleRadius_ * sin(theta);
-    }
 
-    if(theta <= M_PI/2.0){
-      local_x_initial = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
-    }
-    else{
-      local_x_initial = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
-    }
+    local_y_initial = circleRadius_ * sin(theta);
+    local_x_initial = circleRadius_ * cos(theta);
+       
     theta += delta_theta;
-    if(circleWiping_CCW_){
-      local_y_final = - circleRadius_ * sin(theta);
-    }
-    else if(circleWiping_CW_){
-      local_y_final = circleRadius_ * sin(theta);
-    }
+    
+    local_y_final = circleRadius_ * sin(theta);
+    local_x_final = circleRadius_ * cos(theta);
 
-    if(theta <= M_PI/2.0){
-      local_x_final = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
-    }
-    else{
-      local_x_final = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
-    }
+    
     local_x = local_x_final - local_x_initial;
     local_y = local_y_final - local_y_initial;
   }
@@ -256,8 +239,21 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   ctl.frictionEstimator_lf.update(ctl.robot());
   ctl.setTargetFromCoMQP();
 
-  output("OK");
-  return true;
+  double error = ctl.leftFootTask->eval().norm();
+  if (wipingTime >= wipingDuration_ and error < 0.02)
+    {
+      output("OK");
+      return true;
+    }
+  // else
+  //   {
+  //     if (wipingTime >= wipingDuration_)
+  // 	{
+  // 	  mc_rtc::log::warning("Duration OK but error: {}", error);
+  // 	}
+  //   }
+  return false;
+  
 }
 
 void WipingController_WipeItBaby_lf::teardown(mc_control::fsm::Controller & ctl_)
