@@ -273,7 +273,7 @@ WipingController_PrepareMoveHandBack:
       stiffness: 3.0
       weight: 500
       moveWorld:
-        translation: [-0.3, 0.04, 0.05]
+        translation: [-0.4, -0.15, 0.05]
       completion:
         OR:
           - eval: 0.05
@@ -300,7 +300,7 @@ WipingController_PrepareMoveHandBack_AfterShuffle:
     MoveRightHand:
       stiffness: 5.0
       moveWorld:
-        translation: [-0.2, -0.2, 0.05]
+        translation: [-0.3, -0.2, 0.05]
     MoveLeftHand:
       stiffness: 5.0
       moveWorld:

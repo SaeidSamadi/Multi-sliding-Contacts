@@ -1,4 +1,4 @@
-Managed: false
+anaged: false
 StepByStep: false
 IdleKeepState: true # the state is kept running until the transition occurs
 StatesLibraries: ["@MC_STATES_DEFAULT_INSTALL_PREFIX@", "@MC_STATES_INSTALL_PREFIX@"]
@@ -34,10 +34,10 @@ CoMQPConfig:
     friction: 0.5
   right_hand:
     shape: [0.1, 0.05]
-    friction: 0.5
+    friction: 1.0
   left_hand:
     shape: [0.1, 0.05]
-    friction: 0.5
+    friction: 0.25
 
 HandForceFilter:
   m: 5
@@ -83,7 +83,12 @@ contacts:
     r1Surface: RightFoot
     r2Surface: AllGround
     dof: [0,0,1,1,1,0]
-
+  # - r1: tilted_board
+  #   r2: ground
+  #   r1Surface: AllGround
+  #   r2Surface: AllGround
+  #   dof: [1,1,1,1,1,1]
+    
 states:
   WipingController_RightHandTrajectory:
     base: MetaTasks
@@ -681,10 +686,12 @@ states:
             circleWiping_CCW: true
             circleRadius: 0.1
             wipingDuration: 12.0
+            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
           WipingController_WipeItBabyState_lh:
             circleWiping_CW: true
             circleRadius: 0.08
             wipingDuration: 12.0
+            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
     AddContacts:
       - r1: hrp4
         r2: tilted_board
@@ -744,7 +751,7 @@ states:
 
   WipinController::ShuffleLeftFoot:
     base: WipingController_WipeItBabyState_lf
-    maxForce_rh: 20
+    maxForce_rh: 10
     maxForce_lh: 20
     maxForce_lf: 30
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001] #0.001
@@ -770,7 +777,7 @@ states:
     base: WipinController::ShuffleLeftFoot
     linearWiping: true
     circleWiping_CW: false
-    circleRadius: 0.15
+    circleRadius: 0.1
     wipingDuration: 3.0
 
   Shuffle::Circle:
@@ -783,7 +790,7 @@ states:
     
   Shuffle::Forward2:
     base: Shuffle::Forward1
-    circleRadius: -0.15
+    circleRadius: -0.1
 
   Shuffle::Trajectory:
     base : Meta
@@ -830,9 +837,9 @@ states:
         actions:
           Half Sit Slope: HalfSitSlope
 
-  Choose::Slope::StepUpSlope_20deg:
+  Choose::Slope::StepUpSlope_experiment:
     base: Choose
-    states: [UpSlope::FSM::StepUpSlope_20deg, Message, WipingController_ChooseTransition]
+    states: [UpSlope::FSM::StepUpSlope_experiment, Message, WipingController_ChooseTransition]
     configs:
       WipingController_ChooseTransition:
         actions:
@@ -845,14 +852,34 @@ states:
       WipingController_ChooseTransition:
         actions:
           Step Down Slope: StepDownSlope
+      DownSlope::Stabilizer::HalfSitting_Slope:
+        AddCollisions:
+          - r1: hrp4
+            r2: tilted_board
+            collisions:
+              - body1: r_wrist
+                body2: ground
+                iDist: 0.1
+                sDist: 0.03
+                damping: 0.0
+          # - r1: hrp4
+          #   r2: tilted_board
+          #   collisions:
+          #     - body1: R_F23_LINK
+          #       body2: somethingelse
+          #       iDist: 0.1
+          #       sDist: 0.03
+          #       damping: 0.0
 
   Go_HalfSitting:
     base: HalfSitting
     eval: 0.01
+
+    
     
 transitions:
-  - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_20deg, Auto]
-  - [UpSlope::FSM::StepUpSlope_20deg, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
+  - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_experiment, Auto]
+  - [UpSlope::FSM::StepUpSlope_experiment, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
@@ -880,5 +907,5 @@ transitions:
   # - [WipingController_ReleasePushWallCoMQP, OK, DownSlope::Stabilizer::HalfSitting_Slope, Auto]
   # - [DownSlope::Stabilizer::HalfSitting_Slope, OK, Choose::Slope::HalfSitting, Auto]
   - [Choose::Slope::HalfSitting, StepDownSlope, DownSlope::FSM::StepDownSlope, Auto]
-  
+
 init: Choose::Initial

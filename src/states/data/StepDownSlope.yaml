@@ -14,9 +14,9 @@ DownSlope::LeftFootTrajectory:
         translation: [0.017046, 0.12, 0.025]
         rotation: [0.0, 0.0, 0.0]
       controlPoints:
-        - [0.017046, 0.3, 0.25]
-        - [0.017046, 0.15, 0.15]
-        - [0.017046, 0.12, 0.1]
+        - [0.017046, 0.3, 0.20]
+        - [0.017046, 0.15, 0.10]
+        - [0.017046, 0.12, 0.05]
 
 DownSlope::Stabilized::LeftFootTrajectory:
   base: Parallel
@@ -100,7 +100,7 @@ DownSlope::Stabilizer::GoRight:
         pitch: 0
       height: 0
     completion:
-        - dcmEval: [0.05, 0.05, 0.2]        
+        - dcmEval: [0.02, 0.005, 0.2]        
 
 DownSlope::PutLeftFoot:
   base: MetaTasks
@@ -144,12 +144,40 @@ DownSlope::Stabilized::PutLeftFoot:
 DownSlope::Stabilizer::GoCenterFinal:
   base: DownSlope::Stabilizer::GoCenter
 
+DownSlope::Choose::GoRight:
+  base: Parallel
+  states: [DownSlope::Stabilizer::GoRight, Message, WipingController_ChooseTransition]
+  configs:
+    WipingController_ChooseTransition:
+      category: []
+      actions:
+        Next Step: NextStep
+    Message:
+      gui: []
+      log: info
+      message: "Manual transition"
+      prefix": "Waiting for"
+
+DownSlope::Stabilizer::Pause:
+  base: Parallel
+  states: [Pause, DownSlope::Stabilizer::GoRight]
+  configs:
+    Pause:
+      duration: 1.0
+      
 DownSlope::FSM::StepDownSlope:
   base: Meta
   transitions:
-    - [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Stabilizer::GoRight]
+    
     #- [WipingController_HalfSitting, OK, DownSlope::Stabilizer::GoCenter]
     #- [DownSlope::Stabilizer::GoCenter, OK, DownSlope::Stabilizer::GoRight]
-    - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilized::LeftFootTrajectory]
-    - [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot]
-    - [DownSlope::Stabilized::PutLeftFoot, OK, DownSlope::Stabilizer::GoCenterFinal]
+    
+    # - [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Choose::GoRight, Auto]
+    # - [DownSlope:Choose::GoRight, NextStep, DownSlope::Stabilized::LeftFootTrajectory, Auto]
+    
+    - [DownSlope::Stabilizer::HalfSitting_Slope, OK, DownSlope::Stabilizer::GoRight, Auto]
+    - [DownSlope::Stabilizer::GoRight, OK, DownSlope::Stabilizer::Pause, Auto]
+    - [DownSlope::Stabilizer::Pause, OK, DownSlope::Stabilized::LeftFootTrajectory, Auto]
+    
+    - [DownSlope::Stabilized::LeftFootTrajectory, OK, DownSlope::Stabilized::PutLeftFoot, Auto]
+    - [DownSlope::Stabilized::PutLeftFoot, OK, DownSlope::Stabilizer::GoCenterFinal, Auto]

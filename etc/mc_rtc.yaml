@@ -1,5 +1,8 @@
-MainRobot: HRP4ComanoidChoreonoid
+# MainRobot: HRP4ComanoidChoreonoid
+MainRobot: HRP4Comanoid
 Enabled: [WipingController]
+# Enabled: [LIPMStabilizer]
+# Enabled:  [Posture]
 UDP:
   IgnoredJoints:
     joints: [L_HAND_J0, R_HAND_J0, L_HAND_J1]

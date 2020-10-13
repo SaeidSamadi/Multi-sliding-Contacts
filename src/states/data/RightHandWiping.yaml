@@ -27,8 +27,8 @@ RightHand::TrajectoryToWhiteboard:
         timeElapsed: true
       # XXX would be better to target a surface on the environment
       target:
-        translation: [0.3, -0.4, 0.95]
-        rotation: [-0.785, 0.0, 1.57]
+        translation: [0.3, -0.35, 0.95]
+        rotation: [-0.870, 0.0, 1.57]
       controlPoints:
         - [0.0, -0.5, 0.85]
       oriWaypoints:
@@ -42,7 +42,7 @@ RightHand::EstablishContactWithConstantVel:
       r2: tilted_board  
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
   tasks:
     RightHandContactConstantVelocity:
       type: surfaceTransform

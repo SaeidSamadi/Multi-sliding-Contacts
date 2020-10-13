@@ -4,10 +4,10 @@
 
 void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & config)
 {
-	if(config.has("admittance"))
-	{
-	  admittance_ = config("admittance");
-	}
+  if(config.has("admittance"))
+    {
+      admittance_ = config("admittance");
+    }
   if(config.has("feetForceControl"))
   {
     feetForceControl_ = config("feetForceControl");

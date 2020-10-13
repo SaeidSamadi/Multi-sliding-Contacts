@@ -84,6 +84,16 @@ UpSlope::Stabilized::LeftFootTrajectory_20deg:
   base: UpSlope::Stabilized::LeftFootTrajectory
   states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory_20deg]
 
+UpSlope::Stabilized::LeftFootTrajectory_experiment:
+  base: UpSlope::Stabilized::LeftFootTrajectory
+  states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::LeftFootTrajectory_20deg]
+  configs:
+    UpSlope::LeftFootTrajectory_20deg:
+      tasks:
+        LiftFootTask:
+          target:
+            rotation: [0.226, 0.0, 0.0]
+
 UpSlope::Stabilized::PutLeftFoot:
   base: Parallel
   states: [WipingController::Stabilizer::RightFootFlatSupport, UpSlope::PutLeftFoot]
@@ -133,5 +143,13 @@ UpSlope::FSM::StepUpSlope_20deg:
     - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
     - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory_20deg]
     - [UpSlope::Stabilized::LeftFootTrajectory_20deg, OK, UpSlope::Stabilized::PutLeftFoot]
+    - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
+
+UpSlope::FSM::StepUpSlope_experiment:
+  base: Meta
+  transitions:
+    - [WipingController::Stabilizer::GoCenterFlat, OK, WipingController::Stabilizer::GoRightFlat]
+    - [WipingController::Stabilizer::GoRightFlat, OK, UpSlope::Stabilized::LeftFootTrajectory_experiment]
+    - [UpSlope::Stabilized::LeftFootTrajectory_experiment, OK, UpSlope::Stabilized::PutLeftFoot]
     - [UpSlope::Stabilized::PutLeftFoot, OK, UpSlope::Stabilizer::GoCenter]
 

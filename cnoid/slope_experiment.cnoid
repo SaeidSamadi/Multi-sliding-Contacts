@@ -20,19 +20,18 @@ items:
           plugin: Body
           class: BodyItem
           data: 
-            # modelFile: "${MODEL}/HRP4LIRMM/model/HRP4LIRMM_blockHand.wrl"
-            modelFile: "/usr/share/OpenHRP-3.1/robot/HRP4LIRMM/model/HRP4LIRMM_blockHand.wrl"
+            modelFile: "${PROGRAM_TOP}/share/OpenHRP-3.1/robot/HRP4LIRMM/model/HRP4LIRMM_blockHand.wrl"
             currentBaseLink: "WAIST"
-            rootPosition: [ -0.00645432956, 0.00155104001, 0.74560134 ]
+            rootPosition: [ -0.00772265955, 0.00170100557, 0.74549864 ]
             rootAttitude: [ 
-              0.999901735, -0.00919549746, -0.0105812905, 
-              0.0091854345, 0.999957314, -0.000999221227, 
-              0.0105900271, 0.000901929288, 0.999943517 ]
+              0.999876358, -0.00909948034, -0.0128245221, 
+              0.00909490237, 0.999958554, -0.00041524799, 
+              0.0128277691, 0.000298558872, 0.999917676 ]
             jointPositions: [ 
-               0.002294, -0.017558, -0.385746,  0.730958, -0.334619,  0.016352, -0.002904,  0.017020, -0.383656,  0.730837, 
-              -0.336019, -0.017335,  0.141678,  0.000256, -0.000009,  0.000280, -0.051112, -0.166147,  0.000804, -0.515273, 
-              -0.000228,  0.001017,  0.001607,  0.000196,  0.000093, -0.051845,  0.167397, -0.000549, -0.517901,  0.000119, 
-               0.000959, -0.000609, -0.249543,  0.005193, -0.220069,  0.005790, -0.124032,  0.099308, -0.195878,  0.029602 ]
+               0.002173, -0.017154, -0.385566,  0.731379, -0.333514,  0.016505, -0.002814,  0.017388, -0.383611,  0.731442, 
+              -0.334603, -0.017214,  0.141940,  0.000250, -0.000009,  0.000270, -0.051700, -0.166667,  0.000813, -0.514515, 
+              -0.000201,  0.001149,  0.001567,  0.000188,  0.000110, -0.051806,  0.167926, -0.000562, -0.517823,  0.000092, 
+               0.000976, -0.000597, -0.000096, -0.000002, -0.057682, -0.015486, -0.293052,  0.048741, -0.117250,  0.000891 ]
             initialRootPosition: [ -0.00444289964, 0.00195066485, 0.746657583 ]
             initialRootAttitude: [ 
               0.999950635, -0.00907241497, -0.00405209503, 
@@ -80,8 +79,7 @@ items:
           plugin: Body
           class: BodyItem
           data: 
-            # modelFile: "${MODEL}/longfloor.wrl"
-            modelFile: "/usr/share/OpenHRP-3.1/sample/model/longfloor.wrl"
+            modelFile: "${PROGRAM_TOP}/share/OpenHRP-3.1/sample/model/longfloor.wrl"
             currentBaseLink: "WAIST"
             rootPosition: [ 0, 0, -0.1 ]
             rootAttitude: [ 
@@ -140,7 +138,7 @@ items:
             file: "${PROGRAM_TOP}/share/hrpsys/samples/HRP4LIRMM/sim_mc_udp.py"
         - 
           id: 8
-          name: "DRCTestbedButton"
+          name: "VerticalWall"
           plugin: Body
           class: BodyItem
           data: 
@@ -164,23 +162,23 @@ items:
             isEditable: true
         - 
           id: 9
-          name: "DRCTestbedButton2"
+          name: "Slope"
           plugin: Body
           class: BodyItem
           data: 
             modelFile: "${PROGRAM_TOP}/share/hrpsys/samples/environments/DRCTestbedButton.wrl"
             currentBaseLink: ""
-            rootPosition: [ -1.24999771, 0.836006332, 0.23817246 ]
+            rootPosition: [ -1.24999771, 0.852927006, 0.15856695 ]
             rootAttitude: [ 
-              -0.000184151004, 3.41873182e-06, 1.00016476, 
-              -0.342003419, -0.940038794, -3.41873182e-06, 
-              0.939874036, -0.342003419, -0.000145365004 ]
-            jointPositions: [  3.197200 ]
-            initialRootPosition: [ -1.24999771, 0.836006332, 0.23817246 ]
+               -6.02242256e-10, -1.38023782e-17, 1, 
+              -0.2079117, -0.978147599, -1.25213225e-10, 
+              0.978147599, -0.2079117, 5.89081813e-10 ]
+            jointPositions: [  0.000000 ]
+            initialRootPosition: [ -1.24999771, 0.852927006, 0.15856695 ]
             initialRootAttitude: [ 
-              -0.000184150748, 3.41852133e-06, 1.00016476, 
-              -0.342003419, -0.940038796, -3.41852133e-06, 
-              0.939874037, -0.342003419, -0.000145367135 ]
+              -6.022427e-10, 0, 1, 
+              -0.2079117, -0.9781476, 0, 
+              0.978147599, -0.2079117, -6.022427e-10 ]
             initialJointPositions: [  0.000000 ]
             zmp: [ 0, 0, 0 ]
             collisionDetection: true
@@ -195,16 +193,16 @@ items:
             modelFile: "${PROGRAM_TOP}/share/hrpsys/samples/environments/DRCTestbedButton.wrl"
             currentBaseLink: ""
             rootPosition: [ 0.27, -0.69, 0.71 ]
-            rootAttitude: [ 
-              -0.707, 0, 0.707, 
-              0, -0.999823081, 0, 
-              0.707, 0, 0.707176919 ]
-            jointPositions: [ -0.000001 ]
+            rootAttitude: [
+			-0.7771460,  0.0000000,  0.6293204,
+  			-0.0000000, -1.0000000,  0.0000000,
+   			0.6293204, -0.0000000,  0.7771460]
+            jointPositions: [  0.000000 ]
             initialRootPosition: [ 0.27, -0.69, 0.71 ]
-            initialRootAttitude: [ 
-              -0.707, 0, 0.707, 
-              0, -0.999823081, 0, 
-              0.707, 0, 0.707176919 ]
+            initialRootAttitude: [
+			-0.7771460,  0.0000000,  0.6293204,
+  			-0.0000000, -1.0000000,  0.0000000,
+   			0.6293204, -0.0000000,  0.7771460]
             initialJointPositions: [  0.000000 ]
             zmp: [ 0, 0, 0 ]
             collisionDetection: true
@@ -333,9 +331,9 @@ views:
           fieldOfView: 0.6978
           near: 0.01
           far: 10000
-          eye: [ -3.06468649, -2.99595673, 1.20445395 ]
-          direction: [ 0.812911357, 0.582301579, -0.00999983283 ]
-          up: [ 0.00812938414, 0.00582320961, 0.99995 ]
+          eye: [ -4.06538646, 0.238205125, 0.12085102 ]
+          direction: [ 0.987085006, -0.0577185941, 0.149438129 ]
+          up: [ -0.149183305, 0.00872331213, 0.988771078 ]
         - 
           camera: [ System, Orthographic ]
           orthoHeight: 20
@@ -428,10 +426,10 @@ views:
           id: 2
           selectedLinks: [ 0 ]
         - 
-          id: 9
+          id: 8
           selectedLinks: [ 0 ]
         - 
-          id: 8
+          id: 9
           selectedLinks: [ 0 ]
   - 
     id: 14
@@ -465,7 +463,7 @@ toolbars:
     frameRate: 1000
     playbackFrameRate: 50
     idleLoopDrivenMode: false
-    currentTime: 58.094
+    currentTime: 0.762
     speedScale: 1
     syncToOngoingUpdates: true
     autoExpansion: true
@@ -477,10 +475,10 @@ toolbars:
     snapDistance: 0.025
     penetrationBlockDepth: 0.0005
     lazyCollisionDetectionMode: true
-  "LeggedBodyBar": 
-    stanceWidth: 0.15
   "BodyBar": 
     current: 9
+  "LeggedBodyBar": 
+    stanceWidth: 0.15
   "BodyMotionGenerationBar": 
     autoGenerationForNewBody: true
     balancer: false
@@ -571,12 +569,12 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 513, 1397 ]
+      sizes: [ 515, 1401 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 422, 428 ]
+          sizes: [ 479, 486 ]
           children: 
             - 
               type: pane
