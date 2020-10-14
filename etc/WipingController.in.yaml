@@ -230,7 +230,7 @@ states:
     duration: 3.0
     maxDuration: 4.0
     maxForce_rh: 10
-    maxForce_lh: 10
+    maxForce_lh: 15
     maxForce_lf: 30
     forceThreshold: 1
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.005]
@@ -502,8 +502,8 @@ states:
     comStiffness: 60
   WipingController_PrepareShuffleState_:
     base: WipingController_PrepareShuffleAuto
-    maxForce_rh: 15
-    maxForce_lh: 20
+    maxForce_rh: 10
+    maxForce_lh: 15
     maxForce_lf: 30
     duration: 3
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
@@ -686,7 +686,7 @@ states:
             circleWiping_CCW: true
             circleRadius: 0.1
             wipingDuration: 12.0
-            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
           WipingController_WipeItBabyState_lh:
             circleWiping_CW: true
             circleRadius: 0.08
@@ -752,7 +752,7 @@ states:
   WipinController::ShuffleLeftFoot:
     base: WipingController_WipeItBabyState_lf
     maxForce_rh: 10
-    maxForce_lh: 20
+    maxForce_lh: 15
     maxForce_lf: 30
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001] #0.001
     admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]

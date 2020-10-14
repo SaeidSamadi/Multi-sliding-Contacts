@@ -52,19 +52,19 @@ UpSlope::PutLeftFoot:
       type: admittance
       robot: hrp4
       surface: LeftFootCenter
-      stiffness:  [0, 0, 0, 0, 0, 1]
+      stiffness:  [0, 0, 0, 0, 0, 10]
       damping:    [0, 0, 0, 0, 0, 300]
       admittance: [0, 0, 0, 0, 0, 0.001]
       maxVel:
-        linear:  [0.2, 0.2, 0.5]
+        linear:  [0.2, 0.2, 0.3]
         angular: [0.2, 0.2, 0.2]
       # XXX we probably want to target CoP in the center of the foot there to ensure good contact establishment
       wrench:
         couple: [0.0, 0.0, 0.0]
-        force: [0.0, 0.0, 30.0]
+        force: [0.0, 0.0, 10.0]
       completion:
         wrench:
-          force: [.NaN, .NaN, 30]
+          force: [.NaN, .NaN, 15.0]
           couple: [.NaN, .NaN, .NaN]
 
 UpSlope::Stabilized::LeftFootTrajectory:

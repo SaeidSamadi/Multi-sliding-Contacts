@@ -11,7 +11,7 @@ DownSlope::LeftFootTrajectory:
       completion:
         timeElapsed: true
       target:
-        translation: [0.017046, 0.12, 0.025]
+        translation: [0.017046, 0.09, 0.025]
         rotation: [0.0, 0.0, 0.0]
       controlPoints:
         - [0.017046, 0.3, 0.20]

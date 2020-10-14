@@ -28,7 +28,7 @@ RightHand::TrajectoryToWhiteboard:
       # XXX would be better to target a surface on the environment
       target:
         translation: [0.3, -0.35, 0.95]
-        rotation: [-0.870, 0.0, 1.57]
+        rotation: [-0.908, 0.0, 1.57]
       controlPoints:
         - [0.0, -0.5, 0.85]
       oriWaypoints:
@@ -44,6 +44,23 @@ RightHand::EstablishContactWithConstantVel:
       r2Surface: AllGround
       dof: [0, 0, 1, 1, 1, 0]
   tasks:
+    # RightHandAdmittanceTask:
+    #   type: admittance
+    #   robot: hrp4
+    #   surface: RightHandPad
+    #   stiffness:  [0, 0, 0, 0, 0, 10]
+    #   damping:    [0, 0, 0, 0, 0, 300]
+    #   admittance: [0.0, 0.0, 0, 0, 0, 0.01]
+    #   maxVel:
+    #     linear:  [0.0, 0.0, 0.1]
+    #     angular: [0.0, 0.0, 0.0]
+    #   wrench:
+    #     couple: [0.0, 0.0, 0.0]
+    #     force: [0.0, 0.0, 10.0]
+    #   completion:
+    #     wrench:
+    #       force: [.NaN, .NaN, 7.0]
+    #       couple: [.NaN, .NaN, .NaN]
     RightHandContactConstantVelocity:
       type: surfaceTransform
       surface: RightHandPad

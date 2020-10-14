@@ -173,6 +173,16 @@ WipingController_PushWallCoMQP_lh:
   initFromCoMQP: true
   comStiffness: 60
 
+WipingController_PushWallCoMQP_lf:
+  base: WipingController_PushWall_lf
+  useCoMQP: true
+  duration: 3.0
+  maxDuration: 4.0
+  maxForce: 60
+  forceThreshold: 5
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  initFromCoMQP: true
+  comStiffness: 60
 ##
 #FIXME code duplication
 ##
@@ -197,11 +207,20 @@ WipingController_ReleasePushWallCoMQP_rh:
   damping: [28, 28, 28, 28, 28, 300]
 
 WipingController_ReleasePushWallCoMQP_lh:
-  base: WipingController_PushWallCoMQP_lh
+  base: WipingController_PushWallCoMQP_lh  
   useCoMQP: true
   maxForce: 1
   forceThreshold: 2
   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+  stiffness: [200, 200, 200, 200, 200, 1]
+  damping: [28, 28, 28, 28, 28, 300]
+
+WipingController_ReleasePushWallCoMQP_lf:
+  base: WipingController_PushWallCoMQP_lf
+  useCoMQP: true
+  maxForce: 100
+  forceThreshold: 100
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0002]
   stiffness: [200, 200, 200, 200, 200, 1]
   damping: [28, 28, 28, 28, 28, 300]
 
@@ -233,11 +252,13 @@ WipingController_ReleasePushWallCoMQP:
 
 WipingController_ReleasePushWallCoMQP_AfterShuffle:
   base: Parallel
-  states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
+  states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh, WipingController_ReleasePushWallCoMQP_lf]
   configs:
     WipingController_ReleasePushWallCoMQP_rh:
       comStiffness: 30
     WipingController_ReleasePushWallCoMQP_lh:
+      comStiffness: 30
+    WipingController_ReleasePushWallCoMQP_lf:
       comStiffness: 30
   AddContacts:
     - r1: hrp4
