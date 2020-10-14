@@ -1,0 +1,590 @@
+[
+    [
+    "[Cheb]ShufflingForces",
+    "t",
+    [
+      "cop_hrp4_LeftFootCenter_target_wrench_fz",
+      "cop_hrp4_LeftFootCenter_measured_wrench_fz",
+      "cop_hrp4_BlockLeftHand_target_wrench_fz",
+      "cop_hrp4_BlockLeftHand_measured_wrench_fz",
+      "cop_hrp4_RightHandPad_target_wrench_fz",
+      "cop_hrp4_RightHandPad_measured_wrench_fz"
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "cop_hrp4_BlockLeftHand_measured_wrench_fz": {
+        "color": "#984ea3",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_BlockLeftHand_measured_wrench_fz"
+      },
+      "cop_hrp4_BlockLeftHand_target_wrench_fz": {
+        "color": "#4daf4a",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_BlockLeftHand_target_wrench_fz"
+      },
+      "cop_hrp4_LeftFootCenter_measured_wrench_fz": {
+        "color": "#377eb8",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_LeftFootCenter_measured_wrench_fz"
+      },
+      "cop_hrp4_LeftFootCenter_target_wrench_fz": {
+        "color": "#e41a1c",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_LeftFootCenter_target_wrench_fz"
+      },
+      "cop_hrp4_RightHandPad_measured_wrench_fz": {
+        "color": "#f781bf",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_RightHandPad_measured_wrench_fz"
+      },
+      "cop_hrp4_RightHandPad_target_wrench_fz": {
+        "color": "#a65628",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "cop_hrp4_RightHandPad_target_wrench_fz"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "y1_legend_ncol": 3,
+      "labelpad": 10,
+      "bottom_offset": 0.1,
+      "tick_fontsize": 10,
+      "y2_legend_ncol": 3
+    },
+    0
+  ],
+  [
+    "[Cheb]WipingForces",
+    "t",
+    [
+      "cop_hrp4_BlockLeftHand_target_wrench_fz",
+      "cop_hrp4_BlockLeftHand_measured_wrench_fz",
+      "cop_hrp4_RightHandPad_target_wrench_fz",
+      "cop_hrp4_RightHandPad_measured_wrench_fz"
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "cop_hrp4_BlockLeftHand_measured_wrench_fz": {
+        "color": [
+          0.21568627450980393,
+          0.49411764705882355,
+          0.7215686274509804,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Left Hand Normal Force"
+      },
+      "cop_hrp4_BlockLeftHand_target_wrench_fz": {
+        "color": [
+          0.8941176470588236,
+          0.10196078431372549,
+          0.10980392156862745,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 1.0,
+        "linestyle": "-",
+        "label": "Left Hand Target Normal Force"
+      },
+      "cop_hrp4_RightHandPad_measured_wrench_fz": {
+        "color": [
+          0.596078431372549,
+          0.3058823529411765,
+          0.6392156862745098,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Right Hand Normal Force"
+      },
+      "cop_hrp4_RightHandPad_target_wrench_fz": {
+        "color": [
+          0.30196078431372547,
+          0.6862745098039216,
+          0.2901960784313726,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 1.0,
+        "linestyle": "-",
+        "label": "Right Hand Target Normal Force"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "y1_legend_ncol": 3,
+      "labelpad": 10,
+      "bottom_offset": 0.1,
+      "tick_fontsize": 10,
+      "y2_legend_ncol": 3
+    },
+    0
+  ],
+  [
+    "[Cheb]FrictionCoefficient",
+    "t",
+    [
+      "friction_mu_Estim_lh",
+      "friction_mu_Estim_rh",
+      "friction_mu_filtered_lh",
+      "friction_mu_filtered_rh"
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "friction_mu_filtered_lh": {
+        "color": [
+          0.3607843137254902,
+          0.20784313725490197,
+          0.4,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Left Hand Filtered"
+      },
+      "friction_mu_filtered_rh": {
+        "color": [
+          0.807843137254902,
+          0.3607843137254902,
+          0.0,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Right Hand Filtered"
+      },
+      "friction_mu_Estim_rh": {
+        "color": [
+          0.9372549019607843,
+          0.1607843137254902,
+          0.1607843137254902,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Right Hand Estimation"
+      },
+      "friction_mu_Estim_lh": {
+        "color": [
+          0.20392156862745098,
+          0.396078431372549,
+          0.6431372549019608,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Left Hand Estimation"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "t (s)",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "Friction Coefficient",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "y1_legend_ncol": 3,
+      "labelpad": 10,
+      "bottom_offset": 0.1,
+      "tick_fontsize": 10,
+      "y2_legend_ncol": 3
+    },
+    0
+  ],
+  [
+    "[Cheb]Hand Pose Tracking",
+    "t",
+    [
+      [
+        "cop_hrp4_BlockLeftHand_target_pose_ty",
+        "cop_hrp4_BlockLeftHand_target_pose_tz",
+        "Left Hand Target"
+      ],
+      [
+        "cop_hrp4_BlockLeftHand_surface_pose_ty",
+        "cop_hrp4_BlockLeftHand_surface_pose_tz",
+        "Left Hand Pose"
+      ]
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "Left Hand Target": {
+        "color": [
+          0.8,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 1.0,
+        "linestyle": "-",
+        "label": "Left Hand Target"
+      },
+      "Left Hand Pose": {
+        "color": [
+          0.12549019607843137,
+          0.2901960784313726,
+          0.5294117647058824,
+          1.0
+        ],
+        "visible": false,
+        "linewidth": 1.0,
+        "linestyle": "-",
+        "label": "Left Hand Pose"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "tick_fontsize": 10,
+      "labelpad": 10,
+      "y2_legend_ncol": 3,
+      "y1_legend_ncol": 3,
+      "bottom_offset": 0.1
+    },
+    1
+  ],
+  [
+    "[Cheb] 3D Hand Trajectories",
+    "t",
+    [
+      [
+        "cop_hrp4_RightHandPad_surface_pose_tx",
+        "cop_hrp4_RightHandPad_surface_pose_ty",
+        "cop_hrp4_RightHandPad_surface_pose_tz",
+        "Right Hand Trajectory"
+      ],
+      [
+        "cop_hrp4_BlockLeftHand_surface_pose_tx",
+        "cop_hrp4_BlockLeftHand_surface_pose_ty",
+        "cop_hrp4_BlockLeftHand_surface_pose_tz",
+        "Left Hand Trajectory"
+      ],
+      [
+        "cop_hrp4_BlockLeftHand_target_pose_tx",
+        "cop_hrp4_BlockLeftHand_target_pose_ty",
+        "cop_hrp4_BlockLeftHand_target_pose_tz",
+        "Left Hand Target"
+      ],
+      [
+        "cop_hrp4_RightHandPad_target_pose_tx",
+        "cop_hrp4_RightHandPad_target_pose_ty",
+        "cop_hrp4_RightHandPad_target_pose_tz",
+        "Right Hand Target"
+      ]
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "Right Hand Trajectory": {
+        "color": "#984ea3",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Right Hand Trajectory"
+      },
+      "Left Hand Trajectory": {
+        "color": "#4daf4a",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Left Hand Trajectory"
+      },
+      "Right Hand Target": {
+        "color": "#377eb8",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Right Hand Target"
+      },
+      "Left Hand Target": {
+        "color": "#e41a1c",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "Left Hand Target"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "X",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "Y",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "Z",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "y1_legend_ncol": 3,
+      "labelpad": 10,
+      "bottom_offset": 0,
+      "tick_fontsize": 10,
+      "y2_legend_ncol": 0
+    },
+    2
+  ],
+  [
+    "[Cheb] CoM Trajectory",
+    "t",
+    [
+      [
+        "com_hrp4_target_x",
+        "com_hrp4_target_y",
+        "com_hrp4_target_z",
+        "CoM Target"
+      ],
+      [
+        "com_hrp4_pos_x",
+        "com_hrp4_pos_y",
+        "com_hrp4_pos_z",
+        "CoM Measured"
+      ]
+    ],
+    [],
+    [],
+    [],
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "color": "black",
+      "visible": false,
+      "linewidth": 0.5,
+      "linestyle": "--",
+      "label": ""
+    },
+    {
+      "CoM Target": {
+        "color": "#e41a1c",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "CoM Target"
+      },
+      "CoM Measured": {
+        "color": "#377eb8",
+        "visible": false,
+        "linewidth": 0.5,
+        "linestyle": "-",
+        "label": "CoM Measured"
+      }
+    },
+    {},
+    {
+      "x_label": {
+        "text": "X",
+        "fontsize": 10
+      },
+      "y1_label": {
+        "text": "Y",
+        "fontsize": 10
+      },
+      "y2_label": {
+        "text": "Z",
+        "fontsize": 10
+      },
+      "title": {
+        "text": "",
+        "fontsize": 12
+      }
+    },
+    {
+      "legend_fontsize": 10,
+      "top_offset": 0.9,
+      "tick_fontsize": 10,
+      "labelpad": 10,
+      "y2_legend_ncol": 0,
+      "y1_legend_ncol": 3,
+      "bottom_offset": 0
+    },
+    2
+  ]
+]
