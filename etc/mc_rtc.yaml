@@ -1,5 +1,5 @@
-# MainRobot: HRP4ComanoidChoreonoid
-MainRobot: HRP4Comanoid
+MainRobot: HRP4ComanoidChoreonoid
+#MainRobot: HRP4Comanoid
 Enabled: [WipingController]
 # Enabled: [LIPMStabilizer]
 # Enabled:  [Posture]
