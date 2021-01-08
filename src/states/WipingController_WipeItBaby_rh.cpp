@@ -26,18 +26,26 @@ void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & con
     }
   if(config.has("circleRadius"))
     {
-      circleRadius_ = config("circleRadius");
+      amplitude_ = config("circleRadius");
     }
   if(config.has("wipingDuration"))
     {
       wipingDuration_ = config("wipingDuration");
     }
+
+  if (config.has("tune")) tune_ = config("tune");
 }
 
 void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
+  t_ = 0.0;
+  if (tune_){
+    mc_rtc::log::warning("Tunning Mode Activated!");
+    addTunningGUI(ctl);
+  }
+  
   if(feetForceControl_)
   {
     ctl.addFootForceControl();
@@ -68,6 +76,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.rightHandTask->setGains(stiffnessGain, dampingGain);
   ctl.rightHandTask->dimWeight(dimW);
   ctl.rightHandTask->admittance(admittance_);
+  admittanceZ_ = admittance_(5);
   ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
   ctl.rightHandTask->targetPose();
   ctl.setTargetFromCoMQP();
@@ -116,65 +125,24 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
+  t_ += ctl.timeStep;
+  updateTrajectory(ctl.timeStep);
 
+  delta_line << local_x - local_x_prev,
+                local_y - local_y_prev,
+                0.0;
   
-  if(linearWiping_){
-    double linearVelocity = circleRadius_ / wipingDuration_;
-    local_x = ctl.timeStep * linearVelocity;
-    local_y = 0.0;
-  }
-  else if(circleWiping_CCW_ || circleWiping_CW_)
-  {
-    double theta_net = 2 * M_PI;
-    double angleRate = theta_net / wipingDuration_;
-    double delta_theta = angleRate * ctl.timeStep;
-    if(circleWiping_CCW_){
-      local_y_initial = - circleRadius_ * sin(theta);
-    }
-    else if(circleWiping_CW_){
-      local_y_initial = circleRadius_ * sin(theta);
-    }
-
-    if((theta <= M_PI/2.0) || (theta >= 1.5 * M_PI && theta <= 2 * M_PI)){
-      local_x_initial = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
-    }
-    else{
-      local_x_initial = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_initial, 2.0)) + circleRadius_;
-    }
-    theta += delta_theta;
-    if(circleWiping_CCW_){
-      local_y_final = - circleRadius_ * sin(theta);
-    }
-    else if(circleWiping_CW_){
-      local_y_final = circleRadius_ * sin(theta);
-    }
-
-    if((theta <= M_PI/2.0) || (theta >= 1.5 * M_PI && theta <= 2 * M_PI)){
-      local_x_final = -sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
-    }
-    else{
-      local_x_final = sqrt(std::pow(circleRadius_, 2.0) - std::pow(local_y_final, 2.0)) + circleRadius_;
-    }
-    local_x = local_x_final - local_x_initial;
-    local_y = local_y_final - local_y_initial;
-  }
-
-  delta_line << local_x, local_y, 0.0; //This should generate straight line wiping on 45deg tilted_board
+  //This should generate straight line wiping on 45deg tilted_board
   delta_lineW = ctl.tiltedboardPosInvW * delta_line;
-  wipingTime += ctl.timeStep;
   sva::PTransformd poseOutput = ctl.rightHandTask->targetPose();
   auto rotationPose = poseOutput.rotation();
   auto translationPose = poseOutput.translation();
   sva::PTransformd target;
   sva::MotionVecd targetVelocity = sva::MotionVecd::Zero();
   target.rotation() = rotationPose;
-  if(wipingTime <= wipingDuration_){
-    target.translation() = translationPose + delta_lineW;
-    targetVelocity.linear() = delta_lineW / ctl.timeStep;
-  }
-  else{
-    target.translation() = translationPose;
-  }
+  target.translation() = translationPose + delta_lineW;
+  targetVelocity.linear() = delta_lineW / ctl.timeStep;
+
   ctl.rightHandTask->targetPose(target);
 
   ctl.comQP().updateRHPose(target);
@@ -188,8 +156,13 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   //ctl.setFeetTargetFromCoMQP();
   // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
 
-  output("OK");
-  return true;
+  if (tune_){
+    return false;
+  }
+  else{
+    output("OK");
+    return true;
+  }
 }
 
 void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_)
@@ -209,7 +182,95 @@ void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_
   ctl.logger().removeLogEntry("friction_mu_x_Estim");
   //ctl.logger().removeLogEntry("friction_mu_y");
   //ctl.logger().removeLogEntry("friction_mu");
+  removeTunningGUI(ctl);
+}
 
+
+// rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
+
+void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller & ctl_)
+{
+  auto & ctl = static_cast<WipingController &>(ctl_);
+  mc_rtc::log::info("Initial admittance is: {} and {}", admittanceZ_, ctl.rightHandTask->admittance().force()(3));
+  ctl.gui()->addElement({categoryName_, "Gains"},
+			mc_rtc::gui::NumberSlider("Admittance f_z",
+						  [this](){ return this->admittanceZ_;},
+						  [this, &ctl]( double v ){
+						    this->admittanceZ_ = v;
+						    ctl.rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, v}));
+						  },
+						  0.0001, 0.003),
+			mc_rtc::gui::Button("Done", [this](){this->tune_ = false;})
+			);
+  using Color = mc_rtc::gui::Color;
+  ctl.gui()->addPlot(
+		     "Normal Force Tracking",
+		     mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		     mc_rtc::gui::plot::Y("Normal Force (Measure)", [&ctl](){return ctl.rightHandTask->measuredWrench().force()(2);}, Color::Red),
+		     mc_rtc::gui::plot::Y("Normal Force (Target", [&ctl](){return ctl.rightHandTask->targetWrench().force()(2);}, Color::Blue)
+		     
+		     );
+  ctl.gui()->addElement({categoryName_, "Trajectory"},
+			mc_rtc::gui::Label("Target Normal Force", [&ctl](){return ctl.rightHandTask->targetWrench().force()(2);})
+			);
+}
+
+void WipingController_WipeItBaby_rh::removeTunningGUI(mc_control::fsm::Controller & ctl)
+{
+  ctl.gui()->removeCategory({categoryName_});
+  ctl.gui()->removePlot("Normal Force Tracking");
+}
+
+void WipingController_WipeItBaby_rh::resetTrajectory()
+{
+  wipingTime_ = 0.0;
+  // store the initial values for local_x and local_y
+  assert(false);
+}
+
+void WipingController_WipeItBaby_rh::startResumeTrajectory()
+{
+  Wiping_ = true;
+}
+
+void WipingController_WipeItBaby_rh::pauseTrajectory()
+{
+  Wiping_ = false;
+}
+
+void WipingController_WipeItBaby_rh::updateTrajectory(double timeStep)
+{
+  local_x_prev = local_x;
+  local_y_prev = local_y;
+  
+  if (!Wiping_) return;
+  
+  wipingTime_ += timeStep;
+  double timeRatio = wipingTime_/wipingDuration_;
+  
+  if(linearWiping_){ // goes up and comes back
+    double offset = sin(timeRatio * M_PI) * amplitude_;
+    local_x = local_x_initial + cos(orientation_)*offset;
+    local_y = local_y_initial + sin(orientation_)*offset;
+  }
+  else if(circleWiping_CCW_ || circleWiping_CW_)
+  {
+    double Ox, Oy, offsetX, offsetY;
+    Ox = local_x_initial + cos(orientation_)*amplitude_;
+    Oy = local_y_initial + sin(orientation_)*amplitude_;
+    if(circleWiping_CCW_){
+      offsetX = amplitude_ * cos(2*M_PI*timeRatio-orientation_);
+      offsetY = amplitude_ * sin(2*M_PI*timeRatio-orientation_);
+    }
+    else if(circleWiping_CW_){
+      offsetX = amplitude_ * cos(-2*M_PI*timeRatio-orientation_);
+      offsetY = amplitude_ * sin(-2*M_PI*timeRatio-orientation_);
+    }
+    local_x = Ox + offsetX;
+    local_y = Oy + offsetY;
+  }
 }
 
 EXPORT_SINGLE_STATE("WipingController_WipeItBaby_rh", WipingController_WipeItBaby_rh)
+
+

@@ -21,7 +21,7 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
   void createLinearTrajectory();
   bool computeCoMQP();
   void setTargetFromCoMQP();
-	void setFeetTargetFromCoMQP();
+  void setFeetTargetFromCoMQP();
 
   CoMQP & comQP()
   {
@@ -31,12 +31,12 @@ struct MC_CONTROL_DLLAPI WipingController : public mc_control::fsm::Controller
   void addFootForceControl();
   void removeFootForceControl();
 
-	void addRightHandForceControl();
-	void removeRightHandForceControl();
-	void addLeftHandForceControl();
-	void removeLeftHandForceControl();
-	void addLeftFootForceControl();
-	void removeLeftFootForceControl();
+  void addRightHandForceControl();
+  void removeRightHandForceControl();
+  void addLeftHandForceControl();
+  void removeLeftHandForceControl();
+  void addLeftFootForceControl();
+  void removeLeftFootForceControl();
 private:
   void updateFootForceDifferenceControl();
 
