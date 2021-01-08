@@ -1,4 +1,4 @@
-anaged: false
+Managed: false
 StepByStep: false
 IdleKeepState: true # the state is kept running until the transition occurs
 StatesLibraries: ["@MC_STATES_DEFAULT_INSTALL_PREFIX@", "@MC_STATES_INSTALL_PREFIX@"]
@@ -605,6 +605,8 @@ states:
       WipingController_ChooseTransition:
         actions:
           Step Up Slope: StepUpSlope
+          Tune Left Hand: TuneLeftHand
+          Tune Right Hand: TuneRightHand
       WipingController::Stabilizer::GoCenterFlat:
         completion:
           dcmEval: [0.02, 0.02, 0.1]
@@ -874,16 +876,19 @@ states:
   Go_HalfSitting:
     base: HalfSitting
     eval: 0.01
-
-    
     
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_experiment, Auto]
+  # - [Choose::Initial, TuneLeftHand, Tunning::LeftHand, Auto]
+  - [Choose::Initial, TuneRightHand, Tunning::RightHand, Auto]
   - [UpSlope::FSM::StepUpSlope_experiment, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
-    #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
+  # - [Tunning::LeftHand, OK, Choose::Initial, Auto]
+  - [Tunning::RightHand, OK, Choose::Initial, Auto]
+
+  #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
   - [Choose::Slope::PrepareWiping, PrepareWiping, Choose::Slope::PrepareWipingAndChooseBothHands, Auto]
   - [Choose::Slope::PrepareWiping, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]
   - [Choose::Slope::PrepareWiping, Release, WipingController_ReleasePushWallCoMQP, Auto]

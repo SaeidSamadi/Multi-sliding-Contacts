@@ -9,29 +9,29 @@ void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & con
       admittance_ = config("admittance");
     }
   if(config.has("feetForceControl"))
-  {
-    feetForceControl_ = config("feetForceControl");
-  }
+    {
+      feetForceControl_ = config("feetForceControl");
+    }
   if(config.has("linearWiping"))
-  {
-    linearWiping_ = config("linearWiping");
-  }
+    {
+      linearWiping_ = config("linearWiping");
+    }
   if(config.has("circleWiping_CCW"))
-  {
-    circleWiping_CCW_ = config("circleWiping_CCW");
-  }
+    {
+      circleWiping_CCW_ = config("circleWiping_CCW");
+    }
   if(config.has("circleWiping_CW"))
-  {
-    circleWiping_CW_ = config("circleWiping_CW");
-  }
+    {
+      circleWiping_CW_ = config("circleWiping_CW");
+    }
   if(config.has("circleRadius"))
-  {
-    circleRadius_ = config("circleRadius");
-  }
+    {
+      circleRadius_ = config("circleRadius");
+    }
   if(config.has("wipingDuration"))
-  {
-    wipingDuration_ = config("wipingDuration");
-  }
+    {
+      wipingDuration_ = config("wipingDuration");
+    }
 }
 
 void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)

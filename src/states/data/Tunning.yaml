@@ -1,0 +1,101 @@
+Tunning::RightHandToWhiteboard:
+  base: Parallel
+  states: [WipingController::Stabilizer, RightHand::LookAt, RightHand::FSM::RightHandToWhiteboard]
+  config:
+    WipingController::Stabilizer::GoCenterFlat:
+      completion: {}
+  AddContactsAfter:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+
+Something:
+  base: Pause
+  duration: 5
+  
+Tunning::RightHand::PushWall:
+  base: WipingController_PrepareWipingState_rh
+  feetForceControl: true
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 0]
+
+Tunning::RightHand::Tune:
+  base: WipingController_WipeItBaby_rh
+  AddContacts:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+      dof: [1, 1, 1, 0, 0, 0]
+  tune: true
+  linearWiping: false
+  circleWiping_CCW: true
+  circleRadius: 0.1
+  wipingDuration: 12.0
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+  feetForceControl: true
+
+Tunning::RightHand::ReleasePushWall:
+  base: WipingController_ReleasePushWallCoMQP_rh
+  
+Tunning::RightHand::MoveHand:
+  base: MetaTasks
+  RemoveContacts:
+    - r1: hrp4
+      r2: tilted_board
+      r1Surface: RightHandPad
+      r2Surface: AllGround
+  AddContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+  tasks:
+    MoveRightHand:
+      type: surfaceTransform
+      surface: RightHandPad
+      stiffness: 3.0
+      weight: 500
+      moveWorld:
+        translation: [-0.25, -0.10, 0.05]
+      completion:
+        OR:
+          - eval: 0.05
+          - AND:
+              - timeout: 3.0
+              - speed: 0.01
+                
+Tunning::RightHand::MoveHandBack:
+  base: Parallel
+  states: [Stabilizer::Standing, Tunning::RightHand::MoveHand]
+
+Tunning::RightHand:
+  base: Meta
+  transitions: # raise hand, add contact, tune, remove contact, go back to start...
+  - [Tunning::RightHandToWhiteboard, OK, Tunning::RightHand::PushWall, Auto]
+  - [Tunning::RightHand::PushWall, OK, Tunning::RightHand::Tune, Auto]
+  - [Tunning::RightHand::Tune, OK, Tunning::RightHand::ReleasePushWall, Auto]
+  - [Tunning::RightHand::ReleasePushWall, OK, Tunning::RightHand::MoveHandBack, Auto]
+  - [Tunning::RightHand::MoveHandBack, OK, WipingController::Stabilizer::GoHalfSitting, Auto]
+
+#   # Tunning::LeftHand:
+#   #   base: Meta
+#   #   transitions: # raise hand, add contact, tune, remove contact, go back to start...
+#   #     - []

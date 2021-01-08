@@ -59,4 +59,13 @@ WipingController::Stabilizer::RightFootFlatSupport:
         roll: 0
         pitch: 0
       height: 0
-    
+
+  
+WipingController::Stabilizer::GoHalfSitting:
+  base: Parallel
+  states: [WipingController::Stabilizer::GoCenterFlat, HalfSitting]
+  config:
+    WipingController::Stabilizer::GoCenterFlat:
+      completion: {}
+    HalfSitting:
+      eval: 0.01

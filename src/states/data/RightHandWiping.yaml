@@ -31,6 +31,7 @@ RightHand::TrajectoryToWhiteboard:
         rotation: [-0.908, 0.0, 1.57]
       controlPoints:
         - [0.0, -0.5, 0.85]
+        # - [0.0, -0.5, 0.85]
       oriWaypoints:
         - [3.5, [-0.785, 0.0, 1.57]]
 
@@ -81,7 +82,7 @@ RightHand::Contact:
       r1Surface: RightHandPad
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 1]
-
+  
 RightHand::FSM::RightHandToWhiteboard:
   base: Meta
   transitions:
@@ -91,3 +92,4 @@ RightHand::FSM::RightHandToWhiteboard:
 UpSlope::FSM::RightHandToWhiteboard:
   base: Parallel
   states: [UpSlope::Stabilizer::Center, RightHand::LookAt, RightHand::FSM::RightHandToWhiteboard]
+
