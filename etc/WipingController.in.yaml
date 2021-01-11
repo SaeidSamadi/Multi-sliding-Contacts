@@ -45,6 +45,9 @@ HandForceFilter:
   t: 5
   s: 0
 
+# TunedGains_rh:
+#   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0017240000000000005]
+
 robots:
   ground:
     module: env/ground
@@ -88,7 +91,7 @@ contacts:
   #   r1Surface: AllGround
   #   r2Surface: AllGround
   #   dof: [1,1,1,1,1,1]
-    
+  
 states:
   WipingController_RightHandTrajectory:
     base: MetaTasks

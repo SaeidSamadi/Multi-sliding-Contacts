@@ -5,10 +5,22 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
     frictionEstimator_rh(robot(), "RightHandPad", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("right_hand")("friction")),
     frictionEstimator_lh(robot(), "BlockLeftHand", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_hand")("friction")),
     frictionEstimator_lf(robot(), "LeftFoot", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_foot")("friction"))
-{
-
+{ 
   useFeetForceControl_ = config("UseFeetForceControl", false);
 
+  auto & hasTunedGains_rh = datastore().make<bool> ("hasTunedGains_rh", false);
+  auto & tunedGains_rh = datastore().make_initializer<mc_rtc::Configuration> ("TunedGains_rh");
+
+  if (config.has("TunedGains_rh"))
+    {
+      mc_rtc::log::warning("[Wiping Controller] Found Tunned gains in the configuration for the right hand");
+      hasTunedGains_rh = true;
+      tunedGains_rh = config("TunedGains_rh");
+    }
+  else
+    {
+      mc_rtc::log::warning("[Wiping Controller] Tunned gains not Found!");
+    }
 
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));
 
@@ -78,7 +90,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //logger().addLogEntry("RightHandVelocity", [this]() { sva::MotionVecd rhVel;
   //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
-  LOG_SUCCESS("WipingController init done " << this)
+  mc_rtc::log::success("WipingController init done!");
 }
 
 bool WipingController::computeCoMQP()
@@ -210,7 +222,7 @@ void WipingController::addFootForceControl()
     // dof << 1,1,1,1,1,1;
     // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
     // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-    LOG_SUCCESS("FeetForceControlAdded");
+    mc_rtc::log::success("FeetForceControlAdded");
   }
   else
   {
@@ -226,7 +238,7 @@ void WipingController::removeFootForceControl()
   // dof << 1,1,1,1,1,1;
   // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
   // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-  LOG_SUCCESS("FeetForceControl removed");
+  mc_rtc::log::success("FeetForceControl removed");
 }
 
 void WipingController::updateFootForceDifferenceControl()

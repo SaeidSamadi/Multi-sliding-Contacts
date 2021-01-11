@@ -40,6 +40,18 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
+  // check if some tuned gains are stored by the controller:
+  if (ctl.datastore().get<bool> ("hasTunedGains_rh"))
+    { 
+      auto & tunedGains = ctl.datastore().get<mc_rtc::Configuration> ("TunedGains_rh");
+      loadTunedGainsFromConf(tunedGains);
+    }
+  else
+    {
+      mc_rtc::log::error("There is no tuned gains for the Right Hand");
+    }
+  mc_rtc::log::info("The admittance gains are: {}", admittance_.transpose());
+  
   t_ = 0.0;
   if (tune_){
     mc_rtc::log::warning("Tunning Mode Activated!");
@@ -74,7 +86,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.rightHandTask->setGains(stiffnessGain, dampingGain);
   ctl.rightHandTask->dimWeight(dimW);
   ctl.rightHandTask->admittance(admittance_);
-  admittanceZ_ = admittance_(5);
+  //admittanceZ_ = admittance_(5);
   ctl.rightHandTask->targetCoP(Eigen::Vector2d::Zero());
   ctl.rightHandTask->targetPose();
   ctl.setTargetFromCoMQP();
@@ -177,18 +189,25 @@ void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_
   ctl.logger().removeLogEntry("friction_mu");
   
   removeTunningGUI(ctl);
+  saveTunedGains();
+
+  auto & hasTunedGains = ctl.datastore().get<bool> ("hasTunedGains_rh");
+  hasTunedGains = true;
+  auto & tunedGains = ctl.datastore().get<mc_rtc::Configuration> ("TunedGains_rh");
+  tunedGains = mc_rtc::Configuration();
+  addTunedGainsToConf(tunedGains);
 }
 
 void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  mc_rtc::log::info("Initial admittance is: {} and {}", admittanceZ_, ctl.rightHandTask->admittance().force()(3));
+  mc_rtc::log::info("Initial admittance is: {} and {}", admittance_(5), ctl.rightHandTask->admittance().force()(2));
   ctl.gui()->addElement({categoryName_, "Gains"},
 			mc_rtc::gui::NumberSlider("Admittance f_z",
-						  [this](){ return this->admittanceZ_;},
+						  [this](){ return admittance_(5);},
 						  [this, &ctl]( double v ){
-						    this->admittanceZ_ = v;
-						    ctl.rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, v}));
+						    admittance_(5) = v;
+						    ctl.rightHandTask->admittance(admittance_);
 						  },
 						  0.0001, 0.003),
 			mc_rtc::gui::Button("Start/Stop", [this](){Wiping_ = !Wiping_;}),
@@ -261,6 +280,34 @@ void WipingController_WipeItBaby_rh::updateTrajectory(double timeStep)
     local_x = Ox + offsetX;
     local_y = Oy + offsetY;
   }
+}
+
+void WipingController_WipeItBaby_rh::addTunedGainsToConf( mc_rtc::Configuration & config)
+{
+  config.add("admittance", admittance_);
+}
+
+void WipingController_WipeItBaby_rh::loadTunedGainsFromConf( mc_rtc::Configuration & config)
+{
+  // if (!config.has("TunedGains_rh"))
+  //   {
+  //     mc_rtc::log::error(, config.dump());
+  //     return;
+  //   }
+  
+  if(config.has("admittance"))
+    {
+      admittance_ = config("admittance");
+    }
+  else mc_rtc::log::error("[WipingController_WipeItBaby_rh] Tuned Admittance for Right Hand not found!");
+}
+
+void WipingController_WipeItBaby_rh::saveTunedGains()
+{
+  mc_rtc::Configuration confSave;
+  auto section = confSave.add("TunedGains_rh");
+  addTunedGainsToConf(section);
+  confSave.save("/tmp/tunedGains_rh.yaml");
 }
 
 EXPORT_SINGLE_STATE("WipingController_WipeItBaby_rh", WipingController_WipeItBaby_rh)

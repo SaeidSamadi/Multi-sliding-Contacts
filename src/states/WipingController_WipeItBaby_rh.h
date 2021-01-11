@@ -20,6 +20,10 @@ struct WipingController_WipeItBaby_rh : mc_control::fsm::State
   void startResumeTrajectory();
   void pauseTrajectory();
   void updateTrajectory(double timeStep);
+
+  void addTunedGainsToConf( mc_rtc::Configuration & config);
+  void loadTunedGainsFromConf( mc_rtc::Configuration & config);
+  void saveTunedGains();
   
  protected:
   Eigen::Vector6d admittance_ = Eigen::Vector6d::Zero();
@@ -39,7 +43,6 @@ struct WipingController_WipeItBaby_rh : mc_control::fsm::State
   Eigen::Vector3d delta_line, delta_lineW;
   
   bool tune_ = false;
-  double admittanceZ_;
   std::string categoryName_ = "Right Hand Tunning";
 
   double t_;
