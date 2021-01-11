@@ -43,6 +43,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   t_ = 0.0;
   if (tune_){
     mc_rtc::log::warning("Tunning Mode Activated!");
+    Wiping_ = false;
     addTunningGUI(ctl);
   }
   
@@ -63,9 +64,6 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.solver().addTask(ctl.lookAtTask);
 
   ctl.rightHandTask->reset();
-  //ctl.rightHandTask->setGains(1, 300);
-  //ctl.rightHandTask->stiffness(1.);
-  //ctl.rightHandTask->damping(300.);
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 1., 1., 1.;
   sva::MotionVecd stiffnessGain, dampingGain;
@@ -87,12 +85,6 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.solver().addTask(ctl.comTask);
 
   ctl.comQP().addToLogger(ctl.logger());
-  //xx = 10.0;
-  //ctl.logger().addLogEntry("EstimatedFriction",
-  //                         []()
-  //                         { double xxx = 100.0;
-  //                         return xx;
-  //                         });
 
   ctl.logger().addLogEntry("friction_mu_Estim_rh",
                            [&ctl]()
@@ -104,17 +96,17 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
                            {
                            return ctl.frictionEstimator_rh.mu_filtered();
                            });
-  ctl.logger().addLogEntry("SurfaceWrench_x",
+  ctl.logger().addLogEntry("SurfaceWrench_rh_x",
                            [&ctl]()
                            {
                            return ctl.frictionEstimator_rh.forceX();
                            });
-  ctl.logger().addLogEntry("SurfaceWrench_y",
+  ctl.logger().addLogEntry("SurfaceWrench_rh_y",
                            [&ctl]()
                            {
                            return ctl.frictionEstimator_rh.forceY();
                            });
-  ctl.logger().addLogEntry("SurfaceWrench_z",
+  ctl.logger().addLogEntry("SurfaceWrench_rh_z",
                            [&ctl]()
                            {
                            return ctl.frictionEstimator_rh.forceZ();
@@ -149,13 +141,14 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
   ctl.comQP().updateRHVelocity(targetVelocity);
   
   ctl.frictionEstimator_rh.update(ctl.robot());
-  //double EstimatedFriction = ctl.frictionEstimator_rh.mu_calc();
 
-  //mc_rtc::log::info("EstimatedFriction: {}", EstimatedFriction);
   ctl.setTargetFromCoMQP();
-  //ctl.setFeetTargetFromCoMQP();
-  // handForceFilter_.add(ctl.robot().forceSensor("RightHandForceSensor").worldWrench(ctl.robot()));
 
+  if (wipingTime_ >= wipingDuration_ and !tune_)
+    {
+      Wiping_ = false;
+    }
+  
   if (tune_){
     return false;
   }
@@ -180,13 +173,11 @@ void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_
   ctl.comQP().removeFromLogger(ctl.logger());
 
   ctl.logger().removeLogEntry("friction_mu_x_Estim");
-  //ctl.logger().removeLogEntry("friction_mu_y");
-  //ctl.logger().removeLogEntry("friction_mu");
+  ctl.logger().removeLogEntry("friction_mu_y");
+  ctl.logger().removeLogEntry("friction_mu");
+  
   removeTunningGUI(ctl);
 }
-
-
-// rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, 1e-3}));
 
 void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller & ctl_)
 {
@@ -200,6 +191,7 @@ void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller &
 						    ctl.rightHandTask->admittance(sva::ForceVecd({0, 0, 0}, {0, 0, v}));
 						  },
 						  0.0001, 0.003),
+			mc_rtc::gui::Button("Start/Stop", [this](){Wiping_ = !Wiping_;}),
 			mc_rtc::gui::Button("Done", [this](){this->tune_ = false;})
 			);
   using Color = mc_rtc::gui::Color;
