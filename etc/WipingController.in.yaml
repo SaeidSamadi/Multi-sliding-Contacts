@@ -47,6 +47,9 @@ HandForceFilter:
 
 # TunedGains_rh:
 #   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0017240000000000005]
+# TunedGains_lh:
+#   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.00157]
+
 
 robots:
   ground:

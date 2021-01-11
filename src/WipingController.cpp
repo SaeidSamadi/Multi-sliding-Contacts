@@ -19,7 +19,21 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
     }
   else
     {
-      mc_rtc::log::warning("[Wiping Controller] Tunned gains not Found!");
+      mc_rtc::log::warning("[Wiping Controller] Right Hand Tunned gains not Found!");
+    }
+
+  auto & hasTunedGains_lh = datastore().make<bool> ("hasTunedGains_lh", false);
+  auto & tunedGains_lh = datastore().make_initializer<mc_rtc::Configuration> ("TunedGains_lh");
+
+  if (config.has("TunedGains_lh"))
+    {
+      mc_rtc::log::warning("[Wiping Controller] Found Tunned gains in the configuration for the left hand");
+      hasTunedGains_lh = true;
+      tunedGains_lh = config("TunedGains_lh");
+    }
+  else
+    {
+      mc_rtc::log::warning("[Wiping Controller] Left Hand Tunned gains not Found!");
     }
 
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));

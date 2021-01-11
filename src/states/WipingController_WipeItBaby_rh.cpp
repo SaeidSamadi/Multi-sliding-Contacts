@@ -48,13 +48,13 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
     }
   else
     {
-      mc_rtc::log::error("There is no tuned gains for the Right Hand");
+      mc_rtc::log::error("[WipingController_WipeItBaby_rh]There is no tuned gains for the Right Hand");
     }
-  mc_rtc::log::info("The admittance gains are: {}", admittance_.transpose());
+  mc_rtc::log::info("[WipingController_WipeItBaby_rh] The admittance gains are: {}", admittance_.transpose());
   
   t_ = 0.0;
   if (tune_){
-    mc_rtc::log::warning("Tunning Mode Activated!");
+    mc_rtc::log::warning("[WipingController_WipeItBaby_rh] Tunning Mode Activated!");
     Wiping_ = false;
     addTunningGUI(ctl);
   }
@@ -215,7 +215,7 @@ void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller &
 			);
   using Color = mc_rtc::gui::Color;
   ctl.gui()->addPlot(
-		     "Normal Force Tracking",
+		     "Normal Force Tracking (Right Hand)",
 		     mc_rtc::gui::plot::X("t", [this](){return t_;}),
 		     mc_rtc::gui::plot::Y("Normal Force (Measure)", [&ctl](){return ctl.rightHandTask->measuredWrench().force()(2);}, Color::Red),
 		     mc_rtc::gui::plot::Y("Normal Force (Target", [&ctl](){return ctl.rightHandTask->targetWrench().force()(2);}, Color::Blue)
@@ -229,7 +229,7 @@ void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller &
 void WipingController_WipeItBaby_rh::removeTunningGUI(mc_control::fsm::Controller & ctl)
 {
   ctl.gui()->removeCategory({categoryName_});
-  ctl.gui()->removePlot("Normal Force Tracking");
+  ctl.gui()->removePlot("Normal Force Tracking (Right Hand)");
 }
 
 void WipingController_WipeItBaby_rh::resetTrajectory()
