@@ -26,12 +26,15 @@ struct WipingController_WipeItBaby_lh : mc_control::fsm::State
   
  protected:
   Eigen::Vector6d admittance_ = Eigen::Vector6d::Zero();
+  Eigen::Vector6d stiffness_ = Eigen::Vector6d::Zero();
+  Eigen::Vector6d damping_ = Eigen::Vector6d::Zero();
+  
   bool feetForceControl_ = true;
   bool linearWiping_ = false;
   bool circleWiping_CCW_ = false;
   bool circleWiping_CW_ = false;
   double amplitude_ = 0.0;
-  double orientation_ = -M_PI/2;
+  double orientation_ = -M_PI;
   double wipingDuration_ = 0.0;
   double local_x, local_y;
   double local_x_initial, local_y_initial;

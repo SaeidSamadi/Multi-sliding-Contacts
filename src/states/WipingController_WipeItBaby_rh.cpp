@@ -83,11 +83,11 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.rightHandTask->reset();
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 1., 1., 1.;
-  sva::MotionVecd stiffnessGain, dampingGain;
-  stiffnessGain.angular() << 10, 10, 10;
-  stiffnessGain.linear() << 10, 10, 5;
-  dampingGain.angular() << 6, 6, 6;
-  dampingGain.linear() << 6, 6, 300;
+  sva::MotionVecd stiffnessGain(stiffness_), dampingGain(damping_);
+  // stiffnessGain.angular() << 10, 10, 10;
+  // stiffnessGain.linear() << 10, 10, 5;
+  // dampingGain.angular() << 6, 6, 6;
+  // dampingGain.linear() << 6, 6, 300;
   ctl.rightHandTask->setGains(stiffnessGain, dampingGain);
   ctl.rightHandTask->dimWeight(dimW);
   ctl.rightHandTask->admittance(admittance_);
@@ -192,6 +192,11 @@ void WipingController_WipeItBaby_rh::teardown(mc_control::fsm::Controller & ctl_
   ctl.logger().removeLogEntry("friction_mu_x_Estim");
   ctl.logger().removeLogEntry("friction_mu_y");
   ctl.logger().removeLogEntry("friction_mu");
+  ctl.logger().removeLogEntry("friction_mu_Estim_rh");
+  ctl.logger().removeLogEntry("friction_mu_filtered_rh");
+  ctl.logger().removeLogEntry("SurfaceWrench_rh_x");
+  ctl.logger().removeLogEntry("SurfaceWrench_rh_y");
+  ctl.logger().removeLogEntry("SurfaceWrench_rh_z");
   
   removeTunningGUI(ctl);
   saveTunedGains();
@@ -215,7 +220,7 @@ void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller &
 						    admittance_(5) = v;
 						    ctl.rightHandTask->admittance(admittance_);
 						  },
-						  0.0001, 0.003),
+						  0.0001, 0.004),
 			mc_rtc::gui::ArrayInput("Right Hand Admittance Gains", {},
 						[this](){return admittance_;},
 						[this, &ctl] ( const Eigen::Vector6d & v){
@@ -276,7 +281,7 @@ void WipingController_WipeItBaby_rh::addTunningGUI(mc_control::fsm::Controller &
 		     "Right Hand Normal Force Tracking",
 		     mc_rtc::gui::plot::X("t", [this](){return t_;}),
 		     mc_rtc::gui::plot::Y("Normal Force (Measure)", [&ctl](){return ctl.rightHandTask->measuredWrench().force()(2);}, Color::Red),
-		     mc_rtc::gui::plot::Y("Normal Force (Target", [&ctl](){return ctl.rightHandTask->targetWrench().force()(2);}, Color::Blue)		     
+		     mc_rtc::gui::plot::Y("Normal Force (Target)", [&ctl](){return ctl.rightHandTask->targetWrench().force()(2);}, Color::Blue)		     
 		     );
   ctl.gui()->addPlot(
 		     "Right Hand Trajectory Tracking",
@@ -334,8 +339,8 @@ void WipingController_WipeItBaby_rh::updateTrajectory(double timeStep)
   else if(circleWiping_CCW_ || circleWiping_CW_)
   {
     double Ox, Oy, offsetX, offsetY;
-    Ox = local_x_initial + cos(orientation_)*amplitude_;
-    Oy = local_y_initial + sin(orientation_)*amplitude_;
+    Ox = local_x_initial - cos(orientation_)*amplitude_;
+    Oy = local_y_initial - sin(orientation_)*amplitude_;
     if(circleWiping_CCW_){
       offsetX = amplitude_ * cos(2*M_PI*timeRatio-orientation_);
       offsetY = amplitude_ * sin(2*M_PI*timeRatio-orientation_);
@@ -360,9 +365,7 @@ void WipingController_WipeItBaby_rh::loadTunedGainsFromConf( mc_rtc::Configurati
 {
   
   if(config.has("admittance")) admittance_ = config("admittance");
-
   if (config.has("stiffness")) stiffness_ = config("stiffness");
-
   if (config.has("damping")) damping_ = config("damping");
     
 }

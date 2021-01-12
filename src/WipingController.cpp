@@ -4,7 +4,7 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 : mc_control::fsm::Controller(rm, dt, config), comQP_(robot(), config("CoMQPConfig")),
     frictionEstimator_rh(robot(), "RightHandPad", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("right_hand")("friction")),
     frictionEstimator_lh(robot(), "BlockLeftHand", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_hand")("friction")),
-    frictionEstimator_lf(robot(), "LeftFoot", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_foot")("friction"))
+  frictionEstimator_lf(robot(), "LeftFoot", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_foot")("friction")), t_(0.0)
 { 
   useFeetForceControl_ = config("UseFeetForceControl", false);
 
@@ -93,7 +93,20 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
                        {
                         return comqp_dt_.count();
                        });
-
+  logger().addLogEntry("compp_real",
+		       [this](){
+			 return realRobot("hrp4").comAcceleration();});
+  logger().addLogEntry("compp_sim",
+		       [this](){
+			 return robot("hrp4").comAcceleration();});
+  logger().addLogEntry("comp_real",
+		       [this](){
+			 return realRobot("hrp4").comVelocity();});
+  logger().addLogEntry("comp_sim",
+		       [this](){
+			 return robot("hrp4").comVelocity();});
+  
+  
   datastore().make_call("KinematicAnchorFrame::" + robot().name(), [this](const mc_rbdyn::Robot & robot) {
     return sva::interpolate(robot.surfacePose("LeftFoot"), robot.surfacePose("RightFoot"), 0.5);
   });
@@ -104,6 +117,19 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //logger().addLogEntry("RightHandVelocity", [this]() { sva::MotionVecd rhVel;
   //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
+
+  using Color = mc_rtc::gui::Color;
+  gui()->addPlot(
+		 "CoM Trajectory Tracking",
+		 mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		 mc_rtc::gui::plot::Y("CoM Target X", [this](){return comTask->com().x();}, Color::Blue),
+		 mc_rtc::gui::plot::Y("CoM Real X", [this](){return realRobot("hrp4").com().x();}, Color::Red),
+		 mc_rtc::gui::plot::Y("CoM Target Y", [this](){return comTask->com().y();}, Color::Green),
+		 mc_rtc::gui::plot::Y("CoM Real Y", [this](){return realRobot("hrp4").com().y();}, Color::Magenta)
+		 );
+
+
+  
   mc_rtc::log::success("WipingController init done!");
 }
 
@@ -289,6 +315,7 @@ bool WipingController::run()
                                           std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
   auto start_run_t = clock::now();
 
+  t_ += timeStep;
 
   realLeftFootPose = robot().surface("LeftFoot").X_0_s(robot());
   //leftFootPose = robot().surface("RightHandPad").X_0_s(robot()).translation();

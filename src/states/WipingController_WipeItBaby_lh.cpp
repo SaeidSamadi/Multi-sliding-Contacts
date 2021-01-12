@@ -40,6 +40,9 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
 
+  stiffness_ = ctl.leftHandTask->mvStiffness().vector();
+  damping_ = ctl.leftHandTask->mvDamping().vector();
+  
   // check if some tuned gains are stored by the controller:
   if (ctl.datastore().get<bool> ("hasTunedGains_lh"))
     { 
@@ -48,9 +51,11 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
     }
   else
     {
-      mc_rtc::log::error("[WipingController_WipeItBaby_lh] There is no tuned gains for the Right Hand");
+      mc_rtc::log::error("[WipingController_WipeItBaby_lh] There is no tuned gains for the Left Hand");
     }
   mc_rtc::log::info("[WipingController_WipeItBaby_lh] The admittance gains are: {}", admittance_.transpose());
+  mc_rtc::log::info("[WipingController_WipeItBaby_lh] The stiffness gains are: {}", stiffness_.transpose());
+  mc_rtc::log::info("[WipingController_WipeItBaby_lh] The damping gains are: {}", damping_.transpose());
   
   t_ = 0.0;
   if (tune_){
@@ -78,11 +83,11 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
   ctl.leftHandTask->reset();
   Eigen::Vector6d dimW;
   dimW << 1., 1., 1., 1., 1., 1.;
-  sva::MotionVecd stiffnessGain, dampingGain;
-  stiffnessGain.angular() << 10, 10, 10;
-  stiffnessGain.linear() << 10, 10, 5;
-  dampingGain.angular() << 6, 6, 6;
-  dampingGain.linear() << 6, 6, 300;
+  sva::MotionVecd stiffnessGain(stiffness_), dampingGain(damping_);
+  // stiffnessGain.angular() << 10, 10, 10;
+  // stiffnessGain.linear() << 10, 10, 5;
+  // dampingGain.angular() << 6, 6, 6;
+  // dampingGain.linear() << 6, 6, 300;
   ctl.leftHandTask->setGains(stiffnessGain, dampingGain);
   ctl.leftHandTask->dimWeight(dimW);
   ctl.leftHandTask->admittance(admittance_);
@@ -186,7 +191,12 @@ void WipingController_WipeItBaby_lh::teardown(mc_control::fsm::Controller & ctl_
   ctl.logger().removeLogEntry("friction_mu_x");
   ctl.logger().removeLogEntry("friction_mu_y");
   ctl.logger().removeLogEntry("friction_mu");
-
+  ctl.logger().removeLogEntry("friction_mu_Estim_lh");
+  ctl.logger().removeLogEntry("friction_mu_filtered_lh");
+  ctl.logger().removeLogEntry("SurfaceWrench_lh_x");
+  ctl.logger().removeLogEntry("SurfaceWrench_lh_y");
+  ctl.logger().removeLogEntry("SurfaceWrench_lh_z");  
+  
   removeTunningGUI(ctl);
   saveTunedGains();
 
@@ -200,25 +210,84 @@ void WipingController_WipeItBaby_lh::teardown(mc_control::fsm::Controller & ctl_
 void WipingController_WipeItBaby_lh::addTunningGUI(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<WipingController &>(ctl_);
-  mc_rtc::log::info("Initial admittance is: {} and {}", admittance_(5), ctl.leftHandTask->admittance().force()(2));
   ctl.gui()->addElement({categoryName_, "Gains"},
-			mc_rtc::gui::NumberSlider("Admittance f_z",
+			//tunning of the admittance gains
+			mc_rtc::gui::NumberSlider("Admittance Gain f_z",
 						  [this](){ return admittance_(5);},
 						  [this, &ctl]( double v ){
 						    admittance_(5) = v;
 						    ctl.leftHandTask->admittance(admittance_);
 						  },
-						  0.0001, 0.005),
+						  0.0001, 0.004),
+			mc_rtc::gui::ArrayInput("Left Hand Admittance Gains", {},
+						[this](){return admittance_;},
+						[this, &ctl] ( const Eigen::Vector6d & v){
+						  admittance_ = v;
+						  ctl.leftHandTask->admittance(admittance_);
+						}),
+			// tunning of the stiffness gains
+			mc_rtc::gui::NumberSlider("Admittance Stiffness f_z",
+						  [this](){return stiffness_(5);},
+						  [this, &ctl]( double v ){
+						    stiffness_(5) = v;
+						    double dampingZ = ctl.leftHandTask->mvDamping().vector()(5);
+						    sva::MotionVecd stiff(stiffness_);
+						    ctl.leftHandTask->stiffness(stiff);
+						    damping_ = ctl.leftHandTask->mvDamping().vector();
+						    damping_(5) = dampingZ;
+						    sva::MotionVecd damp(damping_);
+						    ctl.leftHandTask->damping(damp);
+						  },
+						  0.0, 12.0),
+			mc_rtc::gui::ArrayInput("Left Hand Admittance Stiffness Gains", {},
+						[this](){ return stiffness_;},
+						[this, &ctl]( const Eigen::Vector6d v ){
+						  stiffness_ = v;
+						  double dampingZ = ctl.leftHandTask->mvDamping().vector()(5);
+						  sva::MotionVecd stiff(stiffness_);
+						  ctl.leftHandTask->stiffness(stiff);
+						  damping_ = ctl.leftHandTask->mvDamping().vector();
+						  damping_(5) = dampingZ;
+						  sva::MotionVecd damp(damping_);
+						  ctl.leftHandTask->damping(damp);
+						}),
+			// tunning of the damping gains
+			mc_rtc::gui::NumberSlider("Admittance Damping f_z",
+						  [this](){ return damping_(5); },
+						  [this, & ctl]( double v ){
+						    damping_(5) = v;
+						    sva::MotionVecd damp(damping_);
+						    ctl.leftHandTask->damping(damp);
+						  },
+						  0.0, 400.0),
+			mc_rtc::gui::ArrayInput("Left Hand Admittance Damping Gains", {},
+						[this, &ctl](){
+						  damping_ = ctl.leftHandTask->mvDamping().vector();
+						  return damping_; },
+						[this, &ctl]( const Eigen::Vector6d v){
+						    damping_ = v;
+						    sva::MotionVecd damp(damping_);
+						    ctl.leftHandTask->damping(damp);
+						  }),
+			// other stuff
 			mc_rtc::gui::Button("Start/Stop", [this](){Wiping_ = !Wiping_;}),
 			mc_rtc::gui::Button("Done", [this](){this->tune_ = false;})
 			);
   using Color = mc_rtc::gui::Color;
   ctl.gui()->addPlot(
-		     "Normal Force Tracking (Left Hand)",
+		     "Left Hand Normal Force Tracking",
 		     mc_rtc::gui::plot::X("t", [this](){return t_;}),
 		     mc_rtc::gui::plot::Y("Normal Force (Measure)", [&ctl](){return ctl.leftHandTask->measuredWrench().force()(2);}, Color::Red),
 		     mc_rtc::gui::plot::Y("Normal Force (Target", [&ctl](){return ctl.leftHandTask->targetWrench().force()(2);}, Color::Blue)
 		     
+		     );
+  ctl.gui()->addPlot(
+		     "Left Hand Trajectory Tracking",
+		     mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		     mc_rtc::gui::plot::Y("Trajectory X (Target)", [&ctl](){return ctl.leftHandTask->targetPose().translation().x();}, Color::Blue),
+		     mc_rtc::gui::plot::Y("Trajectory X (Measure)", [&ctl](){return ctl.leftHandTask->surfacePose().translation().x();}, Color::Red),
+		     mc_rtc::gui::plot::Y("Trajectory Y (Target)", [&ctl](){return ctl.leftHandTask->targetPose().translation().y();}, Color::Green),
+		     mc_rtc::gui::plot::Y("Trajectory Y (Measure)", [&ctl](){return ctl.leftHandTask->surfacePose().translation().y();}, Color::Magenta)
 		     );
   ctl.gui()->addElement({categoryName_, "Trajectory"},
 			mc_rtc::gui::Label("Target Normal Force", [&ctl](){return ctl.leftHandTask->targetWrench().force()(2);})
@@ -228,7 +297,8 @@ void WipingController_WipeItBaby_lh::addTunningGUI(mc_control::fsm::Controller &
 void WipingController_WipeItBaby_lh::removeTunningGUI(mc_control::fsm::Controller & ctl)
 {
   ctl.gui()->removeCategory({categoryName_});
-  ctl.gui()->removePlot("Normal Force Tracking (Left Hand)");
+  ctl.gui()->removePlot("Left Hand Normal Force Tracking");
+  ctl.gui()->removePlot("Left Hand Trajectory Tracking");
 }
 
 void WipingController_WipeItBaby_lh::resetTrajectory()
@@ -266,8 +336,8 @@ void WipingController_WipeItBaby_lh::updateTrajectory(double timeStep)
   else if(circleWiping_CCW_ || circleWiping_CW_)
   {
     double Ox, Oy, offsetX, offsetY;
-    Ox = local_x_initial + cos(orientation_)*amplitude_;
-    Oy = local_y_initial + sin(orientation_)*amplitude_;
+    Ox = local_x_initial - cos(orientation_)*amplitude_;
+    Oy = local_y_initial - sin(orientation_)*amplitude_;
     if(circleWiping_CCW_){
       offsetX = amplitude_ * cos(2*M_PI*timeRatio-orientation_);
       offsetY = amplitude_ * sin(2*M_PI*timeRatio-orientation_);
@@ -284,16 +354,15 @@ void WipingController_WipeItBaby_lh::updateTrajectory(double timeStep)
 void WipingController_WipeItBaby_lh::addTunedGainsToConf( mc_rtc::Configuration & config)
 {
   config.add("admittance", admittance_);
+  config.add("stiffness", stiffness_);
+  config.add("damping", damping_);
 }
 
 void WipingController_WipeItBaby_lh::loadTunedGainsFromConf( mc_rtc::Configuration & config)
 {
-  
-  if(config.has("admittance"))
-    {
-      admittance_ = config("admittance");
-    }
-  else mc_rtc::log::error("[WipingController_WipeItBaby_lh] Tuned Admittance for Left Hand not found!");
+  if(config.has("admittance")) admittance_ = config("admittance");
+  if (config.has("stiffness")) stiffness_ = config("stiffness");
+  if (config.has("damping")) damping_ = config("damping");
 }
 
 void WipingController_WipeItBaby_lh::saveTunedGains()

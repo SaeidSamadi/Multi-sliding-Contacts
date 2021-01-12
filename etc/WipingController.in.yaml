@@ -28,7 +28,7 @@ CoMQPConfig:
     pos: [0.0, 0.0, 0.8]
   left_foot:
     shape: [0.12, 0.065]
-    friction: 0.5
+    friction: 0.25
   right_foot:
     shape: [0.12, 0.065]
     friction: 0.5
@@ -45,6 +45,28 @@ HandForceFilter:
   t: 5
   s: 0
 
+# TunedGains_rh:
+#   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002986]
+#   stiffness: [10.0, 10.0, 10.0, 10.0, 10.0, 5.04]
+#   damping: [6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 328.0]
+
+# TunedGains_lh:
+#   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002]
+#   stiffness: [10.0, 10.0, 10.0, 10.0, 10.0, 0.6]
+#   damping: [6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 300.0]
+
+TunedGains_rh:
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.002089]
+  stiffness: [10.0, 10.0, 10.0, 10.0, 10.0, 5.04]
+  damping: [6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 328.0]
+
+TunedGains_lh:
+  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001543]
+  stiffness: [10.0, 10.0, 10.0, 10.0, 10.0, 0.6]
+  damping: [6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 6.324555320336759, 300.0]
+
+
+  
 robots:
   ground:
     module: env/ground
@@ -57,7 +79,7 @@ robots:
     module: env/ground
     init_pos:
       translation: [7.4, 0.0, 7.8]
-      rotation: [0.0, -0.78, 0.0]
+      rotation: [0.0, -0.80, 0.0]
   slope:
     module: env/ground
     init_pos:
@@ -688,23 +710,23 @@ states:
             circleWiping_CCW: true
             circleRadius: 0.1
             wipingDuration: 12.0
-            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+            admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
           WipingController_WipeItBabyState_lh:
-            circleWiping_CW: true
+            circleWiping_CCW: true
             circleRadius: 0.08
             wipingDuration: 12.0
-            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+            admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
     AddContacts:
       - r1: hrp4
         r2: tilted_board
         r1Surface: RightHandPad
         r2Surface: AllGround
-        dof: [1, 1, 1, 0, 0, 0]
+        dof: [0, 0, 1, 0, 0, 0]
       - r1: hrp4
         r2: wall
         r1Surface: BlockLeftHand
         r2Surface: AllGround
-        dof: [1, 1, 1, 0, 0, 0]
+        dof: [0, 0, 1, 0, 0, 0]
 
 
   Choose::Slope::WipeRightHand:
@@ -905,7 +927,7 @@ transitions:
   #- [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
   - [WipingController_ReleasePushWallCoMQP_AfterShuffle, OK, Wiping::Stabilized::MoveHandsBack_AfterShuffle, Auto]
-  - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK, DownSlope::FSM::StepDownSlope, Auto]
+  - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK,  DownSlope::FSM::StepDownSlope, Auto]
 
   - [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
   - [Choose::Slope::MoveHandsBack, HalfSitSlope, Choose::Slope::HalfSitting, Auto]

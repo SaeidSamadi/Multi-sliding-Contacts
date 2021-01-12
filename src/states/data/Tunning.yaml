@@ -63,13 +63,13 @@ Tunning::RightHand::Tune:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [1, 1, 1, 0, 0, 0]
+      dof: [0, 0, 1, 0, 0, 0]
   tune: true
   linearWiping: false
   circleWiping_CCW: true
   circleRadius: 0.1
   wipingDuration: 12.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  admittance: [0.002, 0.002, 0.0, 0.0, 0.0, 0.002]
   feetForceControl: true
 
 Tunning::RightHand::ReleasePushWall:
@@ -148,13 +148,13 @@ Tunning::LeftHand::Tune:
       r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
-      dof: [1, 1, 1, 0, 0, 0]
+      dof: [0, 0, 1, 0, 0, 0]
   tune: true
   linearWiping: false
   circleWiping_CCW: true
-  circleRadius: 0.1
+  circleRadius: 0.08
   wipingDuration: 12.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  admittance: [0.002, 0.002, 0.0, 0.0, 0.0, 0.002]
   feetForceControl: true
 
 Tunning::LeftHand::Tunning:
