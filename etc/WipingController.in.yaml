@@ -45,13 +45,6 @@ HandForceFilter:
   t: 5
   s: 0
 
-
-TunedGains_rh:
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0015500000000000002]
-TunedGains_lh:
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001276]
-
-
 robots:
   ground:
     module: env/ground
