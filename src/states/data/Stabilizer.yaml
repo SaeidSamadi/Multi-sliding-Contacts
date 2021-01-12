@@ -2,13 +2,6 @@ WipingController::Stabilizer:
   base: StabilizerStandingState
   StabilizerConfig:
     contacts: [Left, Right]
-    # dcm_tracking:
-    #   gains:
-    #     prop: 5
-    #     integral: 10 
-    #     deriv: 0
-    #   derivator_time_constant: 1
-    #   integrator_time_constant: 10
 
 WipingController::Stabilizer::Slope:
   base: StabilizerStandingState
@@ -60,12 +53,14 @@ WipingController::Stabilizer::RightFootFlatSupport:
         pitch: 0
       height: 0
 
-  
 WipingController::Stabilizer::GoHalfSitting:
   base: Parallel
   states: [WipingController::Stabilizer::GoCenterFlat, HalfSitting]
-  config:
+  configs:
     WipingController::Stabilizer::GoCenterFlat:
       completion: {}
     HalfSitting:
-      eval: 0.01
+      robot: hrp4
+      eval: 0.2
+      stiffness: 5.0
+

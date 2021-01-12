@@ -111,7 +111,7 @@ Tunning::RightHand::MoveHand:
 Tunning::RightHand::MoveHandBack:
   base: Parallel
   states: [Stabilizer::Standing, Tunning::RightHand::MoveHand]
-
+    
 Tunning::RightHand:
   base: Meta
   transitions: # raise hand, add contact, tune, remove contact, go back to start...
@@ -200,6 +200,7 @@ Tunning::LeftHand::MoveHand:
 Tunning::LeftHand::MoveHandBack:
   base: Parallel
   states: [Stabilizer::Standing, Tunning::LeftHand::MoveHand]
+
   
 Tunning::LeftHand:
   base: Meta
