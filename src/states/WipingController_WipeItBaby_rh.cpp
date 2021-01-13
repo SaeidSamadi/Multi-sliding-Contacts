@@ -24,9 +24,17 @@ void WipingController_WipeItBaby_rh::configure(const mc_rtc::Configuration & con
     {
       circleWiping_CW_ = config("circleWiping_CW");
     }
-  if(config.has("circleRadius"))
+  if (config.has("squareWiping"))
     {
-      amplitude_ = config("circleRadius");
+      squareWiping_ = config("squareWiping");
+    }
+  if(config.has("amplitude"))
+    {
+      amplitude_ = config("amplitude");
+    }
+  if (config.has("orientation"))
+    {
+      orientation_ = config("orientation");
     }
   if(config.has("wipingDuration"))
     {
@@ -129,6 +137,9 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
                            {
                            return ctl.frictionEstimator_rh.forceZ();
                            });
+
+  local_x_initial = 0.0;
+  local_y_initial = 0.0;
 
 }
 
@@ -313,7 +324,8 @@ void WipingController_WipeItBaby_rh::resetTrajectory()
 {
   wipingTime_ = 0.0;
   // store the initial values for local_x and local_y
-  assert(false);
+  local_x = 0.0;
+  local_y = 0.0;
 }
 
 void WipingController_WipeItBaby_rh::startResumeTrajectory()
@@ -357,6 +369,43 @@ void WipingController_WipeItBaby_rh::updateTrajectory(double timeStep)
     local_x = Ox + offsetX;
     local_y = Oy + offsetY;
   }
+  else if (squareWiping_)
+    {
+      auto trajShape = [](double t){
+	return -sin(8*M_PI*t)/(2*M_PI)+4*t;
+      };
+      
+      double X, Y, intpart;
+      timeRatio = modf(timeRatio, &intpart);
+      
+      if (timeRatio <= 0.25)
+	{
+	  X = local_x_initial + amplitude_ * trajShape(timeRatio);
+	  Y= local_y_initial;
+	}
+      
+      if (timeRatio > 0.25 && timeRatio <= 0.50)
+	{
+	  X = local_x_initial + amplitude_;
+	  Y= local_y_initial + amplitude_ * trajShape(timeRatio-0.25);
+	}
+
+      if (timeRatio > 0.5 && timeRatio <= 0.75)
+	{
+	  X = local_x_initial + amplitude_ * (1 - trajShape(timeRatio-0.50));
+	  Y= local_y_initial + amplitude_;
+	}
+
+      if (timeRatio >= 0.75 && timeRatio <= 1.0)
+	{
+	  X = local_x_initial;
+	  Y= local_y_initial + amplitude_ * (1 - trajShape(timeRatio-0.75));
+	}
+
+      local_x = X * cos(orientation_) - Y * sin(orientation_);
+      local_y = X * sin(orientation_) + Y * cos(orientation_);
+
+    }
 }
 
 void WipingController_WipeItBaby_rh::addTunedGainsToConf( mc_rtc::Configuration & config)

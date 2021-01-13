@@ -33,6 +33,7 @@ struct WipingController_WipeItBaby_lh : mc_control::fsm::State
   bool linearWiping_ = false;
   bool circleWiping_CCW_ = false;
   bool circleWiping_CW_ = false;
+  bool squareWiping_ = false;
   double amplitude_ = 0.0;
   double orientation_ = -M_PI;
   double wipingDuration_ = 0.0;
