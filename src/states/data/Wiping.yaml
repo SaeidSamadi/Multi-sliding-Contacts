@@ -23,13 +23,13 @@ WipingController_PreparePushWallAuto_lh:
 WipingController_PrepareWipingState_rh:
   base: WipingController_PreparePushWallAuto_rh
   maxForce: 10.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 WipingController_PrepareWipingState_lh:
   base: WipingController_PreparePushWallAuto_lh
-  maxForce: 15
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+  maxForce: 15.0
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 ##
@@ -44,12 +44,12 @@ WipingController_PrepareWipingState:
       r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
     - r1: hrp4
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
   RemoveContactsAfter:
     - r1: hrp4
       r2: tilted_board

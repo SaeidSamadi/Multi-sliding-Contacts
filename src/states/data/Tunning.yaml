@@ -9,7 +9,7 @@ Tunning::RightHandToWhiteboard:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
     - r1: hrp4
       r2: ground
       r1Surface: RightFoot
@@ -29,7 +29,7 @@ Tunning::LeftHandToWhiteboard:
       r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
     - r1: hrp4
       r2: ground
       r1Surface: RightFoot
@@ -53,7 +53,7 @@ Tunning::RightHand::PushWall:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
 
 
 Tunning::RightHand::Tune:
@@ -129,7 +129,7 @@ Tunning::LeftHand::PushWall:
       r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
 
 Tunning::LeftHand::TorsoOrientation:
   base: MetaTasks
