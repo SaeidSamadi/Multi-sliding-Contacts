@@ -96,6 +96,7 @@ void WipingController_WipeItBaby_lh::start(mc_control::fsm::Controller & ctl_)
   ctl.setTargetFromCoMQP();
   ctl.addLeftHandForceControl();
 
+  ctl.wallPosInvW = ctl.leftHandTask->surfacePose().rotation().inverse();
   //ctl.setFeetTargetFromCoMQP();
   //ctl.addLeftFootForceControl();
   ctl.solver().addTask(ctl.comTask);

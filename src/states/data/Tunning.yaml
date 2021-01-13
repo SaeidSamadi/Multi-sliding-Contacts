@@ -154,7 +154,7 @@ Tunning::LeftHand::Tune:
   circleWiping_CCW: true
   circleRadius: 0.08
   wipingDuration: 12.0
-  admittance: [0.002, 0.002, 0.0, 0.0, 0.0, 0.002]
+  admittance: [0.01, 0.01, 0.0, 0.0, 0.0, 0.002]
   feetForceControl: true
 
 Tunning::LeftHand::Tunning:

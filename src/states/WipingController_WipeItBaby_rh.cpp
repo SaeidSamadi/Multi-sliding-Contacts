@@ -97,6 +97,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.setTargetFromCoMQP();
   ctl.addRightHandForceControl();
 
+  ctl.tiltedboardPosInvW = ctl.rightHandTask->surfacePose().rotation().inverse();
   //ctl.setFeetTargetFromCoMQP();
   //ctl.addLeftFootForceControl();
   ctl.solver().addTask(ctl.comTask);
@@ -128,6 +129,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
                            {
                            return ctl.frictionEstimator_rh.forceZ();
                            });
+
 }
 
 bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
@@ -142,7 +144,10 @@ bool WipingController_WipeItBaby_rh::run(mc_control::fsm::Controller & ctl_)
                 0.0;
   
   //This should generate straight line wiping on 45deg tilted_board
+  
   delta_lineW = ctl.tiltedboardPosInvW * delta_line;
+
+  
   sva::PTransformd poseOutput = ctl.rightHandTask->targetPose();
   auto rotationPose = poseOutput.rotation();
   auto translationPose = poseOutput.translation();
