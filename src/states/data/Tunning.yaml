@@ -9,7 +9,7 @@ Tunning::RightHandToWhiteboard:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [0, 0, 1, 1, 1, 0]
+      dof: [1, 1, 1, 1, 1, 0]
     - r1: hrp4
       r2: ground
       r1Surface: RightFoot
@@ -53,7 +53,7 @@ Tunning::RightHand::PushWall:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [0, 0, 1, 1, 1, 0]
+      dof: [1, 1, 1, 1, 1, 0]
 
 
 Tunning::RightHand::Tune:
@@ -63,11 +63,11 @@ Tunning::RightHand::Tune:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [0, 0, 1, 0, 0, 0]
+      dof: [1, 1, 1, 0, 0, 0]
   tune: true
   linearWiping: false
-  circleWiping_CCW: false
-  squareWiping: true
+  circleWiping_CCW: true
+  squareWiping: false
   amplitude: 0.1
   wipingDuration: 12.0
   admittance: [0.002, 0.002, 0.0, 0.0, 0.0, 0.002]
@@ -152,8 +152,8 @@ Tunning::LeftHand::Tune:
       dof: [0, 0, 1, 0, 0, 0]
   tune: true
   linearWiping: false
-  circleWiping_CCW: false
-  squareWiping: true
+  circleWiping_CCW: true
+  squareWiping: false
   amplitude: 0.08
   wipingDuration: 12.0
   admittance: [0.01, 0.01, 0.0, 0.0, 0.0, 0.002]

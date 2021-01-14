@@ -696,12 +696,12 @@ states:
           WipingController_WipeItBabyState_rh:
             linearWiping: false
             circleWiping_CCW: true
-            circleRadius: 0.1
+            amplitude: 0.1
             wipingDuration: 12.0
             admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
           WipingController_WipeItBabyState_lh:
             circleWiping_CCW: true
-            circleRadius: 0.08
+            amplitude: 0.08
             wipingDuration: 12.0
             admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
     AddContacts:
@@ -709,7 +709,8 @@ states:
         r2: tilted_board
         r1Surface: RightHandPad
         r2Surface: AllGround
-        dof: [0, 0, 1, 0, 0, 0]
+        # dof: [0, 0, 1, 0, 0, 0]
+        dof: [1, 1, 1, 0, 0, 0]
       - r1: hrp4
         r2: wall
         r1Surface: BlockLeftHand

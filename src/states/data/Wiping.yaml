@@ -49,7 +49,8 @@ WipingController_PrepareWipingState:
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
-      dof: [0, 0, 1, 1, 1, 0]
+      # dof: [0, 0, 1, 1, 1, 0]
+      dof: [1, 1, 1, 1, 1, 0]
   RemoveContactsAfter:
     - r1: hrp4
       r2: tilted_board

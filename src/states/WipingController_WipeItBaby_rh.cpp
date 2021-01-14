@@ -105,7 +105,7 @@ void WipingController_WipeItBaby_rh::start(mc_control::fsm::Controller & ctl_)
   ctl.setTargetFromCoMQP();
   ctl.addRightHandForceControl();
 
-  ctl.tiltedboardPosInvW = ctl.rightHandTask->surfacePose().rotation().inverse();
+  // ctl.tiltedboardPosInvW = ctl.rightHandTask->surfacePose().rotation().inverse();
   //ctl.setFeetTargetFromCoMQP();
   //ctl.addLeftFootForceControl();
   ctl.solver().addTask(ctl.comTask);
