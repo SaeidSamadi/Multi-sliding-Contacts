@@ -128,6 +128,12 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 		 mc_rtc::gui::plot::Y("CoM Real Y", [this](){return realRobot("hrp4").com().y();}, Color::Magenta)
 		 );
 
+  gui()->addPlot("Left Foot Force Tracking",
+		 mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		 mc_rtc::gui::plot::Y("Normal Force Target", [this](){return leftFootTask->targetForce().z();}, Color::Blue),
+		 mc_rtc::gui::plot::Y("Normal Force Measure", [this](){return leftFootTask->measuredWrench().force().z();}, Color::Red)
+		 );
+
 
   
   mc_rtc::log::success("WipingController init done!");

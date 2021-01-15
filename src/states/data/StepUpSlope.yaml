@@ -64,7 +64,7 @@ UpSlope::PutLeftFoot:
         force: [0.0, 0.0, 10.0]
       completion:
         wrench:
-          force: [.NaN, .NaN, 15.0]
+          force: [.NaN, .NaN, 10.0]
           couple: [.NaN, .NaN, .NaN]
 
 UpSlope::Stabilized::LeftFootTrajectory:
