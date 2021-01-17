@@ -4,11 +4,37 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
 : mc_control::fsm::Controller(rm, dt, config), comQP_(robot(), config("CoMQPConfig")),
     frictionEstimator_rh(robot(), "RightHandPad", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("right_hand")("friction")),
     frictionEstimator_lh(robot(), "BlockLeftHand", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_hand")("friction")),
-    frictionEstimator_lf(robot(), "LeftFoot", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_foot")("friction"))
-{
-
+  frictionEstimator_lf(robot(), "LeftFoot", Eigen::Vector3d{0.,0.,-1.}, config("CoMQPConfig")("left_foot")("friction")), t_(0.0)
+{ 
   useFeetForceControl_ = config("UseFeetForceControl", false);
 
+  auto & hasTunedGains_rh = datastore().make<bool> ("hasTunedGains_rh", false);
+  auto & tunedGains_rh = datastore().make_initializer<mc_rtc::Configuration> ("TunedGains_rh");
+
+  if (config.has("TunedGains_rh"))
+    {
+      mc_rtc::log::warning("[Wiping Controller] Found Tunned gains in the configuration for the right hand");
+      hasTunedGains_rh = true;
+      tunedGains_rh = config("TunedGains_rh");
+    }
+  else
+    {
+      mc_rtc::log::warning("[Wiping Controller] Right Hand Tunned gains not Found!");
+    }
+
+  auto & hasTunedGains_lh = datastore().make<bool> ("hasTunedGains_lh", false);
+  auto & tunedGains_lh = datastore().make_initializer<mc_rtc::Configuration> ("TunedGains_lh");
+
+  if (config.has("TunedGains_lh"))
+    {
+      mc_rtc::log::warning("[Wiping Controller] Found Tunned gains in the configuration for the left hand");
+      hasTunedGains_lh = true;
+      tunedGains_lh = config("TunedGains_lh");
+    }
+  else
+    {
+      mc_rtc::log::warning("[Wiping Controller] Left Hand Tunned gains not Found!");
+    }
 
   comTask.reset(new mc_tasks::CoMTask(robots(), robots().robotIndex(), 5, 1000));
 
@@ -67,7 +93,20 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
                        {
                         return comqp_dt_.count();
                        });
-
+  logger().addLogEntry("compp_real",
+		       [this](){
+			 return realRobot("hrp4").comAcceleration();});
+  logger().addLogEntry("compp_sim",
+		       [this](){
+			 return robot("hrp4").comAcceleration();});
+  logger().addLogEntry("comp_real",
+		       [this](){
+			 return realRobot("hrp4").comVelocity();});
+  logger().addLogEntry("comp_sim",
+		       [this](){
+			 return robot("hrp4").comVelocity();});
+  
+  
   datastore().make_call("KinematicAnchorFrame::" + robot().name(), [this](const mc_rbdyn::Robot & robot) {
     return sva::interpolate(robot.surfacePose("LeftFoot"), robot.surfacePose("RightFoot"), 0.5);
   });
@@ -78,7 +117,26 @@ WipingController::WipingController(mc_rbdyn::RobotModulePtr rm, double dt, const
   //logger().addLogEntry("RightHandVelocity", [this]() { sva::MotionVecd rhVel;
   //                                                   rhVel = robot().bodyVelW("r_wrist"); return rhVel; });
   //addFootForceControl();
-  LOG_SUCCESS("WipingController init done " << this)
+
+  using Color = mc_rtc::gui::Color;
+  gui()->addPlot(
+		 "CoM Trajectory Tracking",
+		 mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		 mc_rtc::gui::plot::Y("CoM Target X", [this](){return comTask->com().x();}, Color::Blue),
+		 mc_rtc::gui::plot::Y("CoM Real X", [this](){return realRobot("hrp4").com().x();}, Color::Red),
+		 mc_rtc::gui::plot::Y("CoM Target Y", [this](){return comTask->com().y();}, Color::Green),
+		 mc_rtc::gui::plot::Y("CoM Real Y", [this](){return realRobot("hrp4").com().y();}, Color::Magenta)
+		 );
+
+  gui()->addPlot("Left Foot Force Tracking",
+		 mc_rtc::gui::plot::X("t", [this](){return t_;}),
+		 mc_rtc::gui::plot::Y("Normal Force Target", [this](){return leftFootTask->targetForce().z();}, Color::Blue),
+		 mc_rtc::gui::plot::Y("Normal Force Measure", [this](){return leftFootTask->measuredWrench().force().z();}, Color::Red)
+		 );
+
+
+  
+  mc_rtc::log::success("WipingController init done!");
 }
 
 bool WipingController::computeCoMQP()
@@ -210,7 +268,7 @@ void WipingController::addFootForceControl()
     // dof << 1,1,1,1,1,1;
     // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
     // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-    LOG_SUCCESS("FeetForceControlAdded");
+    mc_rtc::log::success("FeetForceControlAdded");
   }
   else
   {
@@ -226,7 +284,7 @@ void WipingController::removeFootForceControl()
   // dof << 1,1,1,1,1,1;
   // addContact({"hrp4", "ground", "RightFoot", "AllGround", 0.5, dof});
   // addContact({"hrp4", "ground", "LeftFoot", "AllGround", 0.5, dof});
-  LOG_SUCCESS("FeetForceControl removed");
+  mc_rtc::log::success("FeetForceControl removed");
 }
 
 void WipingController::updateFootForceDifferenceControl()
@@ -263,6 +321,7 @@ bool WipingController::run()
                                           std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
   auto start_run_t = clock::now();
 
+  t_ += timeStep;
 
   realLeftFootPose = robot().surface("LeftFoot").X_0_s(robot());
   //leftFootPose = robot().surface("RightHandPad").X_0_s(robot()).translation();

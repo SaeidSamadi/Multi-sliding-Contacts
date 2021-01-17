@@ -28,7 +28,7 @@ CoMQPConfig:
     pos: [0.0, 0.0, 0.8]
   left_foot:
     shape: [0.12, 0.065]
-    friction: 0.5
+    friction: 0.25
   right_foot:
     shape: [0.12, 0.065]
     friction: 0.5
@@ -45,6 +45,16 @@ HandForceFilter:
   t: 5
   s: 0
 
+TunedGains_rh:
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.002089]
+  stiffness: [1.0, 1.0, 10.0, 10.0, 10.0, 5.04]
+  damping: [300.0, 300.0, 6.32456, 6.32456, 6.32456, 328.0]
+
+TunedGains_lh:
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.001543]
+  stiffness: [1.0, 1.0, 10.0, 10.0, 10.0, 0.6]
+  damping: [300.0, 300.0, 6.32456, 6.32456, 6.32456, 300.0]
+  
 robots:
   ground:
     module: env/ground
@@ -56,8 +66,8 @@ robots:
   tilted_board:
     module: env/ground
     init_pos:
-      translation: [7.4, 0.0, 7.6]
-      rotation: [0.0, -0.78, 0.0]
+      translation: [7.4, 0.0, 7.8]
+      rotation: [0.0, -0.80, 0.0]
   slope:
     module: env/ground
     init_pos:
@@ -88,7 +98,7 @@ contacts:
   #   r1Surface: AllGround
   #   r2Surface: AllGround
   #   dof: [1,1,1,1,1,1]
-    
+  
 states:
   WipingController_RightHandTrajectory:
     base: MetaTasks
@@ -504,13 +514,13 @@ states:
     base: WipingController_PrepareShuffleAuto
     maxForce_rh: 10
     maxForce_lh: 15
-    maxForce_lf: 30
+    maxForce_lf: 32
     duration: 3
     admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
-    admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
-    admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
-    stiffness_lf: [1, 1, 1, 1, 1, 6.5]
-    damping_lf: [3, 3, 3, 3, 3, 25]
+    admittance_lh: [0.1, 0.1, 0.0, 0.0, 0.0, 0.0005]
+    admittance_lf: [0.001, 0.001, 0.0, 0.0, 0.0, 0.0001]
+    stiffness_lf: [1, 1, 1, 1, 1, 1]
+    damping_lf: [150, 150, 3, 3, 3, 300]
     comStiffness: 30
   WipingController_PrepareWipingState_lf:
     base: WipingController_PreparePushWallAuto_lf
@@ -525,7 +535,7 @@ states:
         r2: wall  
         r1Surface: BlockLeftHand
         r2Surface: AllGround
-        dof: [1, 1, 1, 1, 1, 0]
+        dof: [0, 0, 1, 1, 1, 0]
       - r1: hrp4
         r2: tilted_board
         r1Surface: RightHandPad
@@ -535,7 +545,7 @@ states:
         r2: slope
         r1Surface: LeftFoot
         r2Surface: AllGround
-        dof: [1, 1, 1, 1, 1, 0]
+        dof: [0, 0, 1, 1, 1, 0]
     RemoveContactsAfter:
       - r1: hrp4
         r2: tilted_board
@@ -686,25 +696,26 @@ states:
           WipingController_WipeItBabyState_rh:
             linearWiping: false
             circleWiping_CCW: true
-            circleRadius: 0.1
+            amplitude: 0.1
             wipingDuration: 12.0
-            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+            admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
           WipingController_WipeItBabyState_lh:
-            circleWiping_CW: true
-            circleRadius: 0.08
+            circleWiping_CCW: true
+            amplitude: 0.08
             wipingDuration: 12.0
-            admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005]
+            admittance: [0.0005, 0.0005, 0.0, 0.0, 0.0, 0.0005]
     AddContacts:
       - r1: hrp4
         r2: tilted_board
         r1Surface: RightHandPad
         r2Surface: AllGround
+        # dof: [0, 0, 1, 0, 0, 0]
         dof: [1, 1, 1, 0, 0, 0]
       - r1: hrp4
         r2: wall
         r1Surface: BlockLeftHand
         r2Surface: AllGround
-        dof: [1, 1, 1, 0, 0, 0]
+        dof: [0, 0, 1, 0, 0, 0]
 
 
   Choose::Slope::WipeRightHand:
@@ -755,21 +766,19 @@ states:
     base: WipingController_WipeItBabyState_lf
     maxForce_rh: 10
     maxForce_lh: 15
-    maxForce_lf: 30
-    admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001] #0.001
-    admittance_lh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
-    admittance_lf: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0006]
+    maxForce_lf: 32
+    admittance_rh: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0005] #0.001
+    admittance_lh: [0.1, 0.1, 0.0, 0.0, 0.0, 0.0005]
+    admittance_lf: [0.005, 0.005, 0.0, 0.0, 0.0, 0.00008]
     # admittance_rh: [0.001, 0.001, 0.0, 0.0, 0.0, 0.001] #0.001
     # admittance_lh: [0.001, 0.001, 0.0, 0.0, 0.0, 0.001]
     # admittance_lf: [0.0006, 0.0006, 0.0, 0.0, 0.0, 0.0006]
-    stiffness_rh: [1, 1, 1, 1, 1, 1]
-    stiffness_lh: [1, 1, 1, 1, 1, 1]
-    #stiffness_lf: [10, 10, 10, 10, 10, 5]
-    damping_rh: [150, 150, 150, 150, 150, 150]
-    damping_lh: [150, 150, 150, 150, 150, 150]
-    #damping_lf: [6, 6, 6, 6, 6, 6]
-    stiffness_lf: [10, 10, 10, 10, 10, 5]
-    damping_lf: [30, 30, 30, 30, 30, 100] #20
+    stiffness_rh: [10, 10, 10, 10, 10, 5.04]
+    stiffness_lh: [1, 1, 10, 10, 10, 0.6]
+    damping_rh: [6.32, 6.32, 6.32, 6.32, 6.32, 328.0]
+    damping_lh: [300, 300, 6.32, 6.32, 6.32, 300.0]
+    stiffness_lf: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    damping_lf: [150, 150, 3, 3, 3, 300] #20
     #damping_rh: [300, 300, 300, 300, 300, 300]
     #damping_lh: [300, 300, 300, 300, 300, 300]
     #damping_lf: [300, 300, 300, 300, 300, 300]
@@ -781,6 +790,7 @@ states:
     circleWiping_CW: false
     circleRadius: 0.1
     wipingDuration: 3.0
+    wipingMaxDuration: 5.0
 
   Shuffle::Circle:
     base: WipinController::ShuffleLeftFoot
@@ -879,13 +889,13 @@ states:
     
 transitions:
   - [Choose::Initial, StepUpSlope, UpSlope::FSM::StepUpSlope_experiment, Auto]
-  # - [Choose::Initial, TuneLeftHand, Tunning::LeftHand, Auto]
+  - [Choose::Initial, TuneLeftHand, Tunning::LeftHand, Auto]
   - [Choose::Initial, TuneRightHand, Tunning::RightHand, Auto]
   - [UpSlope::FSM::StepUpSlope_experiment, OK, UpSlope::FSM::RightHandToWhiteboard, Auto]
   - [UpSlope::FSM::RightHandToWhiteboard, OK, UpSlope::FSM::LeftHandToWhiteboard, Auto]
   - [UpSlope::FSM::LeftHandToWhiteboard, OK, Choose::Slope::PrepareWiping]
 
-  # - [Tunning::LeftHand, OK, Choose::Initial, Auto]
+  - [Tunning::LeftHand, OK, Choose::Initial, Auto]
   - [Tunning::RightHand, OK, Choose::Initial, Auto]
 
   #- [Choose::Slope::PrepareWiping,     PrepareWiping_rh, Choose::Slope::PrepareWipingAndChooseRightHand, Auto]
@@ -895,17 +905,17 @@ transitions:
   
   - [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::WipeBothHands, Auto]
   - [Choose::Slope::PrepareWipingAndChooseBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
-    #- [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::PrepareShuffleState, Auto]
+  #- [Choose::Slope::PrepareWipingAndChooseBothHands, WipeBothHands, Choose::Slope::PrepareShuffleState, Auto]
   - [Choose::Slope::WipeBothHands, Release, WipingController_ReleasePushWallCoMQP, Auto]
   - [Choose::Slope::WipeBothHands, PrepareShuffling, Choose::Slope::PrepareShuffleState, Auto]
   
   - [Choose::Slope::PrepareShuffleState, ShuffleLeftFoot, Choose::Slope::ShuffleLeftFoot, Auto]
   - [Choose::Slope::PrepareShuffleState, Release, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
   
-    #- [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
+  #- [Choose::Slope::PrepareWipingAndChooseRightHand, WipeRightHand, Choose::Slope::WipeRightHand, Auto]
   - [Choose::Slope::ShuffleLeftFoot, ReleaseHands, WipingController_ReleasePushWallCoMQP_AfterShuffle, Auto]
   - [WipingController_ReleasePushWallCoMQP_AfterShuffle, OK, Wiping::Stabilized::MoveHandsBack_AfterShuffle, Auto]
-  - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK, DownSlope::FSM::StepDownSlope, Auto]
+  - [Wiping::Stabilized::MoveHandsBack_AfterShuffle, OK,  DownSlope::FSM::StepDownSlope, Auto]
 
   - [WipingController_ReleasePushWallCoMQP, OK, Choose::Slope::MoveHandsBack, Auto]
   - [Choose::Slope::MoveHandsBack, HalfSitSlope, Choose::Slope::HalfSitting, Auto]

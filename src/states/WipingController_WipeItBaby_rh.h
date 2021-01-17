@@ -20,15 +20,22 @@ struct WipingController_WipeItBaby_rh : mc_control::fsm::State
   void startResumeTrajectory();
   void pauseTrajectory();
   void updateTrajectory(double timeStep);
+
+  void addTunedGainsToConf( mc_rtc::Configuration & config);
+  void loadTunedGainsFromConf( mc_rtc::Configuration & config);
+  void saveTunedGains();
   
  protected:
   Eigen::Vector6d admittance_ = Eigen::Vector6d::Zero();
-  double xx = 0;
+  Eigen::Vector6d stiffness_ = Eigen::Vector6d::Zero();
+  Eigen::Vector6d damping_ = Eigen::Vector6d::Zero();
+  
   bool linearWiping_ = false;
   bool circleWiping_CCW_ = false;
   bool circleWiping_CW_ = false;
+  bool squareWiping_ = false;
   double amplitude_ = 0.0;
-  double orientation_ = M_PI/2;
+  double orientation_ = M_PI;
   double wipingDuration_ = 0.0;
   double local_x, local_y;
   double local_x_initial, local_y_initial;
@@ -40,7 +47,6 @@ struct WipingController_WipeItBaby_rh : mc_control::fsm::State
   Eigen::Vector3d delta_line, delta_lineW;
   
   bool tune_ = false;
-  double admittanceZ_;
   std::string categoryName_ = "Right Hand Tunning";
 
   double t_;

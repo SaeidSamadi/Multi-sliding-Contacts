@@ -23,13 +23,13 @@ WipingController_PreparePushWallAuto_lh:
 WipingController_PrepareWipingState_rh:
   base: WipingController_PreparePushWallAuto_rh
   maxForce: 10.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 WipingController_PrepareWipingState_lh:
   base: WipingController_PreparePushWallAuto_lh
-  maxForce: 15
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001]
+  maxForce: 15.0
+  admittance: [0.1, 0.1, 0.0, 0.0, 0.0, 0.001]
   comStiffness: 30
 
 ##
@@ -44,11 +44,12 @@ WipingController_PrepareWipingState:
       r2: wall
       r1Surface: BlockLeftHand
       r2Surface: AllGround
-      dof: [1, 1, 1, 1, 1, 0]
+      dof: [0, 0, 1, 1, 1, 0]
     - r1: hrp4
       r2: tilted_board
       r1Surface: RightHandPad
       r2Surface: AllGround
+      # dof: [0, 0, 1, 1, 1, 0]
       dof: [1, 1, 1, 1, 1, 0]
   RemoveContactsAfter:
     - r1: hrp4
@@ -218,8 +219,10 @@ WipingController_ReleasePushWallCoMQP_lh:
 WipingController_ReleasePushWallCoMQP_lf:
   base: WipingController_PushWallCoMQP_lf
   useCoMQP: true
-  maxForce: 100
-  forceThreshold: 100
+  duration: 3.0
+  maxDuration: 4.0
+  maxForce: 180
+  forceThreshold: 180
   admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0002]
   stiffness: [200, 200, 200, 200, 200, 1]
   damping: [28, 28, 28, 28, 28, 300]
@@ -250,7 +253,22 @@ WipingController_ReleasePushWallCoMQP:
       r2Surface: AllGround
       dof: [0,0,1,1,1,0]
 
-WipingController_ReleasePushWallCoMQP_AfterShuffle:
+
+WipingController_ReleasePushWallCoMQP_AfterShuffle_P1:
+  base: Parallel
+  states: [WipingController_ReleasePushWallCoMQP_lf, WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh]
+  configs:
+    WipingController_ReleasePushWallCoMQP_rh:
+      duration: 3.0
+      maxForce: 10.0
+      comStiffness: 30
+    WipingController_ReleasePushWallCoMQP_lh:
+      maxForce: 15.0
+      comStiffness: 30
+    WipingController_ReleasePushWallCoMQP_lf:
+      comStiffness: 30
+  
+WipingController_ReleasePushWallCoMQP_AfterShuffle_P2:
   base: Parallel
   states: [WipingController_ReleasePushWallCoMQP_rh, WipingController_ReleasePushWallCoMQP_lh, WipingController_ReleasePushWallCoMQP_lf]
   configs:
@@ -260,6 +278,11 @@ WipingController_ReleasePushWallCoMQP_AfterShuffle:
       comStiffness: 30
     WipingController_ReleasePushWallCoMQP_lf:
       comStiffness: 30
+  
+WipingController_ReleasePushWallCoMQP_AfterShuffle:
+  base: Meta
+  transitions:
+    - [WipingController_ReleasePushWallCoMQP_AfterShuffle_P1, OK, WipingController_ReleasePushWallCoMQP_AfterShuffle_P2, Auto]
   AddContacts:
     - r1: hrp4
       r2: tilted_board
@@ -276,6 +299,7 @@ WipingController_ReleasePushWallCoMQP_AfterShuffle:
       r1Surface: LeftFoot
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
+      
 WipingController_PrepareMoveHandBack:
   base: MetaTasks
   RemoveContacts:

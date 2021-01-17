@@ -52,6 +52,10 @@ void WipingController_WipeItBaby_lf::configure(const mc_rtc::Configuration & con
   {
     wipingDuration_ = config("wipingDuration");
   }
+  if(config.has("wipingMaxDuration"))
+    {
+      wipingMaxDuration_ = config("wipingMaxDuration");
+    }
   if(config.has("comStiffness"))
   {
     comStiffness_ = config("comStiffness");
@@ -240,7 +244,7 @@ bool WipingController_WipeItBaby_lf::run(mc_control::fsm::Controller & ctl_)
   ctl.setTargetFromCoMQP();
 
   double error = ctl.leftFootTask->eval().norm();
-  if (wipingTime >= wipingDuration_ and error < 0.02)
+  if (wipingTime >= wipingDuration_ and (error < 0.02 || wipingTime >= wipingMaxDuration_))
     {
       output("OK");
       return true;

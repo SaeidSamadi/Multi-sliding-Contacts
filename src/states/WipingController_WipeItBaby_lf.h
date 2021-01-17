@@ -26,6 +26,7 @@ struct WipingController_WipeItBaby_lf : mc_control::fsm::State
   bool circleWiping_CW_ = false;
   double circleRadius_ = 0.0; 
   double wipingDuration_ = 0.0;
+  double wipingMaxDuration_ = 1000.0;
   double local_x, local_y;
   double local_x_initial, local_y_initial;
   double local_x_final, local_y_final;

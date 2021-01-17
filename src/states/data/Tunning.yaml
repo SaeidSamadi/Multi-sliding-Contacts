@@ -1,9 +1,9 @@
 Tunning::RightHandToWhiteboard:
   base: Parallel
   states: [WipingController::Stabilizer, RightHand::LookAt, RightHand::FSM::RightHandToWhiteboard]
-  config:
-    WipingController::Stabilizer::GoCenterFlat:
-      completion: {}
+  # config:
+  #   WipingController::Stabilizer::GoCenterFlat:
+  #     completion: {}
   AddContactsAfter:
     - r1: hrp4
       r2: tilted_board
@@ -21,6 +21,26 @@ Tunning::RightHandToWhiteboard:
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 1]
 
+Tunning::LeftHandToWhiteboard:
+  base: Parallel
+  states: [WipingController::Stabilizer, LeftHand::LookAt, LeftHand::FSM::LeftHandToWhiteboard]
+  AddContactsAfter:
+    - r1: hrp4
+      r2: wall
+      r1Surface: BlockLeftHand
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [1, 1, 1, 1, 1, 1]
+    
 Something:
   base: Pause
   duration: 5
@@ -35,6 +55,7 @@ Tunning::RightHand::PushWall:
       r2Surface: AllGround
       dof: [1, 1, 1, 1, 1, 0]
 
+
 Tunning::RightHand::Tune:
   base: WipingController_WipeItBaby_rh
   AddContacts:
@@ -46,9 +67,10 @@ Tunning::RightHand::Tune:
   tune: true
   linearWiping: false
   circleWiping_CCW: true
-  circleRadius: 0.1
+  squareWiping: false
+  amplitude: 0.1
   wipingDuration: 12.0
-  admittance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.003]
+  admittance: [0.002, 0.002, 0.0, 0.0, 0.0, 0.002]
   feetForceControl: true
 
 Tunning::RightHand::ReleasePushWall:
@@ -65,6 +87,11 @@ Tunning::RightHand::MoveHand:
     - r1: hrp4
       r2: ground
       r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
       r2Surface: AllGround
       dof: [0, 0, 1, 1, 1, 0]
   tasks:
@@ -85,7 +112,7 @@ Tunning::RightHand::MoveHand:
 Tunning::RightHand::MoveHandBack:
   base: Parallel
   states: [Stabilizer::Standing, Tunning::RightHand::MoveHand]
-
+    
 Tunning::RightHand:
   base: Meta
   transitions: # raise hand, add contact, tune, remove contact, go back to start...
@@ -95,7 +122,93 @@ Tunning::RightHand:
   - [Tunning::RightHand::ReleasePushWall, OK, Tunning::RightHand::MoveHandBack, Auto]
   - [Tunning::RightHand::MoveHandBack, OK, WipingController::Stabilizer::GoHalfSitting, Auto]
 
-#   # Tunning::LeftHand:
-#   #   base: Meta
-#   #   transitions: # raise hand, add contact, tune, remove contact, go back to start...
-#   #     - []
+Tunning::LeftHand::PushWall:
+  base: WipingController_PrepareWipingState_lh
+  feetForceControl: true
+  AddContacts:
+    - r1: hrp4
+      r2: wall
+      r1Surface: BlockLeftHand
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+
+Tunning::LeftHand::TorsoOrientation:
+  base: MetaTasks
+  tasks:
+    torsoOrientation:
+      type: orientation
+      robot: hrp4
+      body: torso
+      weight: 100
+      stiffness: 1
+      
+Tunning::LeftHand::Tune:
+  base: WipingController_WipeItBaby_lh
+  AddContacts:
+    - r1: hrp4
+      r2: wall
+      r1Surface: BlockLeftHand
+      r2Surface: AllGround
+      dof: [0, 0, 1, 0, 0, 0]
+  tune: true
+  linearWiping: false
+  circleWiping_CCW: true
+  squareWiping: false
+  amplitude: 0.08
+  wipingDuration: 12.0
+  admittance: [0.01, 0.01, 0.0, 0.0, 0.0, 0.002]
+  feetForceControl: true
+
+Tunning::LeftHand::Tunning:
+  base: Parallel
+  states: [Tunning::LeftHand::TorsoOrientation, Tunning::LeftHand::Tune]
+
+Tunning::LeftHand::ReleasePushWall:
+  base: WipingController_ReleasePushWallCoMQP_lh
+  
+Tunning::LeftHand::MoveHand:
+  base: MetaTasks
+  RemoveContacts:
+    - r1: hrp4
+      r2: wall
+      r1Surface: BlockLeftHand
+      r2Surface: AllGround
+  AddContacts:
+    - r1: hrp4
+      r2: ground
+      r1Surface: RightFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+    - r1: hrp4
+      r2: ground
+      r1Surface: LeftFoot
+      r2Surface: AllGround
+      dof: [0, 0, 1, 1, 1, 0]
+  tasks:
+    MoveLeftHand:
+      type: surfaceTransform
+      surface: BlockLeftHand
+      stiffness: 3.0
+      weight: 500
+      moveWorld:
+        translation: [-0.25, -0.10, 0.05]
+      completion:
+        OR:
+          - eval: 0.05
+          - AND:
+              - timeout: 3.0
+              - speed: 0.01
+                
+Tunning::LeftHand::MoveHandBack:
+  base: Parallel
+  states: [Stabilizer::Standing, Tunning::LeftHand::MoveHand]
+
+  
+Tunning::LeftHand:
+  base: Meta
+  transitions: # raise hand, add contact, tune, remove contact, go back to start...
+  - [Tunning::LeftHandToWhiteboard, OK, Tunning::LeftHand::PushWall, Auto]
+  - [Tunning::LeftHand::PushWall, OK, Tunning::LeftHand::Tunning, Auto]
+  - [Tunning::LeftHand::Tunning, OK, Tunning::LeftHand::ReleasePushWall, Auto]
+  - [Tunning::LeftHand::ReleasePushWall, OK, Tunning::LeftHand::MoveHandBack, Auto]
+  - [Tunning::LeftHand::MoveHandBack, OK, WipingController::Stabilizer::GoHalfSitting, Auto]
